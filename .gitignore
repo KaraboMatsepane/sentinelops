@@ -1,0 +1,29 @@
+# Secrets — never commit these
+.env
+agent_config.yaml
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+venv/
+.venv/
+*.egg-info/
+dist/
+build/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+*:Zone.Identifier
+
+# Planning docs (not part of submission)
+sentinelops_master_guide.html
+sentinelops_checklist.html
+*.pdf

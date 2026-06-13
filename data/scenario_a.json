@@ -1,0 +1,86 @@
+{
+  "scenario": "A",
+  "title": "GlobalTech Solutions Partnership Agreement",
+  "description": "74-page partnership contract for $1.8M annual distribution deal",
+  "parties": {
+    "company": "Meridian Ventures Ltd",
+    "partner": "GlobalTech Solutions Inc"
+  },
+  "deal_value": 1800000,
+  "currency": "USD",
+  "duration_years": 3,
+  "document_sections": [
+    {
+      "page": 8,
+      "section": "1.2",
+      "title": "Revenue Share",
+      "content": "GlobalTech Solutions shall receive 35% of all net revenues generated through the partnership channels. This revenue share applies exclusively to all distribution activities conducted by Meridian Ventures within the EMEA and APAC regions for the duration of this agreement."
+    },
+    {
+      "page": 12,
+      "section": "2.1",
+      "title": "Best Efforts Commitment",
+      "content": "Meridian Ventures agrees to use its best efforts to promote GlobalTech Solutions products across all applicable markets and shall dedicate reasonable resources to achieve mutual business objectives as determined from time to time."
+    },
+    {
+      "page": 19,
+      "section": "3.4",
+      "title": "Minimum Purchase Commitment",
+      "content": "Meridian Ventures commits to minimum annual purchases of $600,000 in GlobalTech Solutions products and services. Failure to meet this commitment triggers automatic penalties outlined in Schedule C."
+    },
+    {
+      "page": 27,
+      "section": "4.1",
+      "title": "Intellectual Property",
+      "content": "Any improvements, modifications, or derivative works created by Meridian Ventures using GlobalTech Solutions technology shall become the sole property of GlobalTech Solutions upon creation, without additional compensation."
+    },
+    {
+      "page": 34,
+      "section": "5.2",
+      "title": "Exclusivity Clause",
+      "content": "Meridian Ventures agrees to maintain exclusive distribution rights for GlobalTech Solutions within the EMEA region and shall not distribute, promote, or sell competing products or services during the term of this agreement."
+    },
+    {
+      "page": 41,
+      "section": "6.3",
+      "title": "Termination Rights",
+      "content": "GlobalTech Solutions may terminate this agreement with 30 days written notice for any material breach. GlobalTech Solutions may also terminate without cause with 90 days notice. Meridian Ventures may only terminate for GlobalTech Solutions insolvency or material breach with 180 days cure period."
+    },
+    {
+      "page": 52,
+      "section": "7.1",
+      "title": "Liability Cap",
+      "content": "In no event shall either party's total liability exceed $500,000 regardless of the nature of the claim, including in cases of gross negligence or willful misconduct."
+    },
+    {
+      "page": 58,
+      "section": "8.2",
+      "title": "Data Sharing",
+      "content": "Meridian Ventures grants GlobalTech Solutions irrevocable access to all customer data, sales analytics, and market intelligence gathered during the partnership for GlobalTech Solutions' internal use and product development."
+    },
+    {
+      "page": 67,
+      "section": "9.4",
+      "title": "Non-Compete Extension",
+      "content": "The exclusivity obligations in Section 5.2 shall survive termination of this agreement for a period of 24 months. During this period, Meridian Ventures shall not distribute any products competing with GlobalTech Solutions' current or future product lines."
+    },
+    {
+      "page": 71,
+      "section": "10.1",
+      "title": "Dispute Resolution",
+      "content": "All disputes shall be resolved through binding arbitration in Delaware, USA under AAA rules. Meridian Ventures waives its right to participate in class actions. All arbitration proceedings shall be confidential."
+    }
+  ],
+  "key_financials": {
+    "total_value": 1800000,
+    "annual_minimum": 600000,
+    "revenue_share_pct": 35,
+    "liability_cap": 500000,
+    "penalty_schedule": "Schedule C — not provided in this excerpt"
+  },
+  "key_dates": {
+    "signature_deadline": "2026-06-20",
+    "effective_date": "2026-07-01",
+    "initial_term_end": "2029-06-30"
+  }
+}
