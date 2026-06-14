@@ -1,0 +1,59 @@
+{
+  "company": "Meridian Ventures Ltd",
+  "history_entries": [
+    {
+      "date": "2023-03-15",
+      "type": "vendor_dispute",
+      "title": "GlobalTech Solutions Payment Dispute",
+      "detail": "GlobalTech Solutions filed a payment dispute against Meridian portfolio company TechBridge Ltd for $142,000 in alleged unpaid licensing fees. Dispute escalated to legal proceedings before settling out of court for $89,000 in June 2023. TechBridge CEO noted GlobalTech's aggressive billing practices and lack of transparency in fee calculation.",
+      "outcome": "Settled. TechBridge no longer works with GlobalTech.",
+      "relevance": "HIGH — same vendor now proposing a larger deal with Meridian directly"
+    },
+    {
+      "date": "2022-11-08",
+      "type": "contract_lesson",
+      "title": "DataStream Partnership — Best Efforts Clause Failure",
+      "detail": "Partnership agreement with DataStream Inc used identical 'best efforts' language. When DataStream underperformed, Meridian attempted to claim breach of contract. Legal team found the clause unenforceable because 'best efforts' was never defined. Meridian received no remedy and lost $340,000 in expected revenues.",
+      "outcome": "Negative. Legal lesson: always define 'best efforts' with specific KPIs.",
+      "relevance": "HIGH — same undefined 'best efforts' language appears in current contract"
+    },
+    {
+      "date": "2023-09-20",
+      "type": "board_decision",
+      "title": "Board Resolution: IP Transfer Restrictions",
+      "detail": "Board unanimously passed resolution BRD-2023-47 prohibiting any contract that transfers IP rights to third parties without board approval and valuation. Resolution was passed after the Apex Technologies incident where a partnership agreement inadvertently transferred rights to a key algorithm.",
+      "outcome": "Board resolution in effect. Requires explicit approval for IP transfer clauses.",
+      "relevance": "HIGH — current contract Section 4.1 transfers all IP improvements to GlobalTech automatically"
+    },
+    {
+      "date": "2021-06-12",
+      "type": "contract_lesson",
+      "title": "NovaCorp Exclusivity Trap",
+      "detail": "Signed 3-year exclusivity agreement with NovaCorp that prevented Meridian from distributing competing products. NovaCorp was acquired 14 months in and the acquirer deprioritized the product line. Meridian was locked out of competitors for the remaining 20 months, losing an estimated $780,000 in alternative distribution revenue.",
+      "outcome": "Negative. Lesson: exclusivity agreements need change-of-control clauses and market activity minimums from partner.",
+      "relevance": "MEDIUM — current contract has 3-year exclusivity plus 24-month post-term extension with no change-of-control protection"
+    },
+    {
+      "date": "2024-01-30",
+      "type": "contract_lesson",
+      "title": "Successful High-Value Deal: Vertex Systems",
+      "detail": "Successfully negotiated $2.1M partnership with Vertex Systems. Key terms that protected Meridian: defined performance minimums on both sides, clear liability cap at 100% of deal value, 90-day termination right for both parties, and explicit IP ownership retained by Meridian. Deal closed in 6 weeks.",
+      "outcome": "Positive. This is the template for what a good partnership contract looks like.",
+      "relevance": "MEDIUM — current contract deviates significantly from the Vertex template on liability, termination, and IP"
+    },
+    {
+      "date": "2025-04-03",
+      "type": "market_intel",
+      "title": "GlobalTech Solutions Market Reputation",
+      "detail": "Due diligence file from failed 2025 partnership discussion with GlobalTech (abandoned at LOI stage). Notes from that process: GlobalTech has a pattern of adding penalty clauses in Schedule C that are not disclosed until late in negotiations. Three other companies in our network reported surprise penalty activations. GlobalTech's EMEA performance has been declining — they may be seeking distribution partners to compensate.",
+      "outcome": "Previous discussion abandoned. Reason: terms were unfavorable.",
+      "relevance": "HIGH — Meridian previously chose NOT to partner with GlobalTech and the reasons are documented"
+    }
+  ],
+  "summary": {
+    "total_entries": 6,
+    "high_relevance": 4,
+    "medium_relevance": 2,
+    "key_warning": "Meridian has prior negative history with GlobalTech Solutions and has institutional knowledge suggesting this deal carries elevated risk"
+  }
+}
