@@ -9,7 +9,7 @@
   "vendors": [
     {
       "name": "Stratos Cloud",
-      "annual_cost": 180000,
+      "annual_cost": 380000,
       "proposal_highlights": [
         "99.99% uptime SLA with financial penalties",
         "Dedicated account manager",
@@ -17,30 +17,30 @@
         "3-year price lock guarantee"
       ],
       "concerns": [
-        "Smallest vendor — founded 2021, 47 employees",
+        "Proprietary architecture — migration exit cost estimated $180K+",
         "No existing relationship with Meridian",
-        "Single data center region in EU (Frankfurt only)",
-        "Requires 36-month minimum commitment"
+        "Requires custom API adoption (lock-in risk)",
+        "6 months remaining fees as exit penalty"
       ]
     },
     {
-      "name": "NimbusCore",
-      "annual_cost": 156000,
+      "name": "NimbusStack",
+      "annual_cost": 290000,
       "proposal_highlights": [
-        "Lowest cost option — $156K/year vs $180K and $210K",
-        "Flexible month-to-month billing",
+        "Positive prior relationship (Project Helix pilot, 2023)",
+        "Flexible exit terms — 90-day notice",
         "Multi-region deployment (EU + US East)",
         "Open-source compatible stack"
       ],
       "concerns": [
         "SLA is 99.9% — ten times more allowed downtime than Stratos",
-        "No dedicated support — shared ticket queue only",
-        "SOC 2 Type I only (not Type II)",
-        "CEO previously involved in a failed startup (DataPlex, 2020)"
+        "CPI+2% price escalation clause",
+        "4-hour P1 support response (vs 15 min for Stratos)",
+        "Cost could reach $340K by year 3 under escalation"
       ]
     },
     {
-      "name": "Apex Hosting",
+      "name": "Apex Systems",
       "annual_cost": 210000,
       "proposal_highlights": [
         "Most established — 12 years, 500+ enterprise clients",
@@ -49,10 +49,10 @@
         "Meridian already uses Apex for staging environment"
       ],
       "concerns": [
-        "Most expensive option — $54K/year more than NimbusCore",
-        "Requires proprietary migration tooling — potential lock-in",
-        "Recent pricing increase of 22% for existing clients in Q1 2026",
-        "Previous contract with Meridian had billing disputes in 2024"
+        "Best efforts SLA support — no financial accountability for downtime",
+        "2024 billing dispute with Meridian ($34K overbilling over 6 months)",
+        "Variable pricing with no defined ceiling",
+        "Opaque invoicing practices documented in prior dispute"
       ]
     }
   ],

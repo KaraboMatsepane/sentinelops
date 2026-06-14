@@ -156,6 +156,7 @@ async def main():
         max_tokens=2500,
         respond_to=["sentinelops-analyst"],
         mention_targets=["karabomatsepane16/sentinelops-risk"],
+        provider_order=["featherless", "aiml"],
     )
 
     agent = Agent.create(

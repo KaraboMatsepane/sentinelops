@@ -116,12 +116,89 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); font-si
 .agent-card.active .agent-status { color:var(--risk); font-size:9px; }
 .agent-card.complete .agent-status { color:#22c55e; font-size:9px; }
 .provider-tag {
-  font-family:var(--mono); font-size:8px; letter-spacing:.06em;
-  padding:1px 5px; border-radius:2px; margin-top:2px; display:inline-block;
-  background:rgba(59,130,246,.1); color:var(--analyst); border:1px solid rgba(59,130,246,.15);
+  font-family:var(--mono); font-size:9.5px; font-weight:500; letter-spacing:.06em;
+  padding:3px 8px; border-radius:3px; margin-top:3px; display:inline-block;
+  background:rgba(59,130,246,.12); color:var(--analyst); border:1px solid rgba(59,130,246,.2);
 }
-.provider-tag.featherless { background:rgba(168,85,247,.1); color:var(--precedent); border-color:rgba(168,85,247,.15); }
-.provider-tag.fallback { background:rgba(245,158,11,.1); color:var(--risk); border-color:rgba(245,158,11,.15); }
+.provider-tag.featherless { background:rgba(168,85,247,.12); color:var(--precedent); border-color:rgba(168,85,247,.2); }
+.provider-tag.fallback { background:rgba(245,158,11,.12); color:var(--risk); border-color:rgba(245,158,11,.2); }
+
+/* Pipeline connectors between agent cards */
+.pipe-connector {
+  position:relative; height:20px; margin:0 18px;
+  display:flex; align-items:center; justify-content:center;
+}
+.pipe-line {
+  position:absolute; left:28px; top:0; bottom:0; width:2px;
+  background:var(--border2); transition:background .4s;
+}
+.pipe-connector.active .pipe-line { background:var(--analyst); }
+.pipe-connector.complete .pipe-line { background:rgba(34,197,94,.4); }
+.pipe-pulse {
+  position:absolute; left:25px; width:8px; height:8px;
+  border-radius:50%; opacity:0; transform:translateY(-50%);
+}
+.pipe-connector.active .pipe-pulse {
+  opacity:1;
+  animation:pipePulse 1s ease-in-out infinite;
+}
+@keyframes pipePulse {
+  0% { top:0; opacity:.8; }
+  100% { top:100%; opacity:0; }
+}
+.pipe-connector.complete .pipe-pulse { opacity:0; animation:none; }
+
+/* Band broadcast fork */
+.pipe-fork {
+  position:relative; height:28px; margin:0 18px;
+  display:flex; align-items:center;
+}
+.pipe-fork-line {
+  position:absolute; left:28px; top:0; width:2px; height:100%;
+  background:var(--border2); transition:background .4s;
+}
+.pipe-fork-branch {
+  position:absolute; left:28px; top:50%; width:20px; height:2px;
+  background:var(--border2); transition:background .4s;
+}
+.pipe-fork-label {
+  position:absolute; left:52px; top:50%; transform:translateY(-50%);
+  font-family:var(--mono); font-size:8px; text-transform:uppercase;
+  letter-spacing:.12em; color:var(--muted); opacity:0;
+  transition:opacity .4s, color .4s;
+}
+.pipe-fork.active .pipe-fork-line,
+.pipe-fork.active .pipe-fork-branch { background:var(--precedent); }
+.pipe-fork.active .pipe-fork-label { opacity:1; color:var(--precedent); }
+.pipe-fork.complete .pipe-fork-line,
+.pipe-fork.complete .pipe-fork-branch { background:rgba(34,197,94,.4); }
+.pipe-fork.complete .pipe-fork-label { opacity:1; color:var(--muted); }
+
+/* Merge connector (DA + Precedent → Risk) */
+.pipe-merge {
+  position:relative; height:28px; margin:0 18px;
+  display:flex; align-items:center;
+}
+.pipe-merge-line {
+  position:absolute; left:28px; top:0; width:2px; height:100%;
+  background:var(--border2); transition:background .4s;
+}
+.pipe-merge-branch {
+  position:absolute; left:28px; top:50%; width:20px; height:2px;
+  background:var(--border2); transition:background .4s;
+}
+.pipe-merge-label {
+  position:absolute; left:52px; top:50%; transform:translateY(-50%);
+  font-family:var(--mono); font-size:8px; text-transform:uppercase;
+  letter-spacing:.12em; color:var(--muted); opacity:0;
+  transition:opacity .4s, color .4s;
+}
+.pipe-merge.active .pipe-merge-line,
+.pipe-merge.active .pipe-merge-branch { background:var(--risk); }
+.pipe-merge.active .pipe-merge-label { opacity:1; color:var(--risk); }
+.pipe-merge.complete .pipe-merge-line,
+.pipe-merge.complete .pipe-merge-branch { background:rgba(34,197,94,.4); }
+.pipe-merge.complete .pipe-merge-label { opacity:1; color:var(--muted); }
 
 .feed-panel { display:flex; flex-direction:column; overflow:hidden; background:var(--bg); }
 .feed-header {
@@ -364,6 +441,37 @@ p.risk-flag, li.risk-flag { display:block; }
   margin-top:4px; text-transform:uppercase; letter-spacing:.1em;
 }
 
+.exposure-display {
+  background:var(--surface2); border:1px solid var(--border2);
+  border-radius:6px; padding:14px; margin-top:10px; text-align:center;
+  transition: all .5s;
+}
+.exposure-label {
+  font-family:var(--mono); font-size:9px; text-transform:uppercase;
+  letter-spacing:.14em; color:var(--muted); margin-bottom:4px;
+}
+.exposure-value {
+  font-family:var(--mono); font-size:24px; font-weight:700;
+  color:var(--muted); line-height:1;
+  transition: color .5s;
+}
+.exposure-value.active { color:var(--da); }
+.exposure-glow {
+  animation: exposureGlow 1.5s ease-in-out 2;
+}
+@keyframes exposureGlow {
+  0%, 100% { text-shadow: none; }
+  50% { text-shadow: 0 0 12px rgba(239,68,68,.6), 0 0 24px rgba(239,68,68,.3); }
+}
+
+.value-callout {
+  font-family:var(--mono); font-size:10px; letter-spacing:.03em;
+  color:var(--muted2); text-align:center;
+  padding:8px 14px 0; line-height:1.4;
+  opacity:0; transition: opacity .8s ease;
+}
+.value-callout.visible { opacity:1; }
+
 .start-btn {
   display:block; width:calc(100% - 36px); margin:0 18px 18px;
   padding:14px; border:none; border-radius:6px; cursor:pointer;
@@ -374,6 +482,17 @@ p.risk-flag, li.risk-flag { display:block; }
 }
 .start-btn:hover { transform:translateY(-1px); box-shadow:0 4px 20px rgba(59,130,246,.3); }
 .start-btn:disabled { opacity:.3; cursor:not-allowed; transform:none; box-shadow:none; }
+.kbd-hint {
+  text-align:center; margin:-10px 18px 14px;
+  font-family:var(--mono); font-size:9px; color:var(--muted);
+  letter-spacing:.06em; transition:opacity .3s;
+}
+.kbd-hint.hidden { opacity:0; pointer-events:none; }
+.kbd-hint kbd {
+  display:inline-block; padding:1px 5px; border-radius:3px;
+  background:var(--surface2); border:1px solid var(--border2);
+  font-family:var(--mono); font-size:9px; color:var(--muted2);
+}
 .reset-btn {
   display:none; width:calc(100% - 36px); margin:0 18px 18px;
   padding:12px; border:1px solid var(--border2); border-radius:6px; cursor:pointer;
@@ -533,6 +652,161 @@ p.risk-flag, li.risk-flag { display:block; }
 }
 .brief-body .audit-trail strong { color:var(--text); }
 
+.pipeline-complete-badge {
+  display:none; align-items:center; gap:6px;
+  font-family:var(--mono); font-size:10px; font-weight:500;
+  letter-spacing:.08em; text-transform:uppercase;
+  color:var(--briefing); opacity:0;
+  transition: opacity .6s ease;
+}
+.pipeline-complete-badge.visible { display:flex; opacity:1; }
+.pipeline-complete-badge .pc-dot {
+  width:6px; height:6px; border-radius:50%;
+  background:var(--briefing);
+  box-shadow:0 0 6px rgba(34,197,94,.5);
+}
+
+.agent-card.pipeline-done {
+  animation: cardDone .6s ease-out;
+}
+@keyframes cardDone {
+  0% { background:var(--surface2); }
+  40% { background:rgba(34,197,94,.06); }
+  100% { background:transparent; }
+}
+
+.feed-header.pipeline-done {
+  animation: feedHeaderFlash .8s ease-out;
+}
+@keyframes feedHeaderFlash {
+  0% { border-bottom-color:var(--border); }
+  30% { border-bottom-color:rgba(34,197,94,.4); }
+  100% { border-bottom-color:var(--border); }
+}
+
+.outcome-card {
+  display:none; margin:18px 0; padding:0;
+  border-radius:8px; border:1px solid var(--border2);
+  background:var(--surface); overflow:hidden;
+  animation:outcomeSlide .6s ease-out;
+}
+.outcome-card.visible { display:block; }
+@keyframes outcomeSlide {
+  from { opacity:0; transform:translateY(16px) scale(.97); }
+  to { opacity:1; transform:translateY(0) scale(1); }
+}
+.outcome-header {
+  padding:14px 20px; background:var(--surface2);
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:10px;
+}
+.outcome-header-icon {
+  width:28px; height:28px; border-radius:6px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:13px; background:rgba(34,197,94,.12); color:var(--briefing);
+  border:1px solid rgba(34,197,94,.2);
+}
+.outcome-header-text {
+  font-family:var(--mono); font-size:10px; text-transform:uppercase;
+  letter-spacing:.14em; color:var(--muted2); font-weight:600;
+}
+.outcome-body { padding:18px 20px; }
+.outcome-stats {
+  display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;
+}
+.outcome-stat {
+  padding:10px 14px; border-radius:6px;
+  background:var(--bg); border:1px solid var(--border);
+}
+.outcome-stat-value {
+  font-family:var(--mono); font-size:18px; font-weight:700; line-height:1.2;
+}
+.outcome-stat-value.critical { color:var(--da); }
+.outcome-stat-value.high { color:var(--risk); }
+.outcome-stat-value.exposure { color:var(--analyst); }
+.outcome-stat-label {
+  font-family:var(--mono); font-size:9px; text-transform:uppercase;
+  letter-spacing:.1em; color:var(--muted); margin-top:3px;
+}
+.outcome-verdict {
+  padding:12px 16px; border-radius:6px;
+  border-left:3px solid var(--da);
+  background:rgba(239,68,68,.06);
+}
+.outcome-verdict.go {
+  border-left-color:var(--briefing);
+  background:rgba(34,197,94,.06);
+}
+.outcome-verdict.conditional {
+  border-left-color:var(--risk);
+  background:rgba(245,158,11,.06);
+}
+.outcome-verdict-label {
+  font-family:var(--mono); font-size:9px; text-transform:uppercase;
+  letter-spacing:.1em; color:var(--muted); margin-bottom:4px;
+}
+.outcome-verdict-text {
+  font-size:14px; font-weight:700; color:var(--text); line-height:1.4;
+}
+.outcome-verdict-sub {
+  font-size:11px; color:var(--muted2); margin-top:4px; line-height:1.5;
+}
+
+.band-log-panel {
+  margin:12px 0 0; border:1px solid var(--border2); border-radius:6px;
+  background:var(--surface); overflow:hidden;
+}
+.band-log-toggle {
+  display:flex; align-items:center; gap:8px; width:100%;
+  padding:10px 14px; border:none; background:none; cursor:pointer;
+  font-family:var(--mono); font-size:9px; text-transform:uppercase;
+  letter-spacing:.14em; color:var(--muted2); text-align:left;
+}
+.band-log-toggle:hover { color:var(--text); }
+.band-log-toggle .chevron {
+  transition:transform .2s; font-size:10px; color:var(--muted);
+}
+.band-log-panel.open .band-log-toggle .chevron { transform:rotate(90deg); }
+.band-log-toggle .band-label { color:var(--analyst); font-weight:600; }
+.band-log-toggle .log-count {
+  margin-left:auto; font-size:8px; padding:2px 6px;
+  border-radius:3px; background:rgba(59,130,246,.12);
+  color:var(--analyst); border:1px solid rgba(59,130,246,.2);
+}
+.band-log-body {
+  max-height:0; overflow:hidden; transition:max-height .3s ease;
+}
+.band-log-panel.open .band-log-body { max-height:280px; }
+.band-log-scroll {
+  max-height:260px; overflow-y:auto; padding:0 14px 10px;
+}
+.band-log-entry {
+  display:flex; align-items:baseline; gap:10px;
+  padding:4px 0; border-bottom:1px solid var(--border);
+  animation:msgSlide .3s ease-out;
+}
+.band-log-entry:last-child { border-bottom:none; }
+.band-log-ts {
+  font-family:var(--mono); font-size:9px; color:var(--muted);
+  flex-shrink:0; min-width:38px;
+}
+.band-log-msg {
+  font-family:var(--mono); font-size:10px; color:var(--muted2);
+  letter-spacing:.02em;
+}
+.band-log-msg .log-agent { font-weight:600; }
+.band-log-msg .log-agent.a-analyst { color:var(--analyst); }
+.band-log-msg .log-agent.a-da { color:var(--da); }
+.band-log-msg .log-agent.a-precedent { color:var(--precedent); }
+.band-log-msg .log-agent.a-risk { color:var(--risk); }
+.band-log-msg .log-agent.a-briefing { color:var(--briefing); }
+.band-log-msg .log-arrow { color:var(--muted); margin:0 2px; }
+.band-log-msg .log-broadcast { color:var(--precedent); font-style:italic; }
+.band-log-empty {
+  font-family:var(--mono); font-size:9px; color:var(--muted);
+  padding:8px 0; text-align:center; letter-spacing:.06em;
+}
+
 .bottom-bar {
   display:flex; align-items:center; gap:16px;
   padding:8px 28px; background:var(--surface); border-top:1px solid var(--border);
@@ -556,6 +830,7 @@ p.risk-flag, li.risk-flag { display:block; }
   .agents-panel { flex-direction:row; overflow-x:auto; border-right:none; border-bottom:1px solid var(--border); }
   .agent-list { display:flex; padding:0; }
   .agent-card { flex-direction:column; text-align:center; min-width:100px; border-left:none; border-bottom:3px solid transparent; }
+  .pipe-connector, .pipe-fork, .pipe-merge { display:none; }
   .doc-panel { border-left:none; border-top:1px solid var(--border); }
 }
 </style>
@@ -586,6 +861,11 @@ p.risk-flag, li.risk-flag { display:block; }
           <div class="agent-status" id="status-analyst">Standby</div>
         </div>
       </div>
+      <div class="pipe-fork" id="pipe-analyst-to-parallel">
+        <div class="pipe-fork-line"></div>
+        <div class="pipe-fork-branch"></div>
+        <div class="pipe-fork-label">Band broadcast &darr;&darr;</div>
+      </div>
       <div class="agent-card" data-agent="devils_advocate" id="card-da">
         <div class="agent-icon">DA</div>
         <div class="agent-info">
@@ -594,6 +874,10 @@ p.risk-flag, li.risk-flag { display:block; }
           <div class="provider-tag">AI/ML API</div>
           <div class="agent-status" id="status-da">Standby</div>
         </div>
+      </div>
+      <div class="pipe-connector" id="pipe-parallel-link">
+        <div class="pipe-line"></div>
+        <div class="pipe-pulse" style="background:var(--precedent)"></div>
       </div>
       <div class="agent-card" data-agent="precedent" id="card-precedent">
         <div class="agent-icon">PR</div>
@@ -604,6 +888,11 @@ p.risk-flag, li.risk-flag { display:block; }
           <div class="agent-status" id="status-precedent">Standby</div>
         </div>
       </div>
+      <div class="pipe-merge" id="pipe-parallel-to-risk">
+        <div class="pipe-merge-line"></div>
+        <div class="pipe-merge-branch"></div>
+        <div class="pipe-merge-label">Band merge</div>
+      </div>
       <div class="agent-card" data-agent="risk" id="card-risk">
         <div class="agent-icon">RK</div>
         <div class="agent-info">
@@ -612,6 +901,10 @@ p.risk-flag, li.risk-flag { display:block; }
           <div class="provider-tag">AI/ML API</div>
           <div class="agent-status" id="status-risk">Standby</div>
         </div>
+      </div>
+      <div class="pipe-connector" id="pipe-risk-to-briefing">
+        <div class="pipe-line"></div>
+        <div class="pipe-pulse" style="background:var(--briefing)"></div>
       </div>
       <div class="agent-card" data-agent="briefing" id="card-briefing">
         <div class="agent-icon">BR</div>
@@ -706,8 +999,26 @@ p.risk-flag, li.risk-flag { display:block; }
         <div class="risk-score-value" id="riskScore">&mdash;</div>
         <div class="risk-score-sub" id="riskSub">Pending analysis</div>
       </div>
+      <div class="exposure-display" id="exposureDisplay">
+        <div class="exposure-label" id="exposureLabel">Total Financial Exposure</div>
+        <div class="exposure-value" id="exposureValue">&mdash;</div>
+      </div>
+      <div class="value-callout" id="valueCallout"></div>
+      <div class="band-log-panel" id="bandLogPanel">
+        <button class="band-log-toggle" onclick="toggleBandLog()">
+          <span class="chevron">&#9654;</span>
+          <span class="band-label">Band</span> Coordination Log
+          <span class="log-count" id="bandLogCount">0</span>
+        </button>
+        <div class="band-log-body">
+          <div class="band-log-scroll" id="bandLogScroll">
+            <div class="band-log-empty" id="bandLogEmpty">Waiting for pipeline to start...</div>
+          </div>
+        </div>
+      </div>
     </div>
     <button class="start-btn" id="startBtn" onclick="startAnalysis()">Analyze Contract</button>
+    <div class="kbd-hint" id="kbdHint">Press <kbd>Space</kbd> or <kbd>Enter</kbd></div>
     <button class="reset-btn" id="resetBtn" onclick="resetDashboard()">&#8634; Run Again</button>
   </div>
 </div>
@@ -715,6 +1026,7 @@ p.risk-flag, li.risk-flag { display:block; }
 <div class="bottom-bar">
   <span id="bottomStatus">Ready &mdash; 5 agents connected</span>
   <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="pipeline-complete-badge" id="pipelineBadge"><span class="pc-dot"></span>Executive Brief Ready</div>
   <span style="margin-left:auto">SentinelOps &middot; Band of Agents Hackathon 2026</span>
 </div>
 
@@ -934,8 +1246,8 @@ var SCENARIOS = {
   b: {
     headline: "Marcus’s Decision",
     sub: "Head of Infrastructure · Meridian Ventures Ltd · June 2026",
-    story1: "Meridian Ventures must choose between three cloud infrastructure vendors for a critical platform migration that will affect 40+ internal teams. Budget: <strong>$420K annually</strong>. The decision locks Meridian into a 3-year commitment and cannot be easily reversed once migration begins.",
-    story2: "SentinelOps will analyse all three vendor proposals simultaneously, retrieve precedents from past vendor relationships — including a <strong>2024 billing dispute</strong> with one of the vendors — score risk across eight dimensions, and deliver a ranked recommendation with conditions. Marcus retains full authority.",
+    story1: "Meridian Ventures must choose between three cloud infrastructure vendors for a critical platform migration that will affect 40+ internal teams. Budget: <strong>$420K annually</strong>. The decision locks Meridian into a 3-year commitment and cannot be easily reversed once migration begins. Marcus needs to pick the <strong>safest path forward</strong> — not just avoid the worst one.",
+    story2: "SentinelOps will analyse all three vendor proposals simultaneously, retrieve precedents from past vendor relationships — including a <strong>2024 billing dispute</strong> with one of the vendors — score risk across eight dimensions, and deliver a ranked recommendation with specific conditions for safe execution. Marcus retains full authority.",
     stats: [
       { value: "3", label: "Vendors" },
       { value: "8", label: "Risk Dimensions" },
@@ -978,6 +1290,7 @@ function applyDocInfo(s) {
   var startBtn = document.getElementById('startBtn');
   var suffix = mode === 'demo' ? ' (DEMO)' : '';
   startBtn.textContent = info.btnLabel.toUpperCase() + suffix;
+  document.getElementById('exposureLabel').textContent = EXPOSURE_DATA[s].label;
 }
 
 function showScenarioIntro(callback) {
@@ -1047,9 +1360,11 @@ function setAgentStatus(key, status) {
     } else {
       el.textContent = 'Analyzing...';
     }
+    updatePipeConnectors(key, 'active');
   }
   else if (status === 'complete') {
     card.classList.add('complete'); el.textContent = 'Complete ✓';
+    updatePipeConnectors(key, 'complete');
     if (key === 'briefing') {
       var badge = document.getElementById('personaBadge');
       badge.textContent = 'Review Ready';
@@ -1057,6 +1372,42 @@ function setAgentStatus(key, status) {
     }
   }
   else { el.textContent = 'Standby'; }
+}
+
+function updatePipeConnectors(agent, status) {
+  if (agent === 'analyst' && status === 'complete') {
+    setPipeState('pipe-analyst-to-parallel', 'active');
+  }
+  if ((agent === 'devils_advocate' || agent === 'precedent') && status === 'active') {
+    setPipeState('pipe-analyst-to-parallel', 'complete');
+    setPipeState('pipe-parallel-link', 'active');
+  }
+  if (agent === 'devils_advocate' && status === 'complete') {
+    var prCard = document.getElementById(AGENTS.precedent.card);
+    if (prCard && prCard.classList.contains('complete')) {
+      setPipeState('pipe-parallel-link', 'complete');
+      setPipeState('pipe-parallel-to-risk', 'active');
+    }
+  }
+  if (agent === 'precedent' && status === 'complete') {
+    var daCard = document.getElementById(AGENTS.devils_advocate.card);
+    if (daCard && daCard.classList.contains('complete')) {
+      setPipeState('pipe-parallel-link', 'complete');
+      setPipeState('pipe-parallel-to-risk', 'active');
+    }
+  }
+  if (agent === 'risk' && status === 'active') {
+    setPipeState('pipe-parallel-to-risk', 'complete');
+  }
+  if (agent === 'risk' && status === 'complete') {
+    setPipeState('pipe-risk-to-briefing', 'active');
+  }
+  if (agent === 'briefing' && status === 'active') {
+    setPipeState('pipe-risk-to-briefing', 'complete');
+  }
+  if (agent === 'briefing' && status === 'complete') {
+    setPipeState('pipe-risk-to-briefing', 'complete');
+  }
 }
 
 function escapeHtml(text) {
@@ -1108,6 +1459,7 @@ function postProcessContent(html, agentKey, isHtml) {
 }
 
 function addMessage(agentKey, content, extra) {
+  if (agentKey === 'risk') { lastRiskContent = content; }
   var feed = document.getElementById('feed');
   var intro = document.getElementById('feedIntro');
   if (intro) intro.remove();
@@ -1195,6 +1547,218 @@ var SEVERITY_BORDERS = {
   low: 'rgba(34,197,94,.3)'
 };
 
+var EXPOSURE_DATA = {
+  a: { label: 'Total Financial Exposure', value: 2420000 },
+  b: { label: 'Exposure Avoided (Stratos vs. Apex)', value: 710000 }
+};
+
+function animateExposure(targetValue, label) {
+  var el = document.getElementById('exposureValue');
+  var labelEl = document.getElementById('exposureLabel');
+  if (label) labelEl.textContent = label;
+  el.classList.remove('active', 'exposure-glow');
+  var callout = document.getElementById('valueCallout');
+  callout.classList.remove('visible');
+  var startTime = null;
+  var duration = 2000;
+  function step(timestamp) {
+    if (!startTime) startTime = timestamp;
+    var progress = Math.min((timestamp - startTime) / duration, 1);
+    var eased = 1 - Math.pow(1 - progress, 3);
+    var current = Math.round(targetValue * eased);
+    el.textContent = '$' + current.toLocaleString('en-US');
+    if (progress < 1) {
+      requestAnimationFrame(step);
+    } else {
+      el.textContent = '$' + targetValue.toLocaleString('en-US');
+      el.classList.add('active', 'exposure-glow');
+      callout.textContent = 'SentinelOps identified $' + targetValue.toLocaleString('en-US') + ' in quantifiable exposure.';
+      callout.classList.add('visible');
+    }
+  }
+  requestAnimationFrame(step);
+}
+
+function resetExposure() {
+  var el = document.getElementById('exposureValue');
+  el.textContent = '—';
+  el.classList.remove('active', 'exposure-glow');
+  document.getElementById('exposureLabel').textContent = EXPOSURE_DATA[currentScenario].label;
+  var callout = document.getElementById('valueCallout');
+  callout.textContent = '';
+  callout.classList.remove('visible');
+}
+
+function showPipelineComplete() {
+  var keys = Object.keys(AGENTS);
+  keys.forEach(function(key, i) {
+    setTimeout(function() {
+      var card = document.getElementById(AGENTS[key].card);
+      if (card) {
+        card.classList.add('pipeline-done');
+      }
+    }, i * 100);
+  });
+  document.querySelector('.feed-header').classList.add('pipeline-done');
+  var badge = document.getElementById('pipelineBadge');
+  badge.classList.add('visible');
+}
+
+function resetPipelineComplete() {
+  Object.keys(AGENTS).forEach(function(key) {
+    var card = document.getElementById(AGENTS[key].card);
+    if (card) card.classList.remove('pipeline-done');
+  });
+  var fh = document.querySelector('.feed-header');
+  if (fh) fh.classList.remove('pipeline-done');
+  var badge = document.getElementById('pipelineBadge');
+  badge.classList.remove('visible');
+}
+
+// ========================
+//   Pipeline Connectors
+// ========================
+
+function setPipeState(id, state) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.classList.remove('active', 'complete');
+  if (state) el.classList.add(state);
+}
+
+function resetPipeConnectors() {
+  ['pipe-analyst-to-parallel', 'pipe-parallel-link', 'pipe-parallel-to-risk', 'pipe-risk-to-briefing'].forEach(function(id) {
+    setPipeState(id, '');
+  });
+}
+
+// ========================
+//   Band Coordination Log
+// ========================
+
+var bandLogEntries = 0;
+
+function toggleBandLog() {
+  document.getElementById('bandLogPanel').classList.toggle('open');
+}
+
+function addBandLogEntry(timestamp, from, to, desc) {
+  var scroll = document.getElementById('bandLogScroll');
+  var empty = document.getElementById('bandLogEmpty');
+  if (empty) empty.remove();
+
+  var agentClass = {
+    'Analyst': 'a-analyst', 'Devil\'s Advocate': 'a-da',
+    'Precedent': 'a-precedent', 'Risk': 'a-risk', 'Briefing': 'a-briefing'
+  };
+
+  var entry = document.createElement('div');
+  entry.className = 'band-log-entry';
+
+  var fromSpan = '<span class="log-agent ' + (agentClass[from] || '') + '">' + from + '</span>';
+  var toSpan = to ? '<span class="log-arrow">→</span> <span class="log-agent ' + (agentClass[to] || '') + '">' + to + '</span>' : '';
+  var descSpan = desc ? ' <span style="color:var(--muted)">' + desc + '</span>' : '';
+
+  entry.innerHTML =
+    '<span class="band-log-ts">' + timestamp + '</span>' +
+    '<span class="band-log-msg">' + fromSpan + toSpan + descSpan + '</span>';
+
+  scroll.appendChild(entry);
+  scroll.scrollTop = scroll.scrollHeight;
+
+  bandLogEntries++;
+  document.getElementById('bandLogCount').textContent = bandLogEntries;
+
+  if (bandLogEntries === 1) {
+    document.getElementById('bandLogPanel').classList.add('open');
+  }
+}
+
+function resetBandLog() {
+  var scroll = document.getElementById('bandLogScroll');
+  scroll.innerHTML = '<div class="band-log-empty" id="bandLogEmpty">Waiting for pipeline to start...</div>';
+  bandLogEntries = 0;
+  document.getElementById('bandLogCount').textContent = '0';
+  document.getElementById('bandLogPanel').classList.remove('open');
+}
+
+// ========================
+//   Outcome Summary Card
+// ========================
+
+var lastRiskContent = '';
+
+function showOutcomeCard() {
+  var existing = document.getElementById('outcomeCard');
+  if (existing) existing.remove();
+
+  var riskScore = document.getElementById('riskScore').textContent;
+  var exposureEl = document.getElementById('exposureValue');
+  var exposureText = exposureEl ? exposureEl.textContent : '';
+
+  var criticalCount = 0;
+  var highCount = 0;
+  var verdictText = '';
+  var verdictSub = '';
+  var verdictClass = '';
+
+  if (currentScenario === 'a') {
+    var criticalMatches = lastRiskContent.match(/🔴 CRITICAL/g);
+    var highMatches = lastRiskContent.match(/🟡 HIGH/g);
+    criticalCount = criticalMatches ? criticalMatches.length : 0;
+    highCount = highMatches ? highMatches.length : 0;
+    verdictText = 'DO NOT SIGN AS WRITTEN';
+    verdictSub = riskScore + '/10 risk · ' + (criticalCount + highCount) + ' findings require renegotiation';
+    verdictClass = '';
+  } else {
+    var rejected = lastRiskContent.match(/DO NOT SELECT/g);
+    var conditional = lastRiskContent.match(/RECOMMENDED WITH CONDITIONS/g);
+    criticalCount = rejected ? rejected.length : 0;
+    highCount = conditional ? conditional.length : 0;
+    verdictText = 'SELECT STRATOS CLOUD — WITH CONDITIONS';
+    verdictSub = 'Phased rollout · SLA escrow · Open-API addendum · Staffing clause';
+    verdictClass = 'conditional';
+  }
+
+  var statLabel1 = currentScenario === 'a' ? 'Critical Issues' : 'Vendors Rejected';
+  var statLabel2 = currentScenario === 'a' ? 'High Issues' : 'Conditions Required';
+  var stat2Value = currentScenario === 'a' ? highCount : 4;
+  var statClass1 = 'critical';
+  var statClass2 = 'high';
+  var exposureLabel = document.getElementById('exposureLabel').textContent || 'Total Financial Exposure';
+
+  var card = document.createElement('div');
+  card.className = 'outcome-card visible';
+  card.id = 'outcomeCard';
+  card.innerHTML =
+    '<div class="outcome-header">' +
+      '<div class="outcome-header-icon">✓</div>' +
+      '<div class="outcome-header-text">What SentinelOps Found</div>' +
+    '</div>' +
+    '<div class="outcome-body">' +
+      '<div class="outcome-stats">' +
+        '<div class="outcome-stat"><div class="outcome-stat-value ' + statClass1 + '">' + criticalCount + '</div><div class="outcome-stat-label">' + statLabel1 + '</div></div>' +
+        '<div class="outcome-stat"><div class="outcome-stat-value ' + statClass2 + '">' + stat2Value + '</div><div class="outcome-stat-label">' + statLabel2 + '</div></div>' +
+        '<div class="outcome-stat" style="grid-column:span 2"><div class="outcome-stat-value exposure">' + exposureText + '</div><div class="outcome-stat-label">' + exposureLabel + '</div></div>' +
+      '</div>' +
+      '<div class="outcome-verdict ' + verdictClass + '">' +
+        '<div class="outcome-verdict-label">Recommendation</div>' +
+        '<div class="outcome-verdict-text">' + verdictText + '</div>' +
+        '<div class="outcome-verdict-sub">' + verdictSub + '</div>' +
+      '</div>' +
+    '</div>';
+
+  var feed = document.getElementById('feed');
+  feed.appendChild(card);
+  feed.scrollTop = feed.scrollHeight;
+}
+
+function resetOutcomeCard() {
+  var card = document.getElementById('outcomeCard');
+  if (card) card.remove();
+  lastRiskContent = '';
+}
+
 function setRiskScore(score, severity) {
   var el = document.getElementById('riskScore');
   el.classList.remove('critical', 'high', 'medium', 'low', 'score-pop');
@@ -1277,16 +1841,40 @@ function handleLiveEvent(event) {
       provider: event.provider || null
     });
 
+    var elapsed = document.getElementById('timer').textContent.replace('T+', '');
+    var agentNames = { analyst:'Analyst', devils_advocate:"Devil's Advocate", precedent:'Precedent', risk:'Risk', briefing:'Briefing' };
+    var aName = agentNames[event.agent] || event.agent;
+    if (event.agent === 'analyst') {
+      addBandLogEntry(elapsed, aName, null, '→ Band room');
+      addBandLogEntry(elapsed, 'Band', null, "broadcast → Devil's Advocate + Precedent (parallel)");
+    } else if (event.agent === 'devils_advocate') {
+      addBandLogEntry(elapsed, aName, 'Risk', 'findings delivered');
+    } else if (event.agent === 'precedent') {
+      addBandLogEntry(elapsed, aName, 'Risk', 'institutional memory delivered');
+    } else if (event.agent === 'risk') {
+      addBandLogEntry(elapsed, aName, 'Briefing', 'scored matrix delivered');
+    } else if (event.agent === 'briefing') {
+      addBandLogEntry(elapsed, aName, 'Human', 'executive brief delivered');
+    }
+
     setProgress(AGENT_PROGRESS[event.agent] || 50);
 
     if (event.agent === 'risk') {
       if (currentScenario === 'b') {
-        setRiskScore('3.2', 'low');
-        document.getElementById('riskSub').textContent = 'NimbusStack · Recommended';
+        setRiskScore('4.2', 'moderate');
+        document.getElementById('riskSub').textContent = 'Stratos Cloud · Recommended with Conditions';
+        animateExposure(EXPOSURE_DATA.b.value, EXPOSURE_DATA.b.label);
       } else {
         var scoreMatch = event.content.match(/(\d+\.?\d*)\s*\/\s*10/);
         if (scoreMatch) {
           setRiskScore(scoreMatch[1], getSeverityFromScore(scoreMatch[1]));
+        }
+        var exposureMatch = event.content.match(/[Tt]otal\s+(?:quantifiable\s+)?exposure[:\s]*\$?([\d,]+)/i);
+        if (exposureMatch) {
+          var exposureNum = parseInt(exposureMatch[1].replace(/,/g, ''), 10);
+          animateExposure(exposureNum, EXPOSURE_DATA.a.label);
+        } else {
+          animateExposure(EXPOSURE_DATA.a.value, EXPOSURE_DATA.a.label);
         }
       }
     }
@@ -1299,8 +1887,35 @@ function handleLiveEvent(event) {
       if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
       addSystemMessage('Pipeline complete. All 5 agents have reported. Executive brief ready.', false);
       document.getElementById('resetBtn').style.display = 'block';
+      showPipelineComplete();
+      showOutcomeCard();
       setTimeout(function() { showLiveBrief(event.content); }, 2000);
     }
+  } else if (event.type === 'pipeline_complete') {
+    if (!pollInterval) return;
+    clearInterval(pollInterval); pollInterval = null;
+    Object.keys(AGENTS).forEach(function(key) { setAgentStatus(key, 'complete'); });
+    setProgress(100);
+    var content = event.content || '';
+    var scoreMatch = content.match(/(\d+\.?\d*)\s*\/\s*10/);
+    if (scoreMatch) {
+      setRiskScore(scoreMatch[1], getSeverityFromScore(scoreMatch[1]));
+    }
+    var exposureMatch = content.match(/[Tt]otal\s+(?:quantifiable\s+)?exposure[:\s]*\$?([\d,]+)/i);
+    if (exposureMatch) {
+      animateExposure(parseInt(exposureMatch[1].replace(/,/g, ''), 10), EXPOSURE_DATA[currentScenario].label);
+    } else {
+      animateExposure(EXPOSURE_DATA[currentScenario].value, EXPOSURE_DATA[currentScenario].label);
+    }
+    showLiveBrief(content);
+    document.getElementById('resetBtn').style.display = 'block';
+    setBottomStatus('Analysis complete — 5 agents, 0 autonomous decisions');
+    document.getElementById('liveDot').classList.remove('live');
+    document.getElementById('liveLabel').textContent = 'COMPLETE';
+    clearInterval(timerInterval);
+    addSystemMessage('Pipeline complete. All 5 agents have reported. Executive brief ready.', false);
+    showPipelineComplete();
+    showOutcomeCard();
   }
 }
 
@@ -1367,11 +1982,18 @@ function resetDashboard() {
   document.getElementById('riskSub').textContent = 'Pending analysis';
   document.getElementById('riskDisplay').style.borderColor = '';
 
+  resetExposure();
+  resetPipelineComplete();
+  resetBandLog();
+  resetOutcomeCard();
+  resetPipeConnectors();
+
   document.getElementById('liveDot').classList.remove('live');
   document.getElementById('liveLabel').textContent = 'STANDBY';
 
   var startBtn = document.getElementById('startBtn');
   startBtn.disabled = false;
+  document.getElementById('kbdHint').classList.remove('hidden');
   document.getElementById('resetBtn').style.display = 'none';
 
   narratedSteps = {};
@@ -1456,11 +2078,13 @@ function showBrief() {
 
 var DEMO = [
   [0, 'sys', 'Demo mode: Replaying a previous analysis session with pre-computed results.'],
-  [500, 'live'],
-  [800, 'sysstep', 'Step 1 of 4 — Analyst is extracting all clauses, financial terms, and obligations from the 74-page contract...'],
-  [900, 'activate', 'analyst'],
-  [1200, 'progress', 10],
-  [2500, 'message', 'analyst',
+  [600, 'live'],
+  [800, 'bandlog', '00:00', 'Human', 'Analyst', 'document submitted for analysis'],
+  [1200, 'sysstep', 'Step 1 of 4 — Analyst is extracting all clauses, financial terms, and obligations from the 74-page contract...'],
+  [1500, 'activate', 'analyst'],
+  [2200, 'progress', 10],
+  [5500, 'progress', 20],
+  [7000, 'message', 'analyst',
     '<strong>STRUCTURED CONTRACT BREAKDOWN</strong>\n\n' +
     '<strong>Document:</strong> GlobalTech Solutions Partnership Agreement (74 pages)\n' +
     '<strong>Parties:</strong> Meridian Ventures Ltd ↔ GlobalTech Solutions Inc\n' +
@@ -1476,13 +2100,16 @@ var DEMO = [
     '• Section 8.2 (p.58): Irrevocable customer data access to GlobalTech\n' +
     '• Section 9.4 (p.67): 24-month post-termination non-compete\n\n' +
     'Analysis complete. Forwarding to Devil\'s Advocate and Precedent Agent for parallel review.', {html:true}],
-  [4000, 'complete', 'analyst'],
-  [4200, 'progress', 25],
-  [4400, 'sysstep', 'Step 2 of 4 — Devil\'s Advocate and Precedent Agent are reviewing in parallel. DA attacks the contract; Precedent searches company history...'],
-  [4500, 'activate', 'devils_advocate'],
-  [4500, 'activate', 'precedent'],
-  [5000, 'progress', 35],
-  [7500, 'message', 'devils_advocate',
+  [8000, 'complete', 'analyst'],
+  [8200, 'progress', 25],
+  [8200, 'bandlog', '00:08', 'Analyst', null, '→ Band room (findings posted)'],
+  [9200, 'sysstep', 'Step 2 of 4 — Devil\'s Advocate and Precedent Agent are reviewing in parallel. DA attacks the contract; Precedent searches company history...'],
+  [9500, 'bandlog', '00:09', 'Band', null, 'broadcast → Devil\'s Advocate + Precedent (parallel)'],
+  [10000, 'activate', 'devils_advocate'],
+  [10000, 'activate', 'precedent'],
+  [11000, 'progress', 35],
+  [13500, 'progress', 42],
+  [16000, 'message', 'devils_advocate',
     '<strong>ADVERSARIAL CONTRACT REVIEW</strong>\n\n' +
     '<span class="highlight"><strong>CONTRADICTION:</strong> Section 5.2 (p.34) grants exclusive EMEA distribution. ' +
     'Section 9.4 (p.67) extends this 24 months <em>post-termination</em>. Combined: Meridian is locked in for 3 years ' +
@@ -1498,8 +2125,8 @@ var DEMO = [
     '• Schedule C (penalty clauses) not provided\n' +
     '• No performance minimums on GlobalTech\'s side\n\n' +
     '<strong>Verdict: Do not sign as written. Five clauses require renegotiation minimum.</strong>', {parallel:true, html:true}],
-  [7800, 'progress', 50],
-  [9000, 'message', 'precedent',
+  [16500, 'progress', 50],
+  [18500, 'message', 'precedent',
     '<strong>INSTITUTIONAL MEMORY REPORT</strong>\n\n' +
     '<strong>DIRECT HISTORY WITH THIS VENDOR:</strong>\n' +
     'March 2023: GlobalTech filed a payment dispute against our portfolio company TechBridge Ltd for $142K. ' +
@@ -1514,12 +2141,15 @@ var DEMO = [
     'BRD-2023-47 (September 2023): Prohibits IP transfer without board approval. <strong>Section 4.1 violates this resolution directly.</strong>\n\n' +
     '<strong>BENCHMARK — Vertex Systems (2024, $2.1M):</strong> Liability cap 100%, 90-day mutual exit, IP retained by Meridian.\n\n' +
     '<strong>History says: we avoided this vendor once, were burned by the same language twice, and are about to violate a board resolution.</strong>', {parallel:true, html:true}],
-  [9500, 'complete', 'devils_advocate'],
-  [9700, 'complete', 'precedent'],
-  [10000, 'progress', 65],
-  [10200, 'sysstep', 'Step 3 of 4 — Risk Agent is synthesizing all findings into a scored risk matrix with financial exposure calculations...'],
-  [10500, 'activate', 'risk'],
-  [13000, 'message', 'risk',
+  [19500, 'complete', 'devils_advocate'],
+  [19800, 'complete', 'precedent'],
+  [20000, 'bandlog', '00:20', 'Devil\'s Advocate', 'Risk', 'findings delivered'],
+  [20000, 'bandlog', '00:20', 'Precedent', 'Risk', 'institutional memory delivered'],
+  [20200, 'progress', 60],
+  [21200, 'sysstep', 'Step 3 of 4 — Risk Agent is synthesizing all findings into a scored risk matrix with financial exposure calculations...'],
+  [22000, 'activate', 'risk'],
+  [24000, 'progress', 70],
+  [28000, 'message', 'risk',
     '<strong>RISK ASSESSMENT MATRIX</strong>\n' +
     '<em>Synthesized from Devil\'s Advocate + Precedent Agent findings</em>\n\n' +
     '<span class="risk-high">🔴 CRITICAL — Board Resolution Violation (Section 4.1, p.27)</span>\n' +
@@ -1539,31 +2169,36 @@ var DEMO = [
     '<strong>Exposure: $340,000+</strong>\n\n' +
     '<strong>AGGREGATE RISK SCORE: 8.5 / 10</strong>\n' +
     'Total quantifiable exposure: <strong>$2,420,000+</strong>', {html:true}],
-  [13500, 'complete', 'risk'],
-  [13500, 'riskscore'],
-  [14000, 'progress', 80],
-  [14200, 'sysstep', 'Step 4 of 4 — Briefing Agent is preparing the final executive decision brief for the human decision-maker...'],
-  [14500, 'activate', 'briefing'],
-  [17000, 'message', 'briefing',
+  [28500, 'complete', 'risk'],
+  [28500, 'riskscore'],
+  [28500, 'bandlog', '00:28', 'Risk', 'Briefing', 'scored matrix delivered'],
+  [29500, 'progress', 80],
+  [30500, 'sysstep', 'Step 4 of 4 — Briefing Agent is preparing the final executive decision brief for the human decision-maker...'],
+  [31500, 'activate', 'briefing'],
+  [33500, 'progress', 90],
+  [37500, 'message', 'briefing',
     '<strong>EXECUTIVE DECISION BRIEF GENERATED</strong>\n\n' +
     'Risk Score: 8.5/10 · 3 critical findings · 3 high findings · $2.4M+ exposure\n\n' +
     'The full executive brief has been prepared. It includes ranked risks with severity scores, ' +
     'specific page citations, questions to ask before signing, and a renegotiation checklist.\n\n' +
     '<strong>Bottom line: Do not sign this contract as written.</strong>\n\n' +
     '<em>Click to view the complete executive brief →</em>', {html:true}],
-  [17500, 'complete', 'briefing'],
-  [17500, 'progress', 100],
-  [18000, 'sys', 'Pipeline complete. All 5 agents have reported. Executive brief ready.'],
-  [18500, 'brief'],
+  [38500, 'complete', 'briefing'],
+  [38500, 'progress', 100],
+  [38500, 'bandlog', '00:38', 'Briefing', 'Human', 'executive brief delivered'],
+  [39500, 'sys', 'Pipeline complete. All 5 agents have reported. Executive brief ready.'],
+  [41000, 'brief'],
 ];
 
 var DEMO_B = [
   [0, 'sys', 'Demo mode: Replaying a previous vendor analysis session with pre-computed results.'],
-  [500, 'live'],
-  [800, 'sysstep', 'Step 1 of 4 — Analyst is parsing all three vendor proposals and extracting pricing, SLA, and exit terms...'],
-  [900, 'activate', 'analyst'],
-  [1200, 'progress', 10],
-  [2500, 'message', 'analyst',
+  [600, 'live'],
+  [800, 'bandlog', '00:00', 'Human', 'Analyst', 'vendor proposals submitted for analysis'],
+  [1200, 'sysstep', 'Step 1 of 4 — Analyst is parsing all three vendor proposals and extracting pricing, SLA, and exit terms...'],
+  [1500, 'activate', 'analyst'],
+  [2200, 'progress', 10],
+  [5500, 'progress', 20],
+  [7000, 'message', 'analyst',
     '## Vendor Proposal Analysis — Cloud Infrastructure Migration\n' +
     '*Prepared by: Analyst Agent (SentinelOps)*\n' +
     '*Vendors: Stratos Cloud · NimbusStack · Apex Systems*\n' +
@@ -1588,135 +2223,157 @@ var DEMO_B = [
     '🟢 Stratos Cloud: strongest SLA with defined breach remedies.\n\n' +
     '🟢 NimbusStack: most flexible exit terms of the three vendors.\n\n' +
     '*Forwarding to @sentinelops-devils-advocate and @sentinelops-precedent for parallel review.*'],
-  [4000, 'complete', 'analyst'],
-  [4200, 'progress', 25],
-  [4400, 'sysstep', 'Step 2 of 4 — Devil\'s Advocate and Precedent Agent reviewing in parallel. DA challenges each vendor; Precedent searches vendor history...'],
-  [4500, 'activate', 'devils_advocate'],
-  [4500, 'activate', 'precedent'],
-  [5000, 'progress', 35],
-  [7500, 'message', 'devils_advocate',
+  [8000, 'complete', 'analyst'],
+  [8200, 'progress', 25],
+  [8200, 'bandlog', '00:08', 'Analyst', null, '→ Band room (vendor analysis posted)'],
+  [9200, 'sysstep', 'Step 2 of 4 — Devil\'s Advocate and Precedent Agent reviewing in parallel. DA challenges each vendor; Precedent searches vendor history...'],
+  [9500, 'bandlog', '00:09', 'Band', null, 'broadcast → Devil\'s Advocate + Precedent (parallel)'],
+  [10000, 'activate', 'devils_advocate'],
+  [10000, 'activate', 'precedent'],
+  [11000, 'progress', 35],
+  [13500, 'progress', 42],
+  [16000, 'message', 'devils_advocate',
     '## Challenge Report — Vendor Selection\n' +
-    '*Verdict: Do not select Apex. Stratos requires conditions. NimbusStack is viable.*\n\n' +
-    '### CONTRADICTIONS\n' +
-    '**Apex Systems pricing vs support terms**: The lowest price ($210K) comes with "best efforts" support and no SLA penalty — meaning Meridian bears 100% of the downtime cost while paying for a service with no accountability mechanism.\n\n' +
-    '**Stratos Cloud SLA vs exit terms**: Stratos offers the strongest uptime guarantee (99.99%) but locks Meridian into proprietary architecture. If Stratos underperforms or raises prices in year 2, the exit cost ($180K+) exceeds an entire year of NimbusStack fees.\n\n' +
-    '### UNFAIR TERMS\n' +
-    '🔴 **Apex Systems — No SLA penalty (all proposals, p.34)**: "Best efforts" support with zero financial accountability. If Apex causes 48 hours of downtime affecting 40 teams, Meridian has no contractual remedy.\n\n' +
-    '🔴 **Stratos Cloud — Proprietary lock-in (Section 4.2)**: Migration to Stratos requires adopting their custom APIs. Switching later costs an estimated $180K+ in re-engineering. This is not disclosed prominently in the proposal.\n\n' +
-    '🟡 **NimbusStack — CPI+2% escalation (Section 3.1)**: At 3% CPI, year 3 cost reaches $308K — 6.2% above the quoted price. Not a dealbreaker but must be capped.\n\n' +
-    '### QUESTIONS BEFORE DECIDING\n' +
-    '1. What is Apex\'s explanation for the 2024 billing dispute with Meridian?\n' +
-    '2. Will Stratos agree to open-standard APIs to reduce lock-in risk?\n' +
-    '3. Will NimbusStack cap the CPI escalation at 2% total over the term?\n\n' +
+    '*Verdict: Reject Apex outright. Challenge the assumption that NimbusStack is safer — Stratos Cloud is the stronger risk-adjusted choice.*\n\n' +
+    '### WHY NOT NIMBUSSTACK\n' +
+    '**The "safe" choice has hidden costs.** NimbusStack\'s CPI+2% escalation means Meridian pays $308K by year 3 — and has no price certainty for a platform 40 teams depend on. Their 99.9% SLA allows 8.7 hours of downtime per year. For a business-critical migration, that is a bet on hope.\n\n' +
+    '**Stratos offers what this migration actually needs**: 99.99% uptime (52 minutes/year max downtime), 15-minute P1 response, and fixed pricing that locks in budget certainty for 3 years. These are not luxuries — they are requirements for a platform serving 40+ teams.\n\n' +
+    '### REJECT APEX — NO DEBATE\n' +
+    '🔴 **Apex Systems — No SLA penalty**: "Best efforts" support with zero financial accountability. Combined with the 2024 billing dispute, Apex is disqualified.\n\n' +
+    '### THE REAL QUESTION\n' +
+    '🟡 **Stratos Cloud lock-in is real but manageable**: Yes, proprietary APIs create switching cost. But Meridian is committing to 3 years regardless. The question is whether $180K exit cost in year 4 outweighs $90K in hidden NimbusStack escalation fees PLUS 8x more allowed downtime every single year.\n\n' +
+    '### MY POSITION\n' +
+    'Stratos is the right vendor for this migration. The lock-in risk is the price of reliability — and it can be mitigated with an open-standard API addendum and a phased rollout that validates performance before full commitment.\n\n' +
     '*Forwarding findings to @sentinelops-risk for scoring.*', {parallel:true}],
-  [7800, 'progress', 50],
-  [9000, 'message', 'precedent',
+  [16500, 'progress', 50],
+  [18500, 'message', 'precedent',
     '## Institutional Memory Report — Vendor Selection\n' +
     '*Prepared by: Precedent Agent (Featherless AI)*\n\n' +
     '### DIRECT VENDOR HISTORY\n' +
     '**2024-08-14 — Apex Systems Billing Dispute**: Apex Systems overbilled Meridian $34,000 in managed services fees over 6 months. Dispute resolved after 4 months of back-and-forth. Internal notes: *"Apex\'s billing practices are opaque; invoices do not map clearly to contracted services."* Resolution required external audit.\n' +
-    '→ **Connection**: Apex\'s current proposal has a variable pricing clause with no defined billing methodology. This is the same structural ambiguity that caused the 2024 dispute.\n\n' +
+    '→ **Connection**: Apex\'s current proposal has a variable pricing clause with no defined billing methodology. This is the same structural ambiguity that caused the 2024 dispute. **Institutional recommendation: do not re-engage.**\n\n' +
     '**2023-05-20 — NimbusStack Pilot (Project Helix)**: Meridian ran a 3-month pilot with NimbusStack for a data pipeline project. Performance met SLA targets. Support response averaged 2.1 hours on P1 tickets (SLA: 4 hours). No disputes.\n' +
-    '→ **Connection**: Meridian has a positive prior relationship with NimbusStack at smaller scale. No red flags in institutional history.\n\n' +
-    '### BENCHMARK COMPARISON\n' +
-    '| Term | Stratos Cloud | NimbusStack | Apex Systems | Market Standard |\n' +
-    '|------|--------------|-------------|--------------|------------------|\n' +
-    '| Uptime SLA | 99.99% ✅ | 99.9% ✅ | 99.5% 🔴 | 99.9% |\n' +
-    '| Support P1 | 15 min ✅ | 4 hours ✅ | Best efforts 🔴 | 1–4 hours |\n' +
-    '| Exit penalty | 6 months 🔴 | 90 days ✅ | None stated 🟡 | 30–90 days |\n' +
-    '| Price lock | Fixed ✅ | CPI+2% 🟡 | Variable 🔴 | Fixed or CPI |\n\n' +
+    '→ **Connection**: Positive prior relationship at smaller scale. However, Project Helix was a data pipeline (12 users), not a platform migration (40+ teams). Scale difference is 30x.\n\n' +
+    '**Stratos Cloud — No prior relationship**: No institutional history with Stratos. Founded 2021, 47 employees. Meridian has never worked with a vendor this size for critical infrastructure.\n' +
+    '→ **Connection**: This is both a risk (unproven relationship) and neutral (no negative history). Board directive after Q4 2025 outage prioritized reliability over familiarity.\n\n' +
+    '### RISK CONTEXT\n' +
+    'The Q4 2025 outage cost Meridian an estimated $220K in lost productivity and client penalties. The board directive explicitly stated: *"Prioritize uptime guarantees over cost savings."* This favors Stratos\'s 99.99% SLA but raises the question of whether a 47-person company can deliver on that promise at Meridian\'s scale.\n\n' +
     '*Forwarding institutional memory to @sentinelops-risk for scoring.*', {parallel:true}],
-  [9500, 'complete', 'devils_advocate'],
-  [9700, 'complete', 'precedent'],
-  [10000, 'progress', 65],
-  [10200, 'sysstep', 'Step 3 of 4 — Risk Agent is scoring all three vendors across eight risk dimensions...'],
-  [10500, 'activate', 'risk'],
-  [13000, 'message', 'risk',
+  [19500, 'complete', 'devils_advocate'],
+  [19800, 'complete', 'precedent'],
+  [20000, 'bandlog', '00:20', 'Devil\'s Advocate', 'Risk', 'pro-Stratos position delivered'],
+  [20000, 'bandlog', '00:20', 'Precedent', 'Risk', 'vendor history + concerns delivered'],
+  [20200, 'progress', 60],
+  [21200, 'sysstep', 'Step 3 of 4 — Risk Agent is scoring all three vendors across eight risk dimensions...'],
+  [22000, 'activate', 'risk'],
+  [24000, 'progress', 70],
+  [28000, 'message', 'risk',
     '## Risk Assessment Matrix — Vendor Selection\n' +
     '*Synthesized from Analyst · Devil\'s Advocate · Precedent*\n\n' +
+    '### AGENT DISAGREEMENT NOTE\n' +
+    'Devil\'s Advocate argues strongly for Stratos Cloud based on SLA superiority and fixed pricing. Precedent Agent raises the counterpoint: Stratos is unproven at Meridian\'s scale (47 employees, no prior relationship). Both positions have merit. Scoring reflects this tension.\n\n' +
     '### VENDOR RISK SCORES\n\n' +
     '**APEX SYSTEMS — 🔴 8.9 / 10 RISK — DO NOT SELECT**\n' +
     '- No SLA penalty: $200K+ exposure if extended downtime occurs\n' +
-    '- Billing dispute history: pattern of opaque invoicing unresolved\n' +
-    '- Variable pricing: no ceiling defined — cost could escalate unpredictably\n' +
+    '- Billing dispute history: pattern of opaque invoicing (2024 — $34K overbill)\n' +
+    '- Variable pricing with no ceiling — structural repeat of prior dispute\n' +
     '- Total quantified exposure: $890,000\n\n' +
-    '**STRATOS CLOUD — 🟡 5.4 / 10 RISK — CONDITIONAL APPROVAL**\n' +
-    '- Proprietary lock-in: $180K+ exit cost if migration needed\n' +
-    '- 99.99% SLA is the strongest available — reduces operational risk\n' +
-    '- Fixed pricing provides budget certainty\n' +
-    '- Condition required: open-standard API addendum before signing\n' +
-    '- Total quantified exposure (lock-in only): $180,000\n\n' +
-    '**NIMBUSSTACK — 🟢 3.2 / 10 RISK — RECOMMENDED**\n' +
-    '- Positive prior relationship (Project Helix pilot — no disputes)\n' +
-    '- Flexible exit terms (90-day notice)\n' +
-    '- CPI+2% escalation is manageable if capped\n' +
-    '- Condition required: cap price escalation at 5% total over 3-year term\n' +
-    '- Total quantified exposure: $48,000 (escalation risk only)\n\n' +
+    '**NIMBUSSTACK — 🟡 5.1 / 10 RISK — ADEQUATE BUT NOT OPTIMAL**\n' +
+    '- Positive pilot history (Project Helix) but at 30x smaller scale\n' +
+    '- CPI+2% escalation: $90K additional cost over term if uncapped\n' +
+    '- 99.9% SLA allows 8.7 hours downtime/year — board directive demands better\n' +
+    '- 4-hour P1 response is standard but not what 40 teams need at 3am\n' +
+    '- Total quantified exposure: $310,000 (escalation + downtime cost)\n\n' +
+    '**STRATOS CLOUD — 🟢 4.2 / 10 RISK — RECOMMENDED WITH CONDITIONS**\n' +
+    '- 99.99% SLA directly addresses board directive after Q4 2025 outage\n' +
+    '- Fixed pricing eliminates budget uncertainty over 3 years\n' +
+    '- 15-minute P1 response is best-in-class for critical infrastructure\n' +
+    '- RISKS: 47-employee company, proprietary lock-in ($180K exit), no prior relationship\n' +
+    '- Conditions required: phased rollout, SLA penalty escrow, open-API addendum\n' +
+    '- Total quantified exposure (if conditions met): $180,000 (lock-in only)\n\n' +
     '### AGGREGATE COMPARISON\n' +
-    '| Vendor | Risk Score | Quantified Exposure | Recommendation |\n' +
-    '|--------|-----------|--------------------|-----------------|\n' +
+    '| Vendor | Risk Score | Exposure | Recommendation |\n' +
+    '|--------|-----------|----------|-----------------|\n' +
     '| Apex Systems | 8.9 / 10 | $890,000 | ❌ Do Not Select |\n' +
-    '| Stratos Cloud | 5.4 / 10 | $180,000 | ⚠️ Conditional |\n' +
-    '| NimbusStack | 3.2 / 10 | $48,000 | ✅ Recommended |\n\n' +
+    '| NimbusStack | 5.1 / 10 | $310,000 | ⚠️ Adequate, not optimal |\n' +
+    '| Stratos Cloud | 4.2 / 10 | $180,000 | ✅ Recommended (conditions) |\n\n' +
     '*Forwarding to @sentinelops-briefing for executive brief.*'],
-  [13500, 'complete', 'risk'],
-  [13500, 'riskscoreB'],
-  [14000, 'progress', 80],
-  [14200, 'sysstep', 'Step 4 of 4 — Briefing Agent is preparing the ranked vendor recommendation for Marcus...'],
-  [14500, 'activate', 'briefing'],
-  [17000, 'message', 'briefing',
+  [28500, 'complete', 'risk'],
+  [28500, 'riskscoreB'],
+  [28500, 'bandlog', '00:28', 'Risk', 'Briefing', 'scored matrix + disagreement note delivered'],
+  [29500, 'progress', 80],
+  [30500, 'sysstep', 'Step 4 of 4 — Briefing Agent is preparing the ranked vendor recommendation for Marcus...'],
+  [31500, 'activate', 'briefing'],
+  [33500, 'progress', 90],
+  [37500, 'message', 'briefing',
     '<strong>EXECUTIVE DECISION BRIEF GENERATED</strong>\n\n' +
-    'Recommended Vendor: NimbusStack · Risk Score: 3.2/10 · 2 conditions required\n\n' +
-    'The full executive brief has been prepared. It includes a ranked vendor comparison, ' +
-    'risk scores for all three vendors, conditions for the recommended selection, ' +
-    'and negotiation demands.\n\n' +
-    '<strong>Bottom line: Select NimbusStack — with conditions.</strong>\n\n' +
+    'Recommended Vendor: Stratos Cloud · Risk Score: 4.2/10 · 4 conditions required\n\n' +
+    'Note: Agents disagreed on this recommendation. Devil\'s Advocate championed Stratos Cloud ' +
+    'on SLA and pricing grounds. Risk Agent flagged operational concerns (team size, single region). ' +
+    'The brief synthesizes both positions into a conditional approval.\n\n' +
+    '<strong>Bottom line: Select Stratos Cloud — subject to phased rollout and contractual safeguards.</strong>\n\n' +
     '<em>Click to view the complete executive brief →</em>', {html:true}],
-  [17500, 'complete', 'briefing'],
-  [17500, 'progress', 100],
-  [18000, 'sys', 'Pipeline complete. All 5 agents have reported. Executive brief ready.'],
-  [18500, 'briefB'],
+  [38500, 'complete', 'briefing'],
+  [38500, 'progress', 100],
+  [38500, 'bandlog', '00:38', 'Briefing', 'Human', 'conditional recommendation delivered'],
+  [39500, 'sys', 'Pipeline complete. All 5 agents have reported. Executive brief ready.'],
+  [41000, 'briefB'],
 ];
 
 function showBriefB() {
   document.getElementById('briefTitle').textContent = DOC_INFO.b.briefTitle;
   document.getElementById('briefBody').innerHTML =
     '<h3>Recommendation</h3>' +
-    '<p><strong>SELECT NIMBUSSTACK — WITH CONDITIONS</strong></p>' +
-    '<p>Meridian Ventures should proceed with NimbusStack for the cloud infrastructure ' +
-    'migration. Of the three vendors evaluated, NimbusStack presents the lowest ' +
-    'risk profile, the most flexible exit terms, and a verified positive prior ' +
-    'relationship with Meridian. Two conditions must be met before signing.</p>' +
+    '<p><strong>SELECT STRATOS CLOUD — SUBJECT TO CONDITIONS</strong></p>' +
+    '<p>After synthesizing disagreement between agents, Stratos Cloud is recommended for ' +
+    'Meridian\'s cloud infrastructure migration. Stratos directly addresses the board directive ' +
+    'issued after Q4 2025: its 99.99% SLA with financial penalties, fixed 3-year pricing, and ' +
+    '15-minute P1 response make it the strongest reliability choice. However, legitimate concerns ' +
+    'exist around team size (47 employees), single-region risk, and proprietary lock-in. ' +
+    'These are mitigated by the four conditions below.</p>' +
+
+    '<h3>Agent Disagreement Summary</h3>' +
+    '<div class="risk-item" style="border-left-color:#3b82f6"><strong>Devil\'s Advocate</strong> championed Stratos Cloud — ' +
+    'argued that 99.99% SLA and fixed pricing make it the only vendor that actually meets the board\'s ' +
+    'post-outage reliability mandate. Challenged NimbusStack\'s "safe choice" framing as settling for ' +
+    'inferior guarantees.<br><br>' +
+    '<strong>Risk Agent</strong> raised valid concerns — Stratos is a 47-person company with no prior ' +
+    'Meridian relationship and proprietary lock-in ($180K exit cost). Acknowledged SLA strength but ' +
+    'flagged operational capacity risk.<br><br>' +
+    '<strong>Resolution:</strong> Conditions below neutralize the operational risks while preserving ' +
+    'Stratos\'s SLA and pricing advantages.</div>' +
 
     '<h3>Why Not Apex Systems</h3>' +
     '<div class="risk-item critical"><strong>🔴 Risk Score: 8.9 / 10 — DO NOT SELECT</strong><br>' +
     'Apex carries a risk score of 8.9/10. Their "best efforts" SLA provides zero ' +
-    'financial accountability for downtime. Combined with the 2024 billing dispute ' +
-    'and variable pricing with no defined ceiling, Apex represents unacceptable ' +
-    'risk for a business-critical infrastructure commitment.<br>' +
+    'financial accountability for downtime. The 2024 billing dispute ($34K overbill over 6 months) ' +
+    'and variable pricing with no defined ceiling represent structural risks that would repeat.<br>' +
     '<strong>Potential exposure: $890,000</strong></div>' +
 
-    '<h3>Why Not Stratos (Without Conditions)</h3>' +
-    '<div class="risk-item high"><strong>🟡 Risk Score: 5.4 / 10 — CONDITIONAL</strong><br>' +
-    'Stratos has the strongest technical SLA (99.99%) but their proprietary ' +
-    'architecture creates a $180K+ exit trap. Until they agree to open-standard ' +
-    'APIs in a signed addendum, the lock-in risk outweighs the SLA advantage.</div>' +
+    '<h3>Why Not NimbusStack</h3>' +
+    '<div class="risk-item high"><strong>🟡 Risk Score: 5.1 / 10 — ADEQUATE BUT NOT OPTIMAL</strong><br>' +
+    'NimbusStack has a positive prior relationship (Project Helix) and flexible exit terms. ' +
+    'However, its 99.9% SLA allows 8.7 hours of downtime per year — ten times more than Stratos. ' +
+    'Its 4-hour P1 response and CPI+2% escalation do not meet the bar set by the board directive. ' +
+    'NimbusStack is a defensible fallback if Stratos conditions cannot be met.</div>' +
 
-    '<h3>Conditions for NimbusStack</h3>' +
+    '<h3>Conditions for Stratos Cloud (All 4 Required)</h3>' +
     '<ol style="padding-left:18px;margin:8px 0">' +
-    '<li>✅ Cap CPI price escalation at 5% total over the 3-year term (not per year)</li>' +
-    '<li>✅ Confirm P1 support SLA in writing with defined credit penalties for breach</li></ol>' +
+    '<li>✅ <strong>Phased rollout:</strong> Migrate non-critical workloads first (60 days), then production — with rollback clause if SLA breached during pilot</li>' +
+    '<li>✅ <strong>SLA penalty escrow:</strong> 3 months\' fees held in escrow, released only after 6 months at 99.99% or better</li>' +
+    '<li>✅ <strong>Open-API addendum:</strong> Stratos must provide documented open-standard API access — eliminates proprietary lock-in ($180K exit cost drops to ~$40K)</li>' +
+    '<li>✅ <strong>Staffing & escalation clause:</strong> Named account team of ≥3 engineers; exit rights triggered if Stratos headcount falls below 40 FTE</li></ol>' +
+
+    '<h3>Fallback Position</h3>' +
+    '<p>If Stratos refuses any of the four conditions above, <strong>revert to NimbusStack</strong> ' +
+    'with escalation cap (5% cumulative) and P1 penalty clause. NimbusStack is adequate — ' +
+    'it simply doesn\'t meet the board\'s stated reliability bar.</p>' +
 
     '<h3>Questions for Marcus Before Signing</h3>' +
     '<ol style="padding-left:18px;margin:8px 0">' +
-    '<li>Has NimbusStack agreed to the escalation cap in principle?</li>' +
-    '<li>What is the internal cost estimate for a mid-contract migration if NimbusStack ' +
-    'underperforms? (Needed to validate the 90-day exit clause is sufficient)</li></ol>' +
-
-    '<h3>Negotiation Demands</h3>' +
-    '<ul style="padding-left:18px;margin:8px 0">' +
-    '<li>NimbusStack Section 3.1: Add "CPI escalation capped at 5% cumulative over term"</li>' +
-    '<li>NimbusStack SLA addendum: Define credit structure for P1 response breaches</li></ul>' +
+    '<li>Has Stratos agreed in principle to the phased rollout and escrow terms?</li>' +
+    '<li>Is the board satisfied with NimbusStack as fallback if conditions aren\'t met?</li>' +
+    '<li>What is the internal cost of delaying migration by 30 days to negotiate? (Informs walk-away threshold)</li></ol>' +
 
     '<div class="audit-trail"><strong>Audit Trail</strong><br>' +
     'Analyst → Band → Devil\'s Advocate + Precedent (parallel) → Band → Risk Agent → Band → Briefing Agent → Human<br><br>' +
@@ -1749,13 +2406,18 @@ function startDemo() {
         case 'progress': setProgress(step[2]); break;
         case 'sys': addSystemMessage(step[2], false); break;
         case 'sysstep': addSystemMessage(step[2], true); break;
-        case 'riskscore': setRiskScore('8.5', getSeverityFromScore('8.5')); break;
-        case 'riskscoreB':
-          setRiskScore('3.2', 'low');
-          document.getElementById('riskSub').textContent = 'NimbusStack · Recommended';
+        case 'riskscore':
+          setRiskScore('8.5', getSeverityFromScore('8.5'));
+          animateExposure(EXPOSURE_DATA.a.value, EXPOSURE_DATA.a.label);
           break;
-        case 'brief': showBrief(); break;
-        case 'briefB': showBriefB(); break;
+        case 'riskscoreB':
+          setRiskScore('4.2', 'moderate');
+          document.getElementById('riskSub').textContent = 'Stratos Cloud · Recommended with Conditions';
+          animateExposure(EXPOSURE_DATA.b.value, EXPOSURE_DATA.b.label);
+          break;
+        case 'bandlog': addBandLogEntry(step[2], step[3], step[4], step[5]); break;
+        case 'brief': showBrief(); showPipelineComplete(); showOutcomeCard(); break;
+        case 'briefB': showBriefB(); showPipelineComplete(); showOutcomeCard(); break;
       }
     }, step[0]);
     demoTimeouts.push(id);
@@ -1763,7 +2425,7 @@ function startDemo() {
   demoTimeouts.push(setTimeout(function() {
     clearInterval(timerInterval);
     document.getElementById('resetBtn').style.display = 'block';
-  }, 20000));
+  }, 43000));
 }
 
 // ========================
@@ -1772,6 +2434,7 @@ function startDemo() {
 
 async function startAnalysis() {
   document.getElementById('startBtn').disabled = true;
+  document.getElementById('kbdHint').classList.add('hidden');
 
   var serverUp = await checkServer();
   showScenarioIntro(function() {
@@ -1793,6 +2456,16 @@ async function startAnalysis() {
   }
   applyDocInfo(currentScenario);
 })();
+
+document.addEventListener('keydown', function(e) {
+  if (e.key !== ' ' && e.key !== 'Enter') return;
+  var tag = document.activeElement.tagName.toLowerCase();
+  if (tag === 'input' || tag === 'textarea' || document.activeElement.isContentEditable) return;
+  var btn = document.getElementById('startBtn');
+  if (!btn || btn.disabled) return;
+  e.preventDefault();
+  startAnalysis();
+});
 </script>
 </body>
 </html>

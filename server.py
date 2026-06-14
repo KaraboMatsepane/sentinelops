@@ -149,7 +149,7 @@ class DashboardHandler(SimpleHTTPRequestHandler):
                 event.setdefault("timestamp", time.time())
                 with events_lock:
                     events.append(event)
-                    if event.get("agent") == "sentinelops-briefing" and event.get("type") == "message":
+                    if event.get("agent") == "briefing" and event.get("type") == "message":
                         events.append({
                             "type": "pipeline_complete",
                             "agent": "system",

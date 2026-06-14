@@ -1,7 +1,8 @@
 """
-Multi-provider LLM adapter with automatic fallback.
+Multi-provider LLM adapter with configurable provider order and automatic fallback.
 
-Tries AI/ML API -> Featherless AI -> hardcoded response.
+Default: AI/ML API -> Featherless AI -> hardcoded response.
+Precedent Agent: Featherless AI -> AI/ML API -> hardcoded response.
 Posts events to the local dashboard server for live visualization.
 """
 
@@ -75,13 +76,13 @@ def strip_markdown(text: str) -> str:
 
 class ResilientAdapter(SimpleAdapter[HistoryProvider]):
     """
-    Band adapter that tries multiple LLM providers in order.
+    Band adapter that tries multiple LLM providers in configurable order.
     Integrates with the local dashboard server for live visualization.
 
-    Provider hierarchy:
-    1. AI/ML API (primary — powers Analyst, DA, Risk, Briefing)
-    2. Featherless AI (fallback — primary for Precedent Agent)
-    3. Hardcoded fallback response
+    Provider order is configurable via provider_order parameter:
+    - Default: ["aiml", "featherless"] (AI/ML API first)
+    - Precedent Agent: ["featherless", "aiml"] (Featherless AI first)
+    - Final fallback: hardcoded response if all providers fail
 
     Band chat: receives clean plain text (no markdown clutter)
     Dashboard: receives original markdown for rich formatted rendering
@@ -102,6 +103,7 @@ class ResilientAdapter(SimpleAdapter[HistoryProvider]):
             wait_for_all: list[str] | None = None,
             mention_targets: list[str] | None = None,
             trigger_phrase: str | None = None,
+            provider_order: list[str] | None = None,
     ):
         super().__init__(history_converter=None, features=AdapterFeatures())
         self.agent_name = agent_name
@@ -114,6 +116,7 @@ class ResilientAdapter(SimpleAdapter[HistoryProvider]):
         self.wait_for_all = wait_for_all
         self.mention_targets = mention_targets
         self.trigger_phrase = trigger_phrase
+        self.provider_order = provider_order or ["aiml", "featherless"]
         self._history: dict[str, list[dict[str, str]]] = {}
         self._received_from: dict[str, dict[str, str]] = {}
 
@@ -267,22 +270,24 @@ class ResilientAdapter(SimpleAdapter[HistoryProvider]):
         text = None
         provider_used = "fallback"
 
-        try:
-            logger.info("[%s] Trying AI/ML API...", self.agent_name)
-            text = await self._call_aiml(messages)
-            provider_used = "aiml"
-            logger.info("[%s] AI/ML API succeeded (%d chars)", self.agent_name, len(text))
-        except Exception as e:
-            logger.warning("[%s] AI/ML API failed: %s", self.agent_name, e)
+        provider_calls = {
+            "aiml": (self._call_aiml, "AI/ML API"),
+            "featherless": (self._call_featherless, "Featherless AI"),
+        }
 
-        if text is None:
+        for provider_key in self.provider_order:
+            if text is not None:
+                break
+            call_fn, display_name = provider_calls.get(provider_key, (None, None))
+            if call_fn is None:
+                continue
             try:
-                logger.info("[%s] Trying Featherless AI...", self.agent_name)
-                text = await self._call_featherless(messages)
-                provider_used = "featherless"
-                logger.info("[%s] Featherless succeeded (%d chars)", self.agent_name, len(text))
+                logger.info("[%s] Trying %s...", self.agent_name, display_name)
+                text = await call_fn(messages)
+                provider_used = provider_key
+                logger.info("[%s] %s succeeded (%d chars)", self.agent_name, display_name, len(text))
             except Exception as e:
-                logger.warning("[%s] Featherless AI failed: %s", self.agent_name, e)
+                logger.warning("[%s] %s failed: %s", self.agent_name, display_name, e)
 
         if text is None:
             logger.warning("[%s] All providers failed — using fallback", self.agent_name)
