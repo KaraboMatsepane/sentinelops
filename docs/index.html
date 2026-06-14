@@ -1,1 +1,1798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SentinelOps — Multi-Agent Decision Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+<style>
+:root {
+  --bg: #060709;
+  --surface: #0d0f14;
+  --surface2: #13161e;
+  --surface3: #191d28;
+  --border: #1c2030;
+  --border2: #252b3d;
+  --text: #e4e7f0;
+  --muted: #4a5270;
+  --muted2: #6b7394;
+  --analyst: #3b82f6;
+  --analyst-dim: #0c1a3a;
+  --da: #ef4444;
+  --da-dim: #2a0a0a;
+  --precedent: #a855f7;
+  --precedent-dim: #1a0a30;
+  --risk: #f59e0b;
+  --risk-dim: #2a1a00;
+  --briefing: #22c55e;
+  --briefing-dim: #0a2a10;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'IBM Plex Sans', sans-serif;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:var(--sans); font-size:14px; line-height:1.6; overflow-x:hidden; height:100vh; }
 
+.header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 28px;
+  background:var(--surface); border-bottom:1px solid var(--border);
+  position:relative; z-index:10;
+}
+.logo { font-family:var(--mono); font-size:18px; font-weight:600; letter-spacing:-.02em; }
+.logo span { color:var(--analyst); }
+.header-right { display:flex; align-items:center; gap:18px; }
+.status-badge {
+  display:flex; align-items:center; gap:7px;
+  font-family:var(--mono); font-size:10px; text-transform:uppercase;
+  letter-spacing:.12em; color:var(--muted);
+  padding:5px 12px; border:1px solid var(--border); border-radius:3px;
+}
+.status-dot {
+  width:7px; height:7px; border-radius:50%; background:var(--muted);
+  transition: background .3s;
+}
+.status-dot.live { background:#22c55e; box-shadow:0 0 8px rgba(34,197,94,.5); animation:pulse 2s ease infinite; }
+.mode-badge {
+  font-family:var(--mono); font-size:9px; letter-spacing:.1em;
+  text-transform:uppercase; padding:3px 8px; border-radius:2px;
+  border:1px solid var(--border);
+}
+.mode-badge.live { color:var(--briefing); border-color:rgba(34,197,94,.3); background:rgba(34,197,94,.08); }
+.mode-badge.demo { color:var(--risk); border-color:rgba(245,158,11,.3); background:rgba(245,158,11,.08); }
+@keyframes pulse {
+  0%,100% { opacity:1; }
+  50% { opacity:.4; }
+}
+
+.main { display:grid; grid-template-columns:240px 1fr 320px; height:calc(100vh - 49px); }
+
+.agents-panel {
+  background:var(--surface); border-right:1px solid var(--border);
+  display:flex; flex-direction:column; overflow:hidden;
+}
+.panel-title {
+  font-family:var(--mono); font-size:9px; text-transform:uppercase;
+  letter-spacing:.16em; color:var(--muted); padding:16px 18px 12px;
+  border-bottom:1px solid var(--border);
+}
+.agent-list { flex:1; overflow-y:auto; padding:8px 0; }
+.agent-card {
+  display:flex; align-items:center; gap:12px;
+  padding:12px 18px; cursor:default;
+  border-left:3px solid transparent;
+  transition: all .3s;
+}
+.agent-card.active { background:var(--surface2); }
+.agent-card[data-agent="analyst"].active { border-left-color:var(--analyst); }
+.agent-card[data-agent="devils_advocate"].active { border-left-color:var(--da); }
+.agent-card[data-agent="precedent"].active { border-left-color:var(--precedent); }
+.agent-card[data-agent="risk"].active { border-left-color:var(--risk); }
+.agent-card[data-agent="briefing"].active { border-left-color:var(--briefing); }
+.agent-card.complete { opacity:.7; }
+.agent-card.complete .agent-status { color:#22c55e; }
+
+.agent-icon {
+  width:36px; height:36px; border-radius:6px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:14px; font-weight:700; font-family:var(--mono);
+  flex-shrink:0; transition: box-shadow .3s;
+}
+.agent-card[data-agent="analyst"] .agent-icon { background:var(--analyst-dim); color:var(--analyst); border:1px solid rgba(59,130,246,.2); }
+.agent-card[data-agent="devils_advocate"] .agent-icon { background:var(--da-dim); color:var(--da); border:1px solid rgba(239,68,68,.2); }
+.agent-card[data-agent="precedent"] .agent-icon { background:var(--precedent-dim); color:var(--precedent); border:1px solid rgba(168,85,247,.2); }
+.agent-card[data-agent="risk"] .agent-icon { background:var(--risk-dim); color:var(--risk); border:1px solid rgba(245,158,11,.2); }
+.agent-card[data-agent="briefing"] .agent-icon { background:var(--briefing-dim); color:var(--briefing); border:1px solid rgba(34,197,94,.2); }
+.agent-card.active .agent-icon { box-shadow:0 0 16px rgba(255,255,255,.08); }
+
+.agent-info { flex:1; min-width:0; }
+.agent-name { font-size:13px; font-weight:600; color:var(--text); line-height:1.2; }
+.agent-role { font-family:var(--mono); font-size:9px; text-transform:uppercase; letter-spacing:.1em; color:var(--muted); margin-top:2px; }
+.agent-status {
+  font-family:var(--mono); font-size:9px; text-transform:uppercase;
+  letter-spacing:.08em; color:var(--muted); margin-top:3px;
+  transition: color .3s;
+}
+.agent-card.active .agent-status { color:var(--risk); font-size:9px; }
+.agent-card.complete .agent-status { color:#22c55e; font-size:9px; }
+.provider-tag {
+  font-family:var(--mono); font-size:8px; letter-spacing:.06em;
+  padding:1px 5px; border-radius:2px; margin-top:2px; display:inline-block;
+  background:rgba(59,130,246,.1); color:var(--analyst); border:1px solid rgba(59,130,246,.15);
+}
+.provider-tag.featherless { background:rgba(168,85,247,.1); color:var(--precedent); border-color:rgba(168,85,247,.15); }
+.provider-tag.fallback { background:rgba(245,158,11,.1); color:var(--risk); border-color:rgba(245,158,11,.15); }
+
+.feed-panel { display:flex; flex-direction:column; overflow:hidden; background:var(--bg); }
+.feed-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 24px; background:var(--surface);
+  border-bottom:1px solid var(--border);
+}
+.feed-title { font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:.14em; color:var(--muted2); }
+.feed-timer { font-family:var(--mono); font-size:12px; font-weight:500; color:var(--analyst); letter-spacing:.05em; }
+.feed-scroll { flex:1; overflow-y:auto; padding:16px 24px; scroll-behavior:smooth; }
+
+.feed-intro {
+  color:var(--muted2); font-size:13px; line-height:1.8; padding:8px 0 16px;
+}
+.feed-intro strong { color:var(--text); }
+.pipeline-flow {
+  display:flex; align-items:center; gap:6px; flex-wrap:wrap;
+  padding:12px 16px; margin:12px 0 16px;
+  background:var(--surface2); border:1px solid var(--border2); border-radius:6px;
+  font-family:var(--mono); font-size:10px; letter-spacing:.05em; color:var(--muted2);
+}
+.pipeline-flow .step { padding:3px 8px; border-radius:3px; white-space:nowrap; }
+.pipeline-flow .step-analyst { background:var(--analyst-dim); color:var(--analyst); border:1px solid rgba(59,130,246,.2); }
+.pipeline-flow .step-da { background:var(--da-dim); color:var(--da); border:1px solid rgba(239,68,68,.2); }
+.pipeline-flow .step-pr { background:var(--precedent-dim); color:var(--precedent); border:1px solid rgba(168,85,247,.2); }
+.pipeline-flow .step-risk { background:var(--risk-dim); color:var(--risk); border:1px solid rgba(245,158,11,.2); }
+.pipeline-flow .step-brief { background:var(--briefing-dim); color:var(--briefing); border:1px solid rgba(34,197,94,.2); }
+.pipeline-flow .arrow { color:var(--muted); }
+.pipeline-flow .parallel { font-size:8px; color:var(--precedent); text-transform:uppercase; letter-spacing:.08em; }
+
+.sys-msg {
+  padding:10px 14px; margin:12px 0;
+  border-radius:4px; border-left:3px solid var(--border2);
+  background:var(--surface2); font-family:var(--mono); font-size:11px;
+  color:var(--muted2); letter-spacing:.03em;
+  animation: msgSlide .4s ease-out;
+}
+.sys-msg.step { border-left-color:var(--analyst); color:var(--text); font-weight:500; }
+
+/* ======================== */
+/*   Agent Report Cards     */
+/* ======================== */
+
+.report-card {
+  background:var(--surface); border:1px solid var(--border2);
+  border-left:3px solid var(--muted);
+  border-radius:6px; margin:14px 0; overflow:hidden;
+  animation: msgSlide .4s ease-out;
+}
+@keyframes msgSlide {
+  from { opacity:0; transform:translateY(12px); }
+  to { opacity:1; transform:translateY(0); }
+}
+.card-top-bar {
+  display:flex; align-items:center; gap:10px;
+  padding:10px 16px;
+  background:var(--surface2); border-bottom:1px solid var(--border);
+}
+.card-avatar {
+  width:28px; height:28px; border-radius:5px;
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--mono); font-size:10px; font-weight:600; flex-shrink:0;
+}
+.card-agent-name { font-size:13px; font-weight:600; }
+.card-top-bar .provider-tag { margin-top:0; }
+.card-timestamp {
+  font-family:var(--mono); font-size:9px; letter-spacing:.08em;
+  color:var(--muted); text-transform:uppercase; margin-left:auto;
+}
+.msg-parallel-badge {
+  display:inline-flex; align-items:center; gap:5px;
+  font-family:var(--mono); font-size:9px; letter-spacing:.08em;
+  padding:2px 8px; border-radius:2px;
+  background:rgba(168,85,247,.1); color:var(--precedent);
+  border:1px solid rgba(168,85,247,.2);
+}
+
+/* Card content area */
+.card-content {
+  padding:16px 18px; font-size:13px;
+  color:rgba(228,231,240,.75); line-height:1.7;
+  word-break:break-word; overflow:hidden; position:relative;
+}
+.card-content.html-content { white-space:pre-wrap; }
+.card-content.collapsed { max-height:200px; }
+.card-content.collapsed::after {
+  content:''; position:absolute; bottom:0; left:0; right:0;
+  height:60px; background:linear-gradient(transparent, var(--surface));
+  pointer-events:none;
+}
+.card-content strong { color:var(--text); font-weight:600; }
+.card-content .highlight {
+  background:rgba(239,68,68,.1); border-left:2px solid var(--da);
+  padding:6px 12px; margin:8px 0; display:block; border-radius:0 4px 4px 0;
+}
+.card-content .risk-high { color:var(--da); font-weight:600; }
+.card-content .risk-med { color:var(--risk); font-weight:600; }
+.card-content p { margin:0 0 8px; }
+.card-content p:last-child { margin-bottom:0; }
+.card-content h1, .card-content h2, .card-content h3, .card-content h4 {
+  font-family:var(--mono); font-size:11px; text-transform:uppercase;
+  letter-spacing:.12em; color:var(--card-accent-muted, var(--muted2));
+  margin:20px 0 8px; padding:14px 0 6px;
+  border-top:1px solid var(--border2); border-bottom:1px solid var(--border);
+  font-weight:600;
+}
+.card-content > :first-child { margin-top:0; padding-top:0; border-top:none; }
+.card-content ul, .card-content ol { padding-left:18px; margin:6px 0; }
+.card-content li { margin-bottom:3px; }
+.card-content blockquote {
+  border-left:2px solid var(--border2); padding-left:12px;
+  color:var(--muted2); margin:8px 0;
+}
+.card-content code {
+  font-family:var(--mono); font-size:12px; background:var(--surface2);
+  padding:1px 5px; border-radius:3px; border:1px solid var(--border);
+}
+.card-content pre {
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:4px; padding:10px 14px; margin:8px 0; overflow-x:auto;
+}
+.card-content pre code { background:none; border:none; padding:0; }
+.card-content em { color:var(--muted2); }
+
+/* Tables */
+.card-content table {
+  width:100%; border-collapse:collapse; margin:10px 0; font-size:12px;
+}
+.card-content thead th {
+  background:var(--surface2); font-family:var(--mono); font-size:10px;
+  text-transform:uppercase; letter-spacing:.08em; color:var(--muted2);
+  padding:8px 12px; border:1px solid var(--border); text-align:left;
+}
+.card-content tbody td {
+  padding:8px 12px; border:1px solid var(--border);
+}
+.card-content tbody tr:nth-child(even) { background:rgba(13,15,20,.5); }
+
+/* Risk flag badges */
+.risk-flag { padding:6px 10px; margin:6px 0; border-radius:4px; border-left:3px solid; }
+p.risk-flag, li.risk-flag { display:block; }
+.risk-flag-red { background:rgba(239,68,68,.06); border-left-color:var(--da); }
+.risk-flag-amber { background:rgba(245,158,11,.06); border-left-color:var(--risk); }
+.risk-flag-green { background:rgba(34,197,94,.06); border-left-color:var(--briefing); }
+
+/* Highlighted numbers */
+.highlight-number { font-family:var(--mono); font-weight:600; }
+
+/* Card expand/collapse */
+.card-expand {
+  padding:8px 16px; font-family:var(--mono); font-size:10px;
+  color:var(--analyst); cursor:pointer; letter-spacing:.05em;
+  border-top:1px solid var(--border); text-align:center;
+  background:var(--surface2); transition:background .2s;
+}
+.card-expand:hover { background:var(--surface3); text-decoration:underline; }
+
+.doc-panel {
+  background:var(--surface); border-left:1px solid var(--border);
+  display:flex; flex-direction:column; overflow:hidden;
+}
+.doc-header { padding:16px 18px 12px; border-bottom:1px solid var(--border); }
+.doc-info { padding:18px; flex:1; overflow-y:auto; }
+.doc-field { margin-bottom:16px; }
+.doc-label {
+  font-family:var(--mono); font-size:9px; text-transform:uppercase;
+  letter-spacing:.14em; color:var(--muted); margin-bottom:4px;
+}
+.doc-value { font-size:14px; font-weight:500; color:var(--text); }
+.doc-value.large { font-size:22px; font-weight:700; font-family:var(--mono); }
+
+.how-it-works {
+  margin-top:8px; padding:14px; background:var(--surface2);
+  border:1px solid var(--border2); border-radius:6px;
+}
+.how-it-works .hiw-title {
+  font-family:var(--mono); font-size:9px; text-transform:uppercase;
+  letter-spacing:.12em; color:var(--muted); margin-bottom:10px;
+}
+.hiw-step {
+  display:flex; gap:8px; align-items:flex-start; margin-bottom:8px;
+  font-size:11px; color:var(--muted2); line-height:1.5;
+}
+.hiw-step:last-child { margin-bottom:0; }
+.hiw-num {
+  font-family:var(--mono); font-size:9px; font-weight:600;
+  width:18px; height:18px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  margin-top:1px;
+}
+.hiw-num.c-analyst { background:var(--analyst-dim); color:var(--analyst); }
+.hiw-num.c-da { background:var(--da-dim); color:var(--da); }
+.hiw-num.c-precedent { background:var(--precedent-dim); color:var(--precedent); }
+.hiw-num.c-risk { background:var(--risk-dim); color:var(--risk); }
+.hiw-num.c-briefing { background:var(--briefing-dim); color:var(--briefing); }
+.hiw-parallel {
+  border-left:2px solid var(--precedent-dim); margin:4px 0 4px 7px;
+  padding-left:10px; position:relative;
+}
+.hiw-parallel-label {
+  font-family:var(--mono); font-size:8px; text-transform:uppercase;
+  letter-spacing:.1em; color:var(--precedent); margin-bottom:6px;
+}
+.hiw-provider {
+  font-family:var(--mono); font-size:7px; letter-spacing:.04em;
+  padding:1px 4px; border-radius:2px; margin-left:4px; vertical-align:middle;
+}
+.hiw-provider.aiml { background:rgba(59,130,246,.1); color:var(--analyst); border:1px solid rgba(59,130,246,.15); }
+.hiw-provider.featherless { background:rgba(168,85,247,.1); color:var(--precedent); border:1px solid rgba(168,85,247,.15); }
+
+.risk-score-display {
+  background:var(--surface2); border:1px solid var(--border2);
+  border-radius:6px; padding:18px; margin-top:12px; text-align:center;
+  transition: all .5s;
+}
+.risk-score-label {
+  font-family:var(--mono); font-size:9px; text-transform:uppercase;
+  letter-spacing:.14em; color:var(--muted); margin-bottom:6px;
+}
+.risk-score-value {
+  font-family:var(--mono); font-size:42px; font-weight:700;
+  color:var(--muted); line-height:1;
+  transition: color .5s, transform .4s ease-out, opacity .4s ease-out;
+  transform: scale(1); opacity:1;
+}
+.risk-score-value.score-pop {
+  animation: scorePop .5s ease-out;
+}
+@keyframes scorePop {
+  0% { transform:scale(0.3); opacity:0; }
+  60% { transform:scale(1.15); opacity:1; }
+  100% { transform:scale(1); opacity:1; }
+}
+.risk-score-value.critical { color:var(--da); }
+.risk-score-value.high { color:var(--risk); }
+.risk-score-value.medium { color:var(--precedent); }
+.risk-score-value.low { color:var(--briefing); }
+.risk-score-sub {
+  font-family:var(--mono); font-size:10px; color:var(--muted);
+  margin-top:4px; text-transform:uppercase; letter-spacing:.1em;
+}
+
+.start-btn {
+  display:block; width:calc(100% - 36px); margin:0 18px 18px;
+  padding:14px; border:none; border-radius:6px; cursor:pointer;
+  font-family:var(--mono); font-size:12px; font-weight:600;
+  text-transform:uppercase; letter-spacing:.12em;
+  background:linear-gradient(135deg, var(--analyst), #2563eb);
+  color:#fff; transition:all .2s;
+}
+.start-btn:hover { transform:translateY(-1px); box-shadow:0 4px 20px rgba(59,130,246,.3); }
+.start-btn:disabled { opacity:.3; cursor:not-allowed; transform:none; box-shadow:none; }
+.reset-btn {
+  display:none; width:calc(100% - 36px); margin:0 18px 18px;
+  padding:12px; border:1px solid var(--border2); border-radius:6px; cursor:pointer;
+  font-family:var(--mono); font-size:11px; font-weight:600;
+  text-transform:uppercase; letter-spacing:.1em;
+  background:var(--surface2); color:var(--muted2); transition:all .2s;
+}
+.reset-btn:hover { color:var(--text); border-color:var(--muted); background:var(--surface3); }
+
+.persona-card {
+  display:flex; align-items:center; gap:10px;
+  padding:10px 18px; position:relative;
+  background:var(--surface2); border-bottom:1px solid var(--border);
+}
+.persona-avatar {
+  width:36px; height:36px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--mono); font-size:13px; font-weight:700; color:#fff;
+}
+.persona-avatar.amber { background:var(--risk); }
+.persona-avatar.blue { background:var(--analyst); }
+.persona-info { flex:1; min-width:0; }
+.persona-name { font-size:13px; font-weight:600; color:var(--text); line-height:1.2; }
+.persona-title { font-family:var(--mono); font-size:10px; color:var(--muted2); margin-top:1px; line-height:1.3; }
+.persona-badge {
+  position:absolute; top:8px; right:14px;
+  font-family:var(--mono); font-size:8px; text-transform:uppercase;
+  letter-spacing:.06em; padding:2px 7px; border-radius:9px;
+  background:var(--surface3); color:var(--muted); border:1px solid var(--border2);
+  transition:all .4s ease;
+}
+.persona-badge.ready { background:rgba(34,197,94,.12); color:var(--briefing); border-color:rgba(34,197,94,.25); }
+
+.scenario-switcher {
+  display:flex; padding:14px 18px 0; gap:0;
+}
+.scenario-pill {
+  flex:1; padding:8px 4px;
+  font-family:var(--mono); font-size:9px; text-transform:uppercase;
+  letter-spacing:.04em; text-align:center; cursor:pointer;
+  border:1px solid var(--border2); background:var(--surface2); color:var(--muted);
+  transition:all .2s; white-space:nowrap; line-height:1.3;
+}
+.scenario-pill:first-child { border-radius:4px 0 0 4px; border-right:none; }
+.scenario-pill:last-child { border-radius:0 4px 4px 0; }
+.scenario-pill.active { background:var(--analyst); color:#fff; border-color:var(--analyst); }
+.scenario-pill:not(.active):hover { background:var(--surface3); color:var(--text); }
+.scenario-pill.disabled { pointer-events:none; opacity:.4; }
+
+.scenario-overlay {
+  display:none; position:fixed; inset:0; z-index:200;
+  background:rgba(6,7,9,.94); backdrop-filter:blur(12px);
+  justify-content:center; align-items:center;
+  padding:40px 20px; overflow-y:auto;
+  transition:opacity .3s ease;
+}
+.scenario-overlay.visible { display:flex; }
+.scenario-modal {
+  background:var(--surface); border:1px solid var(--border2);
+  border-radius:10px; max-width:600px; width:100%;
+  padding:40px 36px 32px; position:relative;
+  box-shadow:0 0 80px rgba(59,130,246,.06);
+}
+.scenario-headline {
+  font-family:var(--sans); font-size:30px; font-weight:700;
+  color:var(--text); line-height:1.2; margin-bottom:6px;
+}
+.scenario-sub {
+  font-family:var(--mono); font-size:11px; letter-spacing:.08em;
+  color:var(--muted2); text-transform:uppercase; margin-bottom:28px;
+}
+.scenario-story {
+  font-size:15px; line-height:1.7; color:rgba(228,231,240,.7);
+  margin-bottom:16px;
+}
+.scenario-story:last-of-type { margin-bottom:28px; }
+.scenario-story strong { color:var(--text); font-weight:600; }
+.scenario-stats {
+  display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;
+  margin-bottom:28px;
+}
+.scenario-stat {
+  text-align:center; padding:14px 8px;
+  background:var(--surface2); border:1px solid var(--border2); border-radius:6px;
+}
+.scenario-stat-value {
+  font-family:var(--mono); font-size:20px; font-weight:700;
+  color:var(--analyst); line-height:1; margin-bottom:4px;
+}
+.scenario-stat-label {
+  font-family:var(--mono); font-size:9px; text-transform:uppercase;
+  letter-spacing:.1em; color:var(--muted);
+}
+.scenario-cta {
+  display:block; width:100%; padding:16px;
+  border:none; border-radius:6px; cursor:pointer;
+  font-family:var(--mono); font-size:14px; font-weight:600;
+  letter-spacing:.06em;
+  background:linear-gradient(135deg, var(--analyst), #2563eb);
+  color:#fff; transition:all .2s;
+}
+.scenario-cta:hover { transform:translateY(-1px); box-shadow:0 4px 24px rgba(59,130,246,.35); }
+
+.brief-overlay {
+  display:none; position:fixed; inset:0; z-index:100;
+  background:rgba(6,7,9,.92); backdrop-filter:blur(8px);
+  padding:40px; overflow-y:auto;
+}
+.brief-overlay.visible { display:flex; justify-content:center; align-items:flex-start; }
+.brief-card {
+  background:var(--surface); border:1px solid var(--border2);
+  border-radius:8px; max-width:720px; width:100%;
+  animation: briefIn .5s ease-out;
+  box-shadow:0 0 60px rgba(34,197,94,.08);
+}
+@keyframes briefIn {
+  from { opacity:0; transform:translateY(20px) scale(.98); }
+  to { opacity:1; transform:translateY(0) scale(1); }
+}
+.brief-header {
+  padding:24px 28px; border-bottom:1px solid var(--border2);
+  display:flex; align-items:center; justify-content:space-between;
+}
+.brief-pretitle {
+  font-family:var(--mono); font-size:9px; text-transform:uppercase;
+  letter-spacing:.16em; color:var(--briefing); margin-bottom:4px;
+}
+.brief-title { font-size:20px; font-weight:700; color:var(--text); }
+.brief-close {
+  width:32px; height:32px; border:1px solid var(--border2); border-radius:4px;
+  background:var(--surface2); color:var(--muted2); cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  font-size:16px; transition:all .2s;
+}
+.brief-close:hover { color:var(--text); border-color:var(--muted); }
+.brief-body {
+  padding:28px; font-size:14px; line-height:1.8; color:rgba(228,231,240,.8);
+  white-space:pre-wrap; word-break:break-word;
+}
+.brief-body h3 {
+  font-family:var(--mono); font-size:11px; text-transform:uppercase;
+  letter-spacing:.12em; margin:24px 0 10px; padding-bottom:6px;
+  border-bottom:1px solid var(--border); color:var(--text);
+}
+.brief-body h3:first-child { margin-top:0; }
+.brief-body strong { color:var(--text); }
+.brief-body .risk-item {
+  padding:10px 14px; margin:8px 0;
+  border-radius:4px; border-left:3px solid;
+}
+.brief-body .risk-item.critical { background:rgba(239,68,68,.06); border-color:var(--da); }
+.brief-body .risk-item.high { background:rgba(245,158,11,.06); border-color:var(--risk); }
+.brief-body .audit-trail {
+  background:var(--surface2); border:1px solid var(--border2);
+  border-radius:4px; padding:14px 18px; margin-top:16px;
+  font-family:var(--mono); font-size:11px; color:var(--muted2); line-height:2;
+}
+.brief-body .audit-trail strong { color:var(--text); }
+
+.bottom-bar {
+  display:flex; align-items:center; gap:16px;
+  padding:8px 28px; background:var(--surface); border-top:1px solid var(--border);
+  font-family:var(--mono); font-size:10px; color:var(--muted);
+  text-transform:uppercase; letter-spacing:.08em;
+}
+.progress-track {
+  width:200px; height:3px; background:var(--border2); border-radius:2px; overflow:hidden;
+}
+.progress-fill {
+  height:100%; width:0; border-radius:2px;
+  background:linear-gradient(90deg, var(--analyst), var(--briefing));
+  transition: width .5s ease;
+}
+
+@media(max-width:1024px){
+  .main { grid-template-columns:200px 1fr 260px; }
+}
+@media(max-width:768px){
+  .main { grid-template-columns:1fr; grid-template-rows:auto 1fr auto; }
+  .agents-panel { flex-direction:row; overflow-x:auto; border-right:none; border-bottom:1px solid var(--border); }
+  .agent-list { display:flex; padding:0; }
+  .agent-card { flex-direction:column; text-align:center; min-width:100px; border-left:none; border-bottom:3px solid transparent; }
+  .doc-panel { border-left:none; border-top:1px solid var(--border); }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">Sentinel<span>Ops</span></div>
+  <div class="header-right">
+    <div class="mode-badge" id="modeBadge">DETECTING...</div>
+    <div class="status-badge">
+      <div class="status-dot" id="liveDot"></div>
+      <span id="liveLabel">STANDBY</span>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="agents-panel">
+    <div class="panel-title">Agent Pipeline</div>
+    <div class="agent-list">
+      <div class="agent-card" data-agent="analyst" id="card-analyst">
+        <div class="agent-icon">AN</div>
+        <div class="agent-info">
+          <div class="agent-name">Analyst</div>
+          <div class="agent-role">Step 1 &middot; The Mapper</div>
+          <div class="provider-tag">AI/ML API</div>
+          <div class="agent-status" id="status-analyst">Standby</div>
+        </div>
+      </div>
+      <div class="agent-card" data-agent="devils_advocate" id="card-da">
+        <div class="agent-icon">DA</div>
+        <div class="agent-info">
+          <div class="agent-name">Devil's Advocate</div>
+          <div class="agent-role">Step 2a &middot; The Challenger</div>
+          <div class="provider-tag">AI/ML API</div>
+          <div class="agent-status" id="status-da">Standby</div>
+        </div>
+      </div>
+      <div class="agent-card" data-agent="precedent" id="card-precedent">
+        <div class="agent-icon">PR</div>
+        <div class="agent-info">
+          <div class="agent-name">Precedent</div>
+          <div class="agent-role">Step 2b &middot; The Historian</div>
+          <div class="provider-tag featherless">Featherless AI</div>
+          <div class="agent-status" id="status-precedent">Standby</div>
+        </div>
+      </div>
+      <div class="agent-card" data-agent="risk" id="card-risk">
+        <div class="agent-icon">RK</div>
+        <div class="agent-info">
+          <div class="agent-name">Risk</div>
+          <div class="agent-role">Step 3 &middot; The Scorer</div>
+          <div class="provider-tag">AI/ML API</div>
+          <div class="agent-status" id="status-risk">Standby</div>
+        </div>
+      </div>
+      <div class="agent-card" data-agent="briefing" id="card-briefing">
+        <div class="agent-icon">BR</div>
+        <div class="agent-info">
+          <div class="agent-name">Briefing</div>
+          <div class="agent-role">Step 4 &middot; The Communicator</div>
+          <div class="provider-tag">AI/ML API</div>
+          <div class="agent-status" id="status-briefing">Standby</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="feed-panel">
+    <div class="feed-header">
+      <div class="feed-title">Agent Coordination Feed &middot; via Band</div>
+      <div class="feed-timer" id="timer">T+00:00</div>
+    </div>
+    <div class="feed-scroll" id="feed">
+      <div class="feed-intro" id="feedIntro">
+        <strong>SentinelOps</strong> is a multi-agent decision intelligence system. Five specialized AI agents coordinate through <strong>Band</strong> to review enterprise contracts and produce an executive decision brief.<br><br>
+        Each agent has a distinct role. They communicate through Band's messaging platform, passing findings to the next agent in the pipeline. No autonomous decisions are made — the human retains full authority.
+        <div class="pipeline-flow">
+          <span class="step step-analyst">Analyst</span>
+          <span class="arrow">&rarr;</span>
+          <span class="step step-da">Devil's Advocate</span>
+          <span class="arrow">+</span>
+          <span class="step step-pr">Precedent</span>
+          <span class="parallel">(parallel)</span>
+          <span class="arrow">&rarr;</span>
+          <span class="step step-risk">Risk</span>
+          <span class="arrow">&rarr;</span>
+          <span class="step step-brief">Briefing</span>
+          <span class="arrow">&rarr;</span>
+          <span style="color:var(--text)">Human</span>
+        </div>
+        Press <strong>Analyze Contract</strong> to begin. All agents are connected to Band and ready.
+      </div>
+    </div>
+  </div>
+
+  <div class="doc-panel">
+    <div class="doc-header">
+      <div class="panel-title">Decision Under Review</div>
+    </div>
+    <div class="persona-card" id="personaCard">
+      <div class="persona-avatar amber" id="personaAvatar">AD</div>
+      <div class="persona-info">
+        <div class="persona-name" id="personaName">Amara Diallo</div>
+        <div class="persona-title" id="personaTitle">VP Legal &amp; Compliance · Meridian Ventures</div>
+      </div>
+      <div class="persona-badge" id="personaBadge">Awaiting Analysis</div>
+    </div>
+    <div class="scenario-switcher">
+      <div class="scenario-pill active" id="pillA" onclick="switchScenario('a')">A: Partnership</div>
+      <div class="scenario-pill" id="pillB" onclick="switchScenario('b')">B: Vendor Selection</div>
+    </div>
+    <div class="doc-info">
+      <div class="doc-field">
+        <div class="doc-label">Document</div>
+        <div class="doc-value" id="docDocument">GlobalTech Solutions Partnership Agreement</div>
+      </div>
+      <div class="doc-field">
+        <div class="doc-label" id="docPartiesLabel">Parties</div>
+        <div class="doc-value" id="docParties">Meridian Ventures &rarr; GlobalTech Solutions</div>
+      </div>
+      <div class="doc-field">
+        <div class="doc-label">Deal Value</div>
+        <div class="doc-value large" id="docDealValue" style="color:var(--analyst)">$1,800,000</div>
+      </div>
+      <div class="doc-field">
+        <div class="doc-label">Duration</div>
+        <div class="doc-value" id="docDuration">3 years &middot; EMEA Exclusive</div>
+      </div>
+      <div class="doc-field">
+        <div class="doc-label">Pages</div>
+        <div class="doc-value" id="docPages">74 pages &middot; 10 sections</div>
+      </div>
+      <div class="how-it-works">
+        <div class="hiw-title">How It Works</div>
+        <div class="hiw-step"><div class="hiw-num c-analyst">1</div><div><strong style="color:var(--analyst)">Analyst</strong> <span class="hiw-provider aiml">AI/ML API</span> <span id="hiwAnalyst">extracts every clause, term, and financial obligation</span></div></div>
+        <div class="hiw-parallel">
+          <div class="hiw-parallel-label">parallel via Band</div>
+          <div class="hiw-step"><div class="hiw-num c-da">2a</div><div><strong style="color:var(--da)">Devil's Advocate</strong> <span class="hiw-provider aiml">AI/ML API</span> <span id="hiwDA">attacks the contract &mdash; finds contradictions, unfair terms, missing protections</span></div></div>
+          <div class="hiw-step"><div class="hiw-num c-precedent">2b</div><div><strong style="color:var(--precedent)">Precedent Agent</strong> <span class="hiw-provider featherless">Featherless AI</span> <span id="hiwPrecedent">searches institutional memory for past deals, board resolutions, and precedents</span></div></div>
+        </div>
+        <div class="hiw-step"><div class="hiw-num c-risk">3</div><div><strong style="color:var(--risk)">Risk Agent</strong> <span class="hiw-provider aiml">AI/ML API</span> <span id="hiwRisk">scores every finding and calculates total financial exposure</span></div></div>
+        <div class="hiw-step"><div class="hiw-num c-briefing">4</div><div><strong style="color:var(--briefing)">Briefing Agent</strong> <span class="hiw-provider aiml">AI/ML API</span> <span id="hiwBriefing">synthesizes everything into an executive decision brief</span></div></div>
+      </div>
+      <div class="risk-score-display" id="riskDisplay">
+        <div class="risk-score-label" id="riskLabel">Aggregate Risk Score</div>
+        <div class="risk-score-value" id="riskScore">&mdash;</div>
+        <div class="risk-score-sub" id="riskSub">Pending analysis</div>
+      </div>
+    </div>
+    <button class="start-btn" id="startBtn" onclick="startAnalysis()">Analyze Contract</button>
+    <button class="reset-btn" id="resetBtn" onclick="resetDashboard()">&#8634; Run Again</button>
+  </div>
+</div>
+
+<div class="bottom-bar">
+  <span id="bottomStatus">Ready &mdash; 5 agents connected</span>
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  <span style="margin-left:auto">SentinelOps &middot; Band of Agents Hackathon 2026</span>
+</div>
+
+<div class="brief-overlay" id="briefOverlay">
+  <div class="brief-card">
+    <div class="brief-header">
+      <div>
+        <div class="brief-pretitle">SentinelOps Executive Decision Brief</div>
+        <div class="brief-title" id="briefTitle">GlobalTech Solutions Partnership Agreement</div>
+      </div>
+      <button class="brief-close" onclick="closeBrief()">&times;</button>
+    </div>
+    <div class="brief-body" id="briefBody"></div>
+  </div>
+</div>
+
+<div class="scenario-overlay" id="scenarioOverlay">
+  <div class="scenario-modal">
+    <div class="scenario-headline" id="scenarioHeadline"></div>
+    <div class="scenario-sub" id="scenarioSub"></div>
+    <div class="scenario-story" id="scenarioStory1"></div>
+    <div class="scenario-story" id="scenarioStory2"></div>
+    <div class="scenario-stats" id="scenarioStats"></div>
+    <button class="scenario-cta" id="scenarioCta" onclick="dismissScenarioIntro()"></button>
+  </div>
+</div>
+
+<script>
+marked.setOptions({ breaks: true, gfm: true });
+
+var AGENTS = {
+  analyst: { name:'Analyst', role:'The Mapper', avatar:'AN', card:'card-analyst', status:'status-analyst' },
+  devils_advocate: { name:"Devil's Advocate", role:'The Challenger', avatar:'DA', card:'card-da', status:'status-da' },
+  precedent: { name:'Precedent Agent', role:'The Historian', avatar:'PR', card:'card-precedent', status:'status-precedent' },
+  risk: { name:'Risk Agent', role:'The Scorer', avatar:'RK', card:'card-risk', status:'status-risk' },
+  briefing: { name:'Briefing Agent', role:'The Communicator', avatar:'BR', card:'card-briefing', status:'status-briefing' },
+};
+
+var AGENT_PROGRESS = { analyst: 25, devils_advocate: 45, precedent: 55, risk: 75, briefing: 100 };
+
+var AGENT_COLORS = {
+  analyst:         { accent:'#3b82f6', dim:'var(--analyst-dim)',   muted:'rgba(59,130,246,.7)' },
+  devils_advocate: { accent:'#ef4444', dim:'var(--da-dim)',        muted:'rgba(239,68,68,.7)' },
+  precedent:       { accent:'#a855f7', dim:'var(--precedent-dim)', muted:'rgba(168,85,247,.7)' },
+  risk:            { accent:'#f59e0b', dim:'var(--risk-dim)',      muted:'rgba(245,158,11,.7)' },
+  briefing:        { accent:'#22c55e', dim:'var(--briefing-dim)',  muted:'rgba(34,197,94,.7)' }
+};
+
+var STEP_NARRATION = {
+  a: {
+    analyst: 'Step 1 of 4 — Analyst is extracting all clauses, financial terms, and obligations from the 74-page contract...',
+    devils_advocate: 'Step 2 of 4 — Devil\'s Advocate and Precedent Agent are reviewing in parallel. DA attacks the contract; Precedent searches company history...',
+    precedent: null,
+    risk: 'Step 3 of 4 — Risk Agent is synthesizing all findings into a scored risk matrix with financial exposure calculations...',
+    briefing: 'Step 4 of 4 — Briefing Agent is preparing the final executive decision brief for the human decision-maker...',
+  },
+  b: {
+    analyst: 'Step 1 of 4 — Analyst is parsing all three vendor proposals and extracting pricing, SLA, and exit terms...',
+    devils_advocate: 'Step 2 of 4 — Devil\'s Advocate and Precedent Agent reviewing in parallel. DA challenges each vendor; Precedent searches vendor history...',
+    precedent: null,
+    risk: 'Step 3 of 4 — Risk Agent is scoring all three vendors across eight risk dimensions...',
+    briefing: 'Step 4 of 4 — Briefing Agent is preparing the ranked vendor recommendation for Marcus...',
+  }
+};
+
+var DOC_INFO = {
+  a: {
+    document: 'GlobalTech Solutions Partnership Agreement',
+    partiesLabel: 'Parties',
+    parties: 'Meridian Ventures → GlobalTech Solutions',
+    dealValue: '$1,800,000',
+    duration: '3 years · EMEA Exclusive',
+    pages: '74 pages · 10 sections',
+    riskLabel: 'Aggregate Risk Score',
+    briefTitle: 'GlobalTech Solutions Partnership Agreement',
+    btnLabel: 'Analyze Contract',
+    hiwAnalyst: 'extracts every clause, term, and financial obligation',
+    hiwDA: 'attacks the contract — finds contradictions, unfair terms, missing protections',
+    hiwPrecedent: 'searches institutional memory for past deals, board resolutions, and precedents',
+    hiwRisk: 'scores every finding and calculates total financial exposure',
+    hiwBriefing: 'synthesizes everything into an executive decision brief',
+    personaName: 'Amara Diallo',
+    personaTitle: 'VP Legal & Compliance · Meridian Ventures',
+    personaInitials: 'AD',
+    personaColor: 'amber'
+  },
+  b: {
+    document: 'Vendor Evaluation Report — Cloud Infrastructure Migration',
+    partiesLabel: 'Vendors',
+    parties: 'Stratos Cloud · NimbusStack · Apex Systems',
+    dealValue: '$420,000/yr',
+    duration: '3-year commitment',
+    pages: '48 pages · 8 risk dimensions',
+    riskLabel: 'Vendor Risk Score',
+    briefTitle: 'Cloud Infrastructure Vendor Selection',
+    btnLabel: 'Analyze Vendors',
+    hiwAnalyst: 'parses all vendor proposals and extracts pricing, SLAs, and exit terms',
+    hiwDA: 'challenges each vendor — probes lock-in, SLA gaps, and hidden costs',
+    hiwPrecedent: 'searches institutional memory for past vendor relationships and disputes',
+    hiwRisk: 'scores all vendors across eight risk dimensions',
+    hiwBriefing: 'produces a ranked vendor recommendation with conditions',
+    personaName: 'Marcus Webb',
+    personaTitle: 'Head of Infrastructure · Meridian Ventures',
+    personaInitials: 'MW',
+    personaColor: 'blue'
+  }
+};
+
+var startTime = 0;
+var timerInterval = null;
+var mode = 'detecting';
+var lastEventIndex = 0;
+var pollInterval = null;
+var narratedSteps = {};
+var demoTimeouts = [];
+var feedIntroHtml = '';
+var currentScenario = 'a';
+var pendingAnalysisStart = null;
+var statusIntervals = {};
+
+var AGENT_STATUS_MESSAGES = {
+  analyst: {
+    a: [
+      'Parsing contract structure…',
+      'Extracting clauses (p.1–74)…',
+      'Mapping financial obligations…',
+      'Identifying key terms…',
+      'Compiling structured breakdown…'
+    ],
+    b: [
+      'Parsing 3 vendor proposals…',
+      'Extracting pricing structures…',
+      'Mapping SLA commitments…',
+      'Comparing contract terms…',
+      'Flagging vendor risks…'
+    ]
+  },
+  devils_advocate: {
+    a: [
+      'Scanning for contradictions…',
+      'Testing enforceability…',
+      'Checking termination asymmetry…',
+      'Flagging missing protections…',
+      'Building adversarial report…'
+    ],
+    b: [
+      'Challenging Stratos lock-in…',
+      'Probing NimbusStack SLA gaps…',
+      'Stress-testing Apex proposal…',
+      'Testing migration assumptions…',
+      'Drafting challenge questions…'
+    ]
+  },
+  precedent: {
+    a: [
+      'Searching institutional memory…',
+      'Matching prior vendor history…',
+      'Cross-referencing board resolutions…',
+      'Comparing contract benchmarks…',
+      'Compiling precedent report…'
+    ],
+    b: [
+      'Searching vendor history…',
+      'Retrieving Apex billing dispute 2024…',
+      'Cross-referencing SLA failures…',
+      'Matching past vendor patterns…',
+      'Flagging risk precedents…'
+    ]
+  },
+  risk: {
+    a: [
+      'Ingesting agent findings…',
+      'Calculating financial exposure…',
+      'Scoring risk dimensions…',
+      'Building risk matrix…',
+      'Finalizing aggregate score…'
+    ],
+    b: [
+      'Scoring vendor lock-in risk…',
+      'Weighting SLA exposure…',
+      'Calculating switching costs…',
+      'Benchmarking against market…',
+      'Generating comparison matrix…'
+    ]
+  },
+  briefing: {
+    a: [
+      'Collecting all agent outputs…',
+      'Structuring executive summary…',
+      'Ranking recommendations…',
+      'Formatting decision brief…',
+      'Preparing final deliverable…'
+    ],
+    b: [
+      'Synthesizing vendor comparison…',
+      'Ranking by risk-adjusted value…',
+      'Drafting recommendation…',
+      'Formatting decision brief…',
+      'Preparing conditions list…'
+    ]
+  }
+};
+
+var SCENARIOS = {
+  a: {
+    headline: "Amara's Decision",
+    sub: "VP Legal & Compliance · Meridian Ventures Ltd · June 2026",
+    story1: "Amara Diallo has 48 hours to sign a <strong>$1.8M partnership agreement</strong> with GlobalTech Solutions Inc. The contract is 74 pages. Her legal team flagged nothing. The board is expecting a signature. But something feels off — and she doesn’t have time to read every clause herself.",
+    story2: "SentinelOps will deploy <strong>five specialized agents</strong> through Band to review every clause, cross-reference institutional memory, stress-test the terms, and deliver an executive decision brief — in under 90 seconds. Amara retains full authority. No autonomous decisions will be made.",
+    stats: [
+      { value: "74", label: "Pages" },
+      { value: "10", label: "Key Clauses" },
+      { value: "$1.8M", label: "At Stake" }
+    ],
+    cta: "Begin Analysis →"
+  },
+  b: {
+    headline: "Marcus’s Decision",
+    sub: "Head of Infrastructure · Meridian Ventures Ltd · June 2026",
+    story1: "Meridian Ventures must choose between three cloud infrastructure vendors for a critical platform migration that will affect 40+ internal teams. Budget: <strong>$420K annually</strong>. The decision locks Meridian into a 3-year commitment and cannot be easily reversed once migration begins.",
+    story2: "SentinelOps will analyse all three vendor proposals simultaneously, retrieve precedents from past vendor relationships — including a <strong>2024 billing dispute</strong> with one of the vendors — score risk across eight dimensions, and deliver a ranked recommendation with conditions. Marcus retains full authority.",
+    stats: [
+      { value: "3", label: "Vendors" },
+      { value: "8", label: "Risk Dimensions" },
+      { value: "$420K", label: "/Year" }
+    ],
+    cta: "Begin Analysis →"
+  }
+};
+
+function switchScenario(s) {
+  if (currentScenario === s) return;
+  var startBtn = document.getElementById('startBtn');
+  if (startBtn.disabled) return;
+  currentScenario = s;
+  document.getElementById('pillA').classList.toggle('active', s === 'a');
+  document.getElementById('pillB').classList.toggle('active', s === 'b');
+  applyDocInfo(s);
+}
+
+function applyDocInfo(s) {
+  var info = DOC_INFO[s];
+  document.getElementById('docDocument').textContent = info.document;
+  document.getElementById('docPartiesLabel').textContent = info.partiesLabel;
+  document.getElementById('docParties').textContent = info.parties;
+  document.getElementById('docDealValue').textContent = info.dealValue;
+  document.getElementById('docDuration').textContent = info.duration;
+  document.getElementById('docPages').textContent = info.pages;
+  document.getElementById('riskLabel').textContent = info.riskLabel;
+  document.getElementById('hiwAnalyst').textContent = info.hiwAnalyst;
+  document.getElementById('hiwDA').textContent = info.hiwDA;
+  document.getElementById('hiwPrecedent').textContent = info.hiwPrecedent;
+  document.getElementById('hiwRisk').textContent = info.hiwRisk;
+  document.getElementById('hiwBriefing').textContent = info.hiwBriefing;
+  document.getElementById('personaName').textContent = info.personaName;
+  document.getElementById('personaTitle').textContent = info.personaTitle;
+  document.getElementById('personaAvatar').textContent = info.personaInitials;
+  var avatar = document.getElementById('personaAvatar');
+  avatar.classList.remove('amber', 'blue');
+  avatar.classList.add(info.personaColor);
+  var startBtn = document.getElementById('startBtn');
+  var suffix = mode === 'demo' ? ' (DEMO)' : '';
+  startBtn.textContent = info.btnLabel.toUpperCase() + suffix;
+}
+
+function showScenarioIntro(callback) {
+  var s = SCENARIOS[currentScenario];
+  document.getElementById('scenarioHeadline').textContent = s.headline;
+  document.getElementById('scenarioSub').textContent = s.sub;
+  document.getElementById('scenarioStory1').innerHTML = s.story1;
+  document.getElementById('scenarioStory2').innerHTML = s.story2;
+  var statsHtml = '';
+  for (var i = 0; i < s.stats.length; i++) {
+    statsHtml += '<div class="scenario-stat"><div class="scenario-stat-value">' +
+      s.stats[i].value + '</div><div class="scenario-stat-label">' +
+      s.stats[i].label + '</div></div>';
+  }
+  document.getElementById('scenarioStats').innerHTML = statsHtml;
+  document.getElementById('scenarioCta').textContent = s.cta;
+  pendingAnalysisStart = callback;
+  var overlay = document.getElementById('scenarioOverlay');
+  overlay.classList.remove('fading');
+  overlay.style.opacity = '0';
+  overlay.classList.add('visible');
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() {
+      overlay.style.opacity = '1';
+    });
+  });
+}
+
+function dismissScenarioIntro() {
+  var overlay = document.getElementById('scenarioOverlay');
+  overlay.style.opacity = '0';
+  setTimeout(function() {
+    overlay.classList.remove('visible');
+    overlay.style.opacity = '';
+    if (pendingAnalysisStart) {
+      var cb = pendingAnalysisStart;
+      pendingAnalysisStart = null;
+      cb();
+    }
+  }, 300);
+}
+
+function updateTimer() {
+  var elapsed = Math.floor((Date.now() - startTime) / 1000);
+  document.getElementById('timer').textContent =
+    'T+' + String(Math.floor(elapsed/60)).padStart(2,'0') + ':' + String(elapsed%60).padStart(2,'0');
+}
+
+function setAgentStatus(key, status) {
+  if (!AGENTS[key]) return;
+  var card = document.getElementById(AGENTS[key].card);
+  var el = document.getElementById(AGENTS[key].status);
+  if (!card || !el) return;
+  card.classList.remove('active','complete');
+  if (statusIntervals[key]) { clearInterval(statusIntervals[key]); statusIntervals[key] = null; }
+  if (status === 'active') {
+    card.classList.add('active');
+    var msgs = AGENT_STATUS_MESSAGES[key];
+    if (msgs && !Array.isArray(msgs)) msgs = msgs[currentScenario] || msgs.a;
+    if (msgs && msgs.length) {
+      var idx = 0;
+      el.textContent = msgs[0];
+      statusIntervals[key] = setInterval(function() {
+        idx = (idx + 1) % msgs.length;
+        el.textContent = msgs[idx];
+      }, 2500);
+    } else {
+      el.textContent = 'Analyzing...';
+    }
+  }
+  else if (status === 'complete') {
+    card.classList.add('complete'); el.textContent = 'Complete ✓';
+    if (key === 'briefing') {
+      var badge = document.getElementById('personaBadge');
+      badge.textContent = 'Review Ready';
+      badge.classList.add('ready');
+    }
+  }
+  else { el.textContent = 'Standby'; }
+}
+
+function escapeHtml(text) {
+  var d = document.createElement('div');
+  d.textContent = text;
+  return d.innerHTML;
+}
+
+function addSystemMessage(text, isStep) {
+  var feed = document.getElementById('feed');
+  var intro = document.getElementById('feedIntro');
+  if (intro) intro.remove();
+  var el = document.createElement('div');
+  el.className = 'sys-msg' + (isStep ? ' step' : '');
+  el.textContent = text;
+  feed.appendChild(el);
+  feed.scrollTop = feed.scrollHeight;
+}
+
+function postProcessContent(html, agentKey, isHtml) {
+  var colors = AGENT_COLORS[agentKey] || AGENT_COLORS.analyst;
+
+  if (!isHtml) {
+    var tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    var blocks = tmp.querySelectorAll('p, li');
+    for (var i = 0; i < blocks.length; i++) {
+      var text = blocks[i].textContent;
+      if (text.indexOf('🔴') !== -1 || text.indexOf('❌') !== -1) {
+        blocks[i].classList.add('risk-flag', 'risk-flag-red');
+      } else if (text.indexOf('🟡') !== -1) {
+        blocks[i].classList.add('risk-flag', 'risk-flag-amber');
+      } else if (text.indexOf('🟢') !== -1 || text.indexOf('✅') !== -1) {
+        blocks[i].classList.add('risk-flag', 'risk-flag-green');
+      }
+    }
+    html = tmp.innerHTML;
+  }
+
+  html = html.replace(/>([^<]+)</g, function(match, text) {
+    var result = text
+      .replace(/\$[\d,]+(?:\.\d+)?[KMB]?\+?/g, '<span class="highlight-number" style="color:' + colors.accent + '">$&</span>')
+      .replace(/(\d+\.?\d*)\s*\/\s*10/g, '<span class="highlight-number" style="color:' + colors.accent + '">$&</span>')
+      .replace(/(\d+(?:\.\d+)?)%/g, '<span class="highlight-number" style="color:' + colors.accent + '">$&</span>');
+    return '>' + result + '<';
+  });
+
+  return html;
+}
+
+function addMessage(agentKey, content, extra) {
+  var feed = document.getElementById('feed');
+  var intro = document.getElementById('feedIntro');
+  if (intro) intro.remove();
+  var elapsed = Math.floor((Date.now() - startTime) / 1000);
+  var ts = 'T+' + String(Math.floor(elapsed/60)).padStart(2,'0') + ':' + String(elapsed%60).padStart(2,'0');
+  var colors = AGENT_COLORS[agentKey] || AGENT_COLORS.analyst;
+  var isHtml = extra && extra.html;
+  var rawContent = isHtml ? content : marked.parse(content);
+  var processedContent = postProcessContent(rawContent, agentKey, isHtml);
+  var contentClass = 'card-content' + (isHtml ? ' html-content' : '');
+  var msgId = 'msg-' + Date.now() + '-' + Math.random().toString(36).substring(2,5);
+
+  var parallel = extra && extra.parallel ? '<span class="msg-parallel-badge">&#9889; Parallel</span>' : '';
+  var providerName = '';
+  if (extra && extra.provider) {
+    providerName = extra.provider;
+  } else {
+    providerName = agentKey === 'precedent' ? 'featherless' : 'aiml';
+  }
+  var provCls = providerName === 'featherless' ? ' featherless' : providerName === 'fallback' ? ' fallback' : '';
+  var provLabel = providerName === 'featherless' ? 'Featherless AI' : providerName === 'aiml' ? 'AI/ML API' : providerName.toUpperCase();
+  var providerTag = '<span class="provider-tag' + provCls + '">' + provLabel + '</span>';
+
+  var card = document.createElement('div');
+  card.className = 'report-card';
+  card.style.borderLeftColor = colors.accent;
+  card.style.setProperty('--card-accent-muted', colors.muted);
+  card.innerHTML =
+    '<div class="card-top-bar">' +
+      '<div class="card-avatar" style="background:' + colors.dim + ';color:' + colors.accent + '">' + (AGENTS[agentKey]?.avatar||'SY') + '</div>' +
+      '<span class="card-agent-name" style="color:' + colors.accent + '">' + (AGENTS[agentKey]?.name||'System') + '</span>' +
+      parallel + providerTag +
+      '<span class="card-timestamp">' + ts + '</span>' +
+    '</div>' +
+    '<div class="' + contentClass + '" id="' + msgId + '">' + processedContent + '</div>';
+  feed.appendChild(card);
+
+  var contentEl = document.getElementById(msgId);
+  if (contentEl && contentEl.scrollHeight > 400) {
+    contentEl.classList.add('collapsed');
+    var expandBtn = document.createElement('div');
+    expandBtn.className = 'card-expand';
+    expandBtn.textContent = 'Show full analysis ↓';
+    expandBtn.onclick = function() { toggleCardExpand(msgId, expandBtn); };
+    card.appendChild(expandBtn);
+  }
+
+  feed.scrollTop = feed.scrollHeight;
+}
+
+function toggleCardExpand(id, btn) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  if (el.classList.contains('collapsed')) {
+    el.classList.remove('collapsed');
+    btn.textContent = 'Collapse ↑';
+  } else {
+    el.classList.add('collapsed');
+    btn.textContent = 'Show full analysis ↓';
+  }
+}
+
+function setProgress(p) { document.getElementById('progressFill').style.width = p + '%'; }
+function setBottomStatus(t) { document.getElementById('bottomStatus').textContent = t; }
+
+function getSeverityFromScore(score) {
+  var n = parseFloat(score);
+  if (n >= 8) return 'critical';
+  if (n >= 6) return 'high';
+  if (n >= 4) return 'medium';
+  return 'low';
+}
+
+var SEVERITY_LABELS = {
+  critical: 'EXTREME — Do not sign as written',
+  high: 'HIGH — Significant concerns identified',
+  medium: 'MODERATE — Review flagged items',
+  low: 'LOW — Minor issues only'
+};
+
+var SEVERITY_BORDERS = {
+  critical: 'rgba(239,68,68,.3)',
+  high: 'rgba(245,158,11,.3)',
+  medium: 'rgba(168,85,247,.3)',
+  low: 'rgba(34,197,94,.3)'
+};
+
+function setRiskScore(score, severity) {
+  var el = document.getElementById('riskScore');
+  el.classList.remove('critical', 'high', 'medium', 'low', 'score-pop');
+  el.textContent = score;
+  el.classList.add(severity);
+  void el.offsetWidth;
+  el.classList.add('score-pop');
+  document.getElementById('riskSub').textContent = SEVERITY_LABELS[severity] || severity;
+  document.getElementById('riskDisplay').style.borderColor = SEVERITY_BORDERS[severity] || 'rgba(239,68,68,.3)';
+}
+
+function setMode(m) {
+  mode = m;
+  var badge = document.getElementById('modeBadge');
+  badge.textContent = m.toUpperCase();
+  badge.className = 'mode-badge ' + m;
+}
+
+// ========================
+//   LIVE MODE
+// ========================
+
+async function checkServer() {
+  try {
+    var resp = await fetch('/api/status', { cache: 'no-store' });
+    if (resp.ok) return true;
+  } catch(e) {}
+  return false;
+}
+
+async function triggerLive() {
+  try {
+    var resp = await fetch('/api/trigger', { method: 'POST', cache: 'no-store' });
+    var data = await resp.json();
+    return data.triggered;
+  } catch(e) {
+    return false;
+  }
+}
+
+async function pollEvents() {
+  try {
+    var resp = await fetch('/api/events?after=' + lastEventIndex + '&_=' + Date.now(), { cache: 'no-store' });
+    var events = await resp.json();
+    for (var i = 0; i < events.length; i++) {
+      handleLiveEvent(events[i]);
+      lastEventIndex++;
+    }
+  } catch(e) {
+    console.error('Poll error:', e);
+  }
+}
+
+function handleLiveEvent(event) {
+  if (event.type === 'status') {
+    if (event.status === 'active') {
+      setAgentStatus(event.agent, 'active');
+      setBottomStatus(AGENTS[event.agent]?.name + ' analyzing...');
+      var curProgress = parseFloat(document.getElementById('progressFill').style.width) || 0;
+      setProgress(Math.max(curProgress, (AGENT_PROGRESS[event.agent] || 10) - 15));
+
+      if (STEP_NARRATION[currentScenario][event.agent] && !narratedSteps[event.agent]) {
+        narratedSteps[event.agent] = true;
+        addSystemMessage(STEP_NARRATION[currentScenario][event.agent], true);
+      }
+    } else if (event.status === 'complete') {
+      setAgentStatus(event.agent, 'complete');
+    }
+  } else if (event.type === 'message') {
+    setAgentStatus(event.agent, 'complete');
+    var isParallel = event.agent === 'devils_advocate' || event.agent === 'precedent';
+
+    if (STEP_NARRATION[currentScenario][event.agent] && !narratedSteps[event.agent]) {
+      narratedSteps[event.agent] = true;
+      addSystemMessage(STEP_NARRATION[currentScenario][event.agent], true);
+    }
+
+    addMessage(event.agent, event.content, {
+      parallel: isParallel,
+      provider: event.provider || null
+    });
+
+    setProgress(AGENT_PROGRESS[event.agent] || 50);
+
+    if (event.agent === 'risk') {
+      if (currentScenario === 'b') {
+        setRiskScore('3.2', 'low');
+        document.getElementById('riskSub').textContent = 'NimbusStack · Recommended';
+      } else {
+        var scoreMatch = event.content.match(/(\d+\.?\d*)\s*\/\s*10/);
+        if (scoreMatch) {
+          setRiskScore(scoreMatch[1], getSeverityFromScore(scoreMatch[1]));
+        }
+      }
+    }
+
+    if (event.agent === 'briefing') {
+      setBottomStatus('Analysis complete — 5 agents, 0 autonomous decisions');
+      document.getElementById('liveDot').classList.remove('live');
+      document.getElementById('liveLabel').textContent = 'COMPLETE';
+      clearInterval(timerInterval);
+      if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
+      addSystemMessage('Pipeline complete. All 5 agents have reported. Executive brief ready.', false);
+      document.getElementById('resetBtn').style.display = 'block';
+      setTimeout(function() { showLiveBrief(event.content); }, 2000);
+    }
+  }
+}
+
+function showLiveBrief(content) {
+  document.getElementById('briefTitle').textContent = DOC_INFO[currentScenario].briefTitle;
+  document.getElementById('briefBody').innerHTML = marked.parse(content);
+  document.getElementById('briefOverlay').classList.add('visible');
+}
+
+function closeBrief() { document.getElementById('briefOverlay').classList.remove('visible'); }
+
+async function startLiveMode() {
+  setMode('live');
+  document.getElementById('startBtn').disabled = true;
+  document.getElementById('pillA').classList.add('disabled');
+  document.getElementById('pillB').classList.add('disabled');
+  startTime = Date.now();
+  timerInterval = setInterval(updateTimer, 200);
+  document.getElementById('liveDot').classList.add('live');
+  document.getElementById('liveLabel').textContent = 'LIVE';
+  setProgress(2);
+  narratedSteps = {};
+
+  addSystemMessage('Sending analysis request to Band platform. All 5 agents will coordinate through Band messaging to review this contract.', false);
+
+  try { await fetch('/api/reset', { cache: 'no-store' }); } catch(e) {}
+  lastEventIndex = 0;
+
+  var triggered = await triggerLive();
+  if (triggered) {
+    setBottomStatus('Trigger sent — waiting for Analyst (each LLM call takes 30–60s)...');
+    setProgress(5);
+    addSystemMessage('Trigger sent via Band. Waiting for Analyst to begin extraction...', false);
+    pollInterval = setInterval(pollEvents, 2000);
+  } else {
+    addSystemMessage('Could not reach Band platform. Falling back to demo mode with pre-computed results.', false);
+    setBottomStatus('Trigger failed — falling back to demo mode');
+    setTimeout(function() { startDemo(); }, 1500);
+  }
+}
+
+function resetDashboard() {
+  closeBrief();
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
+  demoTimeouts.forEach(function(id) { clearTimeout(id); });
+  demoTimeouts = [];
+  Object.keys(statusIntervals).forEach(function(key) {
+    if (statusIntervals[key]) { clearInterval(statusIntervals[key]); statusIntervals[key] = null; }
+  });
+
+  var feed = document.getElementById('feed');
+  feed.innerHTML = feedIntroHtml;
+
+  Object.keys(AGENTS).forEach(function(key) { setAgentStatus(key, 'standby'); });
+
+  setProgress(0);
+  document.getElementById('timer').textContent = 'T+00:00';
+  setBottomStatus('Ready — 5 agents connected');
+
+  var riskEl = document.getElementById('riskScore');
+  riskEl.textContent = '—';
+  riskEl.classList.remove('critical', 'high', 'medium', 'low', 'score-pop');
+  document.getElementById('riskSub').textContent = 'Pending analysis';
+  document.getElementById('riskDisplay').style.borderColor = '';
+
+  document.getElementById('liveDot').classList.remove('live');
+  document.getElementById('liveLabel').textContent = 'STANDBY';
+
+  var startBtn = document.getElementById('startBtn');
+  startBtn.disabled = false;
+  document.getElementById('resetBtn').style.display = 'none';
+
+  narratedSteps = {};
+  lastEventIndex = 0;
+
+  document.getElementById('pillA').classList.remove('disabled');
+  document.getElementById('pillB').classList.remove('disabled');
+
+  var badge = document.getElementById('personaBadge');
+  badge.textContent = 'Awaiting Analysis';
+  badge.classList.remove('ready');
+
+  document.getElementById('briefTitle').textContent = DOC_INFO[currentScenario].briefTitle;
+
+  (async function() {
+    var serverUp = await checkServer();
+    if (serverUp) {
+      setMode('live');
+    } else {
+      setMode('demo');
+    }
+    applyDocInfo(currentScenario);
+  })();
+}
+
+// ========================
+//   DEMO MODE (fallback)
+// ========================
+
+function showBrief() {
+  document.getElementById('briefTitle').textContent = DOC_INFO.a.briefTitle;
+  document.getElementById('briefBody').innerHTML =
+    '<h3>What You Are Being Asked to Sign</h3>' +
+    '<p>A 3-year, $1.8M exclusive EMEA distribution partnership with GlobalTech Solutions Inc. ' +
+    'Meridian Ventures has a $600K annual minimum commitment and a $500K liability cap — ' +
+    '<strong>27.8% of deal value</strong>.</p>' +
+
+    '<h3>Top Risks — Act on These Before Signing</h3>' +
+    '<div class="risk-item critical"><strong>🔴 CRITICAL: Board Resolution BRD-2023-47 Violation (Section 4.1, p.27)</strong><br>' +
+    'Automatic IP transfer to GlobalTech. Your board prohibited this in September 2023. ' +
+    'This contract <strong>cannot be signed without board approval</strong>.</div>' +
+    '<div class="risk-item critical"><strong>🔴 CRITICAL: We Rejected This Vendor 12 Months Ago (April 2025)</strong><br>' +
+    'Meridian evaluated GlobalTech and chose not to proceed. Documented reasons — surprise penalty clauses, ' +
+    'declining EMEA performance — are present in this contract.</div>' +
+    '<div class="risk-item critical"><strong>🔴 CRITICAL: 5+ Year Exclusivity Lock-In (p.34 + p.67)</strong><br>' +
+    '3-year exclusivity plus 24-month post-termination extension. NovaCorp precedent: $780K lost in identical structure.</div>' +
+    '<div class="risk-item high"><strong>🟡 HIGH: Liability Cap Leaves $1.3M Exposed (p.52)</strong><br>' +
+    '$500K cap on $1.8M deal = 27.8% coverage. Vertex benchmark: 100% of deal value. Recovery gap: $1,300,000.</div>' +
+    '<div class="risk-item high"><strong>🟡 HIGH: "Best Efforts" Is Legally Unenforceable (p.12)</strong><br>' +
+    'No KPIs, no benchmarks, no definition. DataStream precedent: identical language, $340K lost with zero remedy.</div>' +
+
+    '<h3>What Your Company\'s History Says</h3>' +
+    '<p>You have been burned by "best efforts" language before — DataStream, 2022, $340K lost. ' +
+    'You have been burned by open-ended exclusivity — NovaCorp, 2021, $780K lost. ' +
+    'You evaluated this exact vendor 12 months ago and chose not to proceed. ' +
+    '<strong>This contract has all three problems.</strong></p>' +
+
+    '<h3>Questions to Ask Before Signing</h3>' +
+    '<ol style="padding-left:18px;margin:8px 0">' +
+    '<li>What is in Schedule C? Penalty clauses must be disclosed before any signature.</li>' +
+    '<li>Has the board reviewed Section 4.1 per Resolution BRD-2023-47?</li>' +
+    '<li>Why can GlobalTech exit in 90 days while Meridian needs 180 days to cure?</li>' +
+    '<li>Who owns the customer relationships and data if this agreement terminates?</li></ol>' +
+
+    '<h3>Negotiation Demands</h3>' +
+    '<ul style="padding-left:18px;margin:8px 0">' +
+    '<li>Define "best efforts" with specific quarterly KPIs and mutual minimums (p.12)</li>' +
+    '<li>Remove or cap post-termination exclusivity to 6 months maximum (p.67)</li>' +
+    '<li>Raise liability cap to 100% of deal value — $1,800,000 (p.52)</li>' +
+    '<li>Add change-of-control clause: Meridian exits if GlobalTech is acquired</li>' +
+    '<li>Require full Schedule C disclosure before any signature</li>' +
+    '<li>Equalize termination rights: both parties get 90-day exit</li></ul>' +
+
+    '<div class="audit-trail"><strong>Audit Trail</strong><br>' +
+    'Analyst → Band → Devil\'s Advocate + Precedent (parallel) → Band → Risk Agent → Band → Briefing Agent → Human<br><br>' +
+    '<strong>Autonomous decisions made: 0</strong><br>' +
+    'You retain full authority over this decision at every stage.<br><br>' +
+    'SentinelOps · Multi-Agent Decision Intelligence</div>';
+
+  document.getElementById('briefOverlay').classList.add('visible');
+}
+
+var DEMO = [
+  [0, 'sys', 'Demo mode: Replaying a previous analysis session with pre-computed results.'],
+  [500, 'live'],
+  [800, 'sysstep', 'Step 1 of 4 — Analyst is extracting all clauses, financial terms, and obligations from the 74-page contract...'],
+  [900, 'activate', 'analyst'],
+  [1200, 'progress', 10],
+  [2500, 'message', 'analyst',
+    '<strong>STRUCTURED CONTRACT BREAKDOWN</strong>\n\n' +
+    '<strong>Document:</strong> GlobalTech Solutions Partnership Agreement (74 pages)\n' +
+    '<strong>Parties:</strong> Meridian Ventures Ltd ↔ GlobalTech Solutions Inc\n' +
+    '<strong>Value:</strong> $1,800,000 over 3 years | Annual minimum: $600,000\n\n' +
+    '<strong>Key Clauses Extracted:</strong>\n' +
+    '• Section 1.2 (p.8): 35% revenue share on all EMEA/APAC distribution\n' +
+    '• Section 2.1 (p.12): "Best efforts" commitment — <strong>undefined, no KPIs</strong>\n' +
+    '• Section 3.4 (p.19): $600K annual minimum purchase, penalties in Schedule C\n' +
+    '• Section 4.1 (p.27): All IP improvements transfer to GlobalTech automatically\n' +
+    '• Section 5.2 (p.34): Exclusive EMEA distribution rights\n' +
+    '• Section 6.3 (p.41): GlobalTech exits in 90 days; Meridian needs 180-day cure\n' +
+    '• Section 7.1 (p.52): $500K liability cap on $1.8M deal\n' +
+    '• Section 8.2 (p.58): Irrevocable customer data access to GlobalTech\n' +
+    '• Section 9.4 (p.67): 24-month post-termination non-compete\n\n' +
+    'Analysis complete. Forwarding to Devil\'s Advocate and Precedent Agent for parallel review.', {html:true}],
+  [4000, 'complete', 'analyst'],
+  [4200, 'progress', 25],
+  [4400, 'sysstep', 'Step 2 of 4 — Devil\'s Advocate and Precedent Agent are reviewing in parallel. DA attacks the contract; Precedent searches company history...'],
+  [4500, 'activate', 'devils_advocate'],
+  [4500, 'activate', 'precedent'],
+  [5000, 'progress', 35],
+  [7500, 'message', 'devils_advocate',
+    '<strong>ADVERSARIAL CONTRACT REVIEW</strong>\n\n' +
+    '<span class="highlight"><strong>CONTRADICTION:</strong> Section 5.2 (p.34) grants exclusive EMEA distribution. ' +
+    'Section 9.4 (p.67) extends this 24 months <em>post-termination</em>. Combined: Meridian is locked in for 3 years ' +
+    'AND locked out of competitors for 2 years after. That is a <strong>5+ year commitment</strong> buried across two sections 33 pages apart.</span>\n\n' +
+    '<strong>UNFAIR TERMS:</strong>\n' +
+    '• <span class="risk-high">Termination asymmetry (p.41)</span>: GlobalTech exits in 90 days. Meridian needs 180 days to <em>cure</em> any breach. Not a partnership — a one-way door.\n' +
+    '• <span class="risk-high">Liability cap $500K (p.52)</span> on a $1.8M deal. Maximum recovery is 27.8% of commitment.\n' +
+    '• <span class="risk-high">IP transfer (p.27)</span>: ALL improvements become GlobalTech property automatically. Zero compensation.\n\n' +
+    '<strong>UNENFORCEABLE:</strong>\n' +
+    '• "Best efforts" (p.12) has no definition. No KPIs. No benchmarks. Legally worthless.\n\n' +
+    '<strong>MISSING:</strong>\n' +
+    '• No change-of-control clause\n' +
+    '• Schedule C (penalty clauses) not provided\n' +
+    '• No performance minimums on GlobalTech\'s side\n\n' +
+    '<strong>Verdict: Do not sign as written. Five clauses require renegotiation minimum.</strong>', {parallel:true, html:true}],
+  [7800, 'progress', 50],
+  [9000, 'message', 'precedent',
+    '<strong>INSTITUTIONAL MEMORY REPORT</strong>\n\n' +
+    '<strong>DIRECT HISTORY WITH THIS VENDOR:</strong>\n' +
+    'March 2023: GlobalTech filed a payment dispute against our portfolio company TechBridge Ltd for $142K. ' +
+    'Settled for $89K. TechBridge CEO noted "aggressive billing practices." <strong>TechBridge no longer works with GlobalTech.</strong>\n\n' +
+    'April 2025 — 12 months ago — Meridian evaluated a GlobalTech partnership and <strong>abandoned it at the LOI stage</strong>. ' +
+    'Due diligence file documents a pattern of surprise penalty clauses in Schedule C. ' +
+    '<strong>We chose not to proceed. Those reasons are on file.</strong>\n\n' +
+    '<strong>RELEVANT CONTRACT PRECEDENTS:</strong>\n' +
+    '• <strong>DataStream Inc (2022):</strong> Identical "best efforts" language. Clause unenforceable. Lost $340,000 with no remedy.\n' +
+    '• <strong>NovaCorp (2021):</strong> 3-year exclusivity, no change-of-control. Acquired at month 14. Locked out for 20 months. Lost ~$780,000.\n\n' +
+    '<strong>BOARD RESOLUTION AT RISK:</strong>\n' +
+    'BRD-2023-47 (September 2023): Prohibits IP transfer without board approval. <strong>Section 4.1 violates this resolution directly.</strong>\n\n' +
+    '<strong>BENCHMARK — Vertex Systems (2024, $2.1M):</strong> Liability cap 100%, 90-day mutual exit, IP retained by Meridian.\n\n' +
+    '<strong>History says: we avoided this vendor once, were burned by the same language twice, and are about to violate a board resolution.</strong>', {parallel:true, html:true}],
+  [9500, 'complete', 'devils_advocate'],
+  [9700, 'complete', 'precedent'],
+  [10000, 'progress', 65],
+  [10200, 'sysstep', 'Step 3 of 4 — Risk Agent is synthesizing all findings into a scored risk matrix with financial exposure calculations...'],
+  [10500, 'activate', 'risk'],
+  [13000, 'message', 'risk',
+    '<strong>RISK ASSESSMENT MATRIX</strong>\n' +
+    '<em>Synthesized from Devil\'s Advocate + Precedent Agent findings</em>\n\n' +
+    '<span class="risk-high">🔴 CRITICAL — Board Resolution Violation (Section 4.1, p.27)</span>\n' +
+    'IP auto-transfer triggers BRD-2023-47. Deal invalidation + legal liability.\n' +
+    '<strong>Exposure: Contract voidability</strong>\n\n' +
+    '<span class="risk-high">🔴 CRITICAL — Prior Vendor Rejection on File (April 2025)</span>\n' +
+    'Evaluated and rejected GlobalTech 12 months ago. Documented risks unchanged.\n' +
+    '<strong>Exposure: Repeated pattern of unfavorable terms</strong>\n\n' +
+    '<span class="risk-high">🔴 CRITICAL — Exclusivity Lock-In (p.34 + p.67)</span>\n' +
+    '3-year term + 24-month post-termination = 5+ years restricted.\n' +
+    '<strong>Exposure: ~$780,000</strong> (NovaCorp precedent)\n\n' +
+    '<span class="risk-med">🟡 HIGH — Inadequate Liability Cap (p.52)</span>\n' +
+    '$500K cap on $1.8M deal = 27.8% coverage. Vertex benchmark: 100%.\n' +
+    '<strong>Exposure: $1,300,000 unrecoverable</strong>\n\n' +
+    '<span class="risk-med">🟡 HIGH — Unenforceable "Best Efforts" (p.12)</span>\n' +
+    'Undefined commitment. DataStream precedent: $340K lost.\n' +
+    '<strong>Exposure: $340,000+</strong>\n\n' +
+    '<strong>AGGREGATE RISK SCORE: 8.5 / 10</strong>\n' +
+    'Total quantifiable exposure: <strong>$2,420,000+</strong>', {html:true}],
+  [13500, 'complete', 'risk'],
+  [13500, 'riskscore'],
+  [14000, 'progress', 80],
+  [14200, 'sysstep', 'Step 4 of 4 — Briefing Agent is preparing the final executive decision brief for the human decision-maker...'],
+  [14500, 'activate', 'briefing'],
+  [17000, 'message', 'briefing',
+    '<strong>EXECUTIVE DECISION BRIEF GENERATED</strong>\n\n' +
+    'Risk Score: 8.5/10 · 3 critical findings · 3 high findings · $2.4M+ exposure\n\n' +
+    'The full executive brief has been prepared. It includes ranked risks with severity scores, ' +
+    'specific page citations, questions to ask before signing, and a renegotiation checklist.\n\n' +
+    '<strong>Bottom line: Do not sign this contract as written.</strong>\n\n' +
+    '<em>Click to view the complete executive brief →</em>', {html:true}],
+  [17500, 'complete', 'briefing'],
+  [17500, 'progress', 100],
+  [18000, 'sys', 'Pipeline complete. All 5 agents have reported. Executive brief ready.'],
+  [18500, 'brief'],
+];
+
+var DEMO_B = [
+  [0, 'sys', 'Demo mode: Replaying a previous vendor analysis session with pre-computed results.'],
+  [500, 'live'],
+  [800, 'sysstep', 'Step 1 of 4 — Analyst is parsing all three vendor proposals and extracting pricing, SLA, and exit terms...'],
+  [900, 'activate', 'analyst'],
+  [1200, 'progress', 10],
+  [2500, 'message', 'analyst',
+    '## Vendor Proposal Analysis — Cloud Infrastructure Migration\n' +
+    '*Prepared by: Analyst Agent (SentinelOps)*\n' +
+    '*Vendors: Stratos Cloud · NimbusStack · Apex Systems*\n' +
+    '*Total proposals: 48 pages · 8 risk dimensions evaluated*\n\n' +
+    '### I. PRICING COMPARISON\n' +
+    '| Vendor | Annual Cost | 3-Year Total | Price Lock | Exit Penalty |\n' +
+    '|--------|-------------|--------------|------------|---------------|\n' +
+    '| Stratos Cloud | $380,000 | $1,140,000 | Fixed | 6 months remaining fees |\n' +
+    '| NimbusStack | $290,000 | $870,000 | CPI+2% | 90-day notice |\n' +
+    '| Apex Systems | $210,000 | $630,000 | Variable | None stated |\n\n' +
+    '### II. SLA COMPARISON\n' +
+    '| Vendor | Uptime SLA | Support Response | Penalty for Breach | Credits Cap |\n' +
+    '|--------|-----------|-----------------|-------------------|-------------|\n' +
+    '| Stratos Cloud | 99.99% | 15 minutes P1 | Service credits | 10% monthly fee |\n' +
+    '| NimbusStack | 99.9% | 4 hours P1 | Service credits | 5% monthly fee |\n' +
+    '| Apex Systems | 99.5% | Best efforts | None defined | None |\n\n' +
+    '### III. KEY FLAGS\n' +
+    '🔴 Apex Systems: "best efforts" SLA support — unenforceable. No penalty for downtime.\n\n' +
+    '🔴 Stratos Cloud: proprietary architecture lock-in. Migration exit cost estimated $180K+.\n\n' +
+    '🟡 NimbusStack: CPI+2% price escalation clause — cost could reach $340K by year 3.\n\n' +
+    '🟡 Apex Systems: no defined exit penalty — but billing dispute history with Meridian (2024).\n\n' +
+    '🟢 Stratos Cloud: strongest SLA with defined breach remedies.\n\n' +
+    '🟢 NimbusStack: most flexible exit terms of the three vendors.\n\n' +
+    '*Forwarding to @sentinelops-devils-advocate and @sentinelops-precedent for parallel review.*'],
+  [4000, 'complete', 'analyst'],
+  [4200, 'progress', 25],
+  [4400, 'sysstep', 'Step 2 of 4 — Devil\'s Advocate and Precedent Agent reviewing in parallel. DA challenges each vendor; Precedent searches vendor history...'],
+  [4500, 'activate', 'devils_advocate'],
+  [4500, 'activate', 'precedent'],
+  [5000, 'progress', 35],
+  [7500, 'message', 'devils_advocate',
+    '## Challenge Report — Vendor Selection\n' +
+    '*Verdict: Do not select Apex. Stratos requires conditions. NimbusStack is viable.*\n\n' +
+    '### CONTRADICTIONS\n' +
+    '**Apex Systems pricing vs support terms**: The lowest price ($210K) comes with "best efforts" support and no SLA penalty — meaning Meridian bears 100% of the downtime cost while paying for a service with no accountability mechanism.\n\n' +
+    '**Stratos Cloud SLA vs exit terms**: Stratos offers the strongest uptime guarantee (99.99%) but locks Meridian into proprietary architecture. If Stratos underperforms or raises prices in year 2, the exit cost ($180K+) exceeds an entire year of NimbusStack fees.\n\n' +
+    '### UNFAIR TERMS\n' +
+    '🔴 **Apex Systems — No SLA penalty (all proposals, p.34)**: "Best efforts" support with zero financial accountability. If Apex causes 48 hours of downtime affecting 40 teams, Meridian has no contractual remedy.\n\n' +
+    '🔴 **Stratos Cloud — Proprietary lock-in (Section 4.2)**: Migration to Stratos requires adopting their custom APIs. Switching later costs an estimated $180K+ in re-engineering. This is not disclosed prominently in the proposal.\n\n' +
+    '🟡 **NimbusStack — CPI+2% escalation (Section 3.1)**: At 3% CPI, year 3 cost reaches $308K — 6.2% above the quoted price. Not a dealbreaker but must be capped.\n\n' +
+    '### QUESTIONS BEFORE DECIDING\n' +
+    '1. What is Apex\'s explanation for the 2024 billing dispute with Meridian?\n' +
+    '2. Will Stratos agree to open-standard APIs to reduce lock-in risk?\n' +
+    '3. Will NimbusStack cap the CPI escalation at 2% total over the term?\n\n' +
+    '*Forwarding findings to @sentinelops-risk for scoring.*', {parallel:true}],
+  [7800, 'progress', 50],
+  [9000, 'message', 'precedent',
+    '## Institutional Memory Report — Vendor Selection\n' +
+    '*Prepared by: Precedent Agent (Featherless AI)*\n\n' +
+    '### DIRECT VENDOR HISTORY\n' +
+    '**2024-08-14 — Apex Systems Billing Dispute**: Apex Systems overbilled Meridian $34,000 in managed services fees over 6 months. Dispute resolved after 4 months of back-and-forth. Internal notes: *"Apex\'s billing practices are opaque; invoices do not map clearly to contracted services."* Resolution required external audit.\n' +
+    '→ **Connection**: Apex\'s current proposal has a variable pricing clause with no defined billing methodology. This is the same structural ambiguity that caused the 2024 dispute.\n\n' +
+    '**2023-05-20 — NimbusStack Pilot (Project Helix)**: Meridian ran a 3-month pilot with NimbusStack for a data pipeline project. Performance met SLA targets. Support response averaged 2.1 hours on P1 tickets (SLA: 4 hours). No disputes.\n' +
+    '→ **Connection**: Meridian has a positive prior relationship with NimbusStack at smaller scale. No red flags in institutional history.\n\n' +
+    '### BENCHMARK COMPARISON\n' +
+    '| Term | Stratos Cloud | NimbusStack | Apex Systems | Market Standard |\n' +
+    '|------|--------------|-------------|--------------|------------------|\n' +
+    '| Uptime SLA | 99.99% ✅ | 99.9% ✅ | 99.5% 🔴 | 99.9% |\n' +
+    '| Support P1 | 15 min ✅ | 4 hours ✅ | Best efforts 🔴 | 1–4 hours |\n' +
+    '| Exit penalty | 6 months 🔴 | 90 days ✅ | None stated 🟡 | 30–90 days |\n' +
+    '| Price lock | Fixed ✅ | CPI+2% 🟡 | Variable 🔴 | Fixed or CPI |\n\n' +
+    '*Forwarding institutional memory to @sentinelops-risk for scoring.*', {parallel:true}],
+  [9500, 'complete', 'devils_advocate'],
+  [9700, 'complete', 'precedent'],
+  [10000, 'progress', 65],
+  [10200, 'sysstep', 'Step 3 of 4 — Risk Agent is scoring all three vendors across eight risk dimensions...'],
+  [10500, 'activate', 'risk'],
+  [13000, 'message', 'risk',
+    '## Risk Assessment Matrix — Vendor Selection\n' +
+    '*Synthesized from Analyst · Devil\'s Advocate · Precedent*\n\n' +
+    '### VENDOR RISK SCORES\n\n' +
+    '**APEX SYSTEMS — 🔴 8.9 / 10 RISK — DO NOT SELECT**\n' +
+    '- No SLA penalty: $200K+ exposure if extended downtime occurs\n' +
+    '- Billing dispute history: pattern of opaque invoicing unresolved\n' +
+    '- Variable pricing: no ceiling defined — cost could escalate unpredictably\n' +
+    '- Total quantified exposure: $890,000\n\n' +
+    '**STRATOS CLOUD — 🟡 5.4 / 10 RISK — CONDITIONAL APPROVAL**\n' +
+    '- Proprietary lock-in: $180K+ exit cost if migration needed\n' +
+    '- 99.99% SLA is the strongest available — reduces operational risk\n' +
+    '- Fixed pricing provides budget certainty\n' +
+    '- Condition required: open-standard API addendum before signing\n' +
+    '- Total quantified exposure (lock-in only): $180,000\n\n' +
+    '**NIMBUSSTACK — 🟢 3.2 / 10 RISK — RECOMMENDED**\n' +
+    '- Positive prior relationship (Project Helix pilot — no disputes)\n' +
+    '- Flexible exit terms (90-day notice)\n' +
+    '- CPI+2% escalation is manageable if capped\n' +
+    '- Condition required: cap price escalation at 5% total over 3-year term\n' +
+    '- Total quantified exposure: $48,000 (escalation risk only)\n\n' +
+    '### AGGREGATE COMPARISON\n' +
+    '| Vendor | Risk Score | Quantified Exposure | Recommendation |\n' +
+    '|--------|-----------|--------------------|-----------------|\n' +
+    '| Apex Systems | 8.9 / 10 | $890,000 | ❌ Do Not Select |\n' +
+    '| Stratos Cloud | 5.4 / 10 | $180,000 | ⚠️ Conditional |\n' +
+    '| NimbusStack | 3.2 / 10 | $48,000 | ✅ Recommended |\n\n' +
+    '*Forwarding to @sentinelops-briefing for executive brief.*'],
+  [13500, 'complete', 'risk'],
+  [13500, 'riskscoreB'],
+  [14000, 'progress', 80],
+  [14200, 'sysstep', 'Step 4 of 4 — Briefing Agent is preparing the ranked vendor recommendation for Marcus...'],
+  [14500, 'activate', 'briefing'],
+  [17000, 'message', 'briefing',
+    '<strong>EXECUTIVE DECISION BRIEF GENERATED</strong>\n\n' +
+    'Recommended Vendor: NimbusStack · Risk Score: 3.2/10 · 2 conditions required\n\n' +
+    'The full executive brief has been prepared. It includes a ranked vendor comparison, ' +
+    'risk scores for all three vendors, conditions for the recommended selection, ' +
+    'and negotiation demands.\n\n' +
+    '<strong>Bottom line: Select NimbusStack — with conditions.</strong>\n\n' +
+    '<em>Click to view the complete executive brief →</em>', {html:true}],
+  [17500, 'complete', 'briefing'],
+  [17500, 'progress', 100],
+  [18000, 'sys', 'Pipeline complete. All 5 agents have reported. Executive brief ready.'],
+  [18500, 'briefB'],
+];
+
+function showBriefB() {
+  document.getElementById('briefTitle').textContent = DOC_INFO.b.briefTitle;
+  document.getElementById('briefBody').innerHTML =
+    '<h3>Recommendation</h3>' +
+    '<p><strong>SELECT NIMBUSSTACK — WITH CONDITIONS</strong></p>' +
+    '<p>Meridian Ventures should proceed with NimbusStack for the cloud infrastructure ' +
+    'migration. Of the three vendors evaluated, NimbusStack presents the lowest ' +
+    'risk profile, the most flexible exit terms, and a verified positive prior ' +
+    'relationship with Meridian. Two conditions must be met before signing.</p>' +
+
+    '<h3>Why Not Apex Systems</h3>' +
+    '<div class="risk-item critical"><strong>🔴 Risk Score: 8.9 / 10 — DO NOT SELECT</strong><br>' +
+    'Apex carries a risk score of 8.9/10. Their "best efforts" SLA provides zero ' +
+    'financial accountability for downtime. Combined with the 2024 billing dispute ' +
+    'and variable pricing with no defined ceiling, Apex represents unacceptable ' +
+    'risk for a business-critical infrastructure commitment.<br>' +
+    '<strong>Potential exposure: $890,000</strong></div>' +
+
+    '<h3>Why Not Stratos (Without Conditions)</h3>' +
+    '<div class="risk-item high"><strong>🟡 Risk Score: 5.4 / 10 — CONDITIONAL</strong><br>' +
+    'Stratos has the strongest technical SLA (99.99%) but their proprietary ' +
+    'architecture creates a $180K+ exit trap. Until they agree to open-standard ' +
+    'APIs in a signed addendum, the lock-in risk outweighs the SLA advantage.</div>' +
+
+    '<h3>Conditions for NimbusStack</h3>' +
+    '<ol style="padding-left:18px;margin:8px 0">' +
+    '<li>✅ Cap CPI price escalation at 5% total over the 3-year term (not per year)</li>' +
+    '<li>✅ Confirm P1 support SLA in writing with defined credit penalties for breach</li></ol>' +
+
+    '<h3>Questions for Marcus Before Signing</h3>' +
+    '<ol style="padding-left:18px;margin:8px 0">' +
+    '<li>Has NimbusStack agreed to the escalation cap in principle?</li>' +
+    '<li>What is the internal cost estimate for a mid-contract migration if NimbusStack ' +
+    'underperforms? (Needed to validate the 90-day exit clause is sufficient)</li></ol>' +
+
+    '<h3>Negotiation Demands</h3>' +
+    '<ul style="padding-left:18px;margin:8px 0">' +
+    '<li>NimbusStack Section 3.1: Add "CPI escalation capped at 5% cumulative over term"</li>' +
+    '<li>NimbusStack SLA addendum: Define credit structure for P1 response breaches</li></ul>' +
+
+    '<div class="audit-trail"><strong>Audit Trail</strong><br>' +
+    'Analyst → Band → Devil\'s Advocate + Precedent (parallel) → Band → Risk Agent → Band → Briefing Agent → Human<br><br>' +
+    '<strong>Autonomous decisions made: 0</strong><br>' +
+    'Marcus retains full authority over this decision at every stage.<br><br>' +
+    'SentinelOps · Multi-Agent Decision Intelligence</div>';
+
+  document.getElementById('briefOverlay').classList.add('visible');
+}
+
+function startDemo() {
+  setMode('demo');
+  document.getElementById('startBtn').disabled = true;
+  document.getElementById('pillA').classList.add('disabled');
+  document.getElementById('pillB').classList.add('disabled');
+  startTime = Date.now();
+  timerInterval = setInterval(updateTimer, 200);
+  demoTimeouts = [];
+  var demoData = currentScenario === 'b' ? DEMO_B : DEMO;
+  demoData.forEach(function(step) {
+    var id = setTimeout(function() {
+      switch(step[1]) {
+        case 'live':
+          document.getElementById('liveDot').classList.add('live');
+          document.getElementById('liveLabel').textContent = 'ACTIVE';
+          break;
+        case 'activate': setAgentStatus(step[2], 'active'); break;
+        case 'complete': setAgentStatus(step[2], 'complete'); break;
+        case 'message': addMessage(step[2], step[3], step[4]); break;
+        case 'progress': setProgress(step[2]); break;
+        case 'sys': addSystemMessage(step[2], false); break;
+        case 'sysstep': addSystemMessage(step[2], true); break;
+        case 'riskscore': setRiskScore('8.5', getSeverityFromScore('8.5')); break;
+        case 'riskscoreB':
+          setRiskScore('3.2', 'low');
+          document.getElementById('riskSub').textContent = 'NimbusStack · Recommended';
+          break;
+        case 'brief': showBrief(); break;
+        case 'briefB': showBriefB(); break;
+      }
+    }, step[0]);
+    demoTimeouts.push(id);
+  });
+  demoTimeouts.push(setTimeout(function() {
+    clearInterval(timerInterval);
+    document.getElementById('resetBtn').style.display = 'block';
+  }, 20000));
+}
+
+// ========================
+//   ENTRY POINT
+// ========================
+
+async function startAnalysis() {
+  document.getElementById('startBtn').disabled = true;
+
+  var serverUp = await checkServer();
+  showScenarioIntro(function() {
+    if (serverUp) {
+      startLiveMode();
+    } else {
+      startDemo();
+    }
+  });
+}
+
+(async function() {
+  feedIntroHtml = document.getElementById('feed').innerHTML;
+  var serverUp = await checkServer();
+  if (serverUp) {
+    setMode('live');
+  } else {
+    setMode('demo');
+  }
+  applyDocInfo(currentScenario);
+})();
+</script>
+</body>
+</html>
