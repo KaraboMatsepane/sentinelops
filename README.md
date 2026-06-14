@@ -1,10 +1,10 @@
 # SentinelOps — Multi-Agent Decision Intelligence
 
-**Five AI agents. One coordinated team. 90 seconds to a complete intelligence brief.**
+**Five AI agents. One coordinated team. Minutes, not days.**
 
 > Amara Diallo, VP Legal & Compliance at Meridian Ventures, has **48 hours** to sign a **$1.8M partnership contract**. Her legal team flagged nothing. The board is expecting a signature. But the contract is 74 pages — and something feels off.
 >
-> SentinelOps deploys five specialized agents through **Band** to review every clause, cross-reference institutional memory, stress-test the terms, and deliver an executive decision brief — in **under 90 seconds**. It finds **$2,420,000 in quantifiable exposure** across three critical and two high-severity issues.
+> SentinelOps deploys five specialized agents through **Band** to review every clause, cross-reference institutional memory, stress-test the terms, and deliver an executive decision brief — in **minutes, not days**. It finds **$2,420,000 in quantifiable exposure** across three critical and two high-severity issues.
 >
 > **The verdict: Do not sign as written.**
 >
@@ -50,6 +50,20 @@ Band is the coordination layer — not a wrapper. It broadcasts messages to all 
 
 ---
 
+## Why Band — Not a Wrapper
+
+Band is not an integration of convenience. It provides three architectural capabilities that SentinelOps depends on:
+
+1. **True parallel broadcast.** When Analyst posts findings to the Band room, Devil's Advocate and Precedent Agent both receive the message simultaneously. Without Band, Analyst would have to call each downstream agent sequentially — doubling the runtime of the adversarial review stage. Band's broadcast model is what makes fork/merge parallelism possible.
+
+2. **Shared room context.** Risk Agent waits for both parallel agents to complete before activating. Band's room model provides natural synchronization — Risk Agent listens in the same room and can see when both DA and Precedent have posted. No custom orchestration logic needed; the coordination emerges from the messaging topology.
+
+3. **Observable coordination.** Every message routed through Band is visible in the Band Coordination Log on the dashboard. Judges, auditors, and enterprise buyers can see exactly which agent said what, when, and to whom. This is not possible with direct function calls between agents — Band makes the coordination layer transparent and auditable.
+
+Remove Band and SentinelOps becomes five isolated scripts with a for-loop. Band is what makes them a team.
+
+---
+
 ## Partner Technology
 
 | # | Agent | Role | Provider |
@@ -64,7 +78,7 @@ Band is the coordination layer — not a wrapper. It broadcasts messages to all 
 
 **[AI/ML API](https://aimlapi.com)** provides LLM inference for four agents: Analyst, Devil's Advocate, Risk, and Briefing. These agents handle document parsing, adversarial analysis, risk scoring, and brief generation respectively.
 
-**[Featherless AI](https://featherless.ai)** provides open-source model inference for the Precedent Agent. The Precedent Agent is configured to call Featherless AI first (`provider_order=["featherless", "aiml"]`), with AI/ML API available as a fallback. This ensures meaningful, primary usage of Featherless — not a badge.
+**[Featherless AI](https://featherless.ai)** provides open-source model inference for the Precedent Agent. The Precedent Agent is configured with `provider_order=["featherless", "aiml"]` — Featherless AI is its **primary provider**, not a fallback. This is a deliberate architectural choice: institutional memory retrieval benefits from open-source model flexibility (Qwen3-30B-A3B via Featherless), and Featherless's serverless inference means no cold-start latency for this critical-path agent. AI/ML API is available only as a secondary fallback.
 
 ---
 

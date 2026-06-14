@@ -6,8 +6,10 @@ This folder contains evidence from the live SentinelOps demonstration run showin
 
 | File | Description | Status |
 |------|-------------|--------|
-| `band_room_screenshot.png` | Screenshot of the Band room showing all five agents connected and active | **Pending** |
-| `live_run_transcript.md` | Full transcript of the live analysis session (Scenario A) | **Pending** |
+| `band_room_screenshot.png` | Screenshot of the Band room showing all five agents connected and active | To be captured before submission |
+| `live_run_transcript.md` | Full transcript of the live analysis session (Scenario A) | To be captured before submission |
+
+> **Note:** The GitHub Pages dashboard (`docs/index.html`) runs in demo mode, replaying the exact outputs produced during live testing. To capture fresh evidence, run `python run_demo.py --clean` with the dashboard server active and record the terminal output.
 
 ## What the Live Run Demonstrates
 
@@ -15,7 +17,7 @@ This folder contains evidence from the live SentinelOps demonstration run showin
 2. **Parallel activation** — Devil's Advocate and Precedent Agent fire simultaneously after Analyst posts
 3. **Featherless AI usage** — Precedent Agent calls Featherless AI as its primary provider
 4. **AI/ML API usage** — Analyst, Devil's Advocate, Risk, and Briefing use AI/ML API
-5. **Complete pipeline** — Document to executive brief in under 90 seconds
+5. **Complete pipeline** — Document to executive brief in minutes, not days
 6. **Zero autonomous decisions** — the system recommends, the human decides
 
 ## Notes

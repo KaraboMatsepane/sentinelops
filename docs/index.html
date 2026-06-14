@@ -8,25 +8,25 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
 <style>
 :root {
-  --bg: #060709;
-  --surface: #0d0f14;
-  --surface2: #13161e;
-  --surface3: #191d28;
-  --border: #1c2030;
-  --border2: #252b3d;
-  --text: #e4e7f0;
+  --bg: #090b10;
+  --surface: #0f1118;
+  --surface2: #151820;
+  --surface3: #1b1f2a;
+  --border: #1e2235;
+  --border2: #282d42;
+  --text: #e8ebf4;
   --muted: #4a5270;
   --muted2: #6b7394;
-  --analyst: #3b82f6;
-  --analyst-dim: #0c1a3a;
-  --da: #ef4444;
-  --da-dim: #2a0a0a;
-  --precedent: #a855f7;
-  --precedent-dim: #1a0a30;
-  --risk: #f59e0b;
-  --risk-dim: #2a1a00;
-  --briefing: #22c55e;
-  --briefing-dim: #0a2a10;
+  --analyst: #4b8df8;
+  --analyst-dim: #0e1d3e;
+  --da: #f05252;
+  --da-dim: #2c0c0c;
+  --precedent: #b06af0;
+  --precedent-dim: #1c0c32;
+  --risk: #f5a623;
+  --risk-dim: #2c1c02;
+  --briefing: #34d068;
+  --briefing-dim: #0c2c14;
   --mono: 'IBM Plex Mono', monospace;
   --sans: 'IBM Plex Sans', sans-serif;
 }
@@ -35,12 +35,13 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); font-si
 
 .header {
   display:flex; align-items:center; justify-content:space-between;
-  padding:12px 28px;
+  padding:10px 28px;
   background:var(--surface); border-bottom:1px solid var(--border);
-  position:relative; z-index:10;
+  position:relative; z-index:60;
 }
-.logo { font-family:var(--mono); font-size:18px; font-weight:600; letter-spacing:-.02em; }
+.logo { font-family:var(--mono); font-size:16px; font-weight:600; letter-spacing:-.02em; }
 .logo span { color:var(--analyst); }
+.logo .logo-sub { font-size:9px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-left:12px; font-weight:400; }
 .header-right { display:flex; align-items:center; gap:18px; }
 .status-badge {
   display:flex; align-items:center; gap:7px;
@@ -200,7 +201,7 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); font-si
 .pipe-merge.complete .pipe-merge-branch { background:rgba(34,197,94,.4); }
 .pipe-merge.complete .pipe-merge-label { opacity:1; color:var(--muted); }
 
-.feed-panel { display:flex; flex-direction:column; overflow:hidden; background:var(--bg); }
+.feed-panel { display:flex; flex-direction:column; overflow:hidden; background:var(--bg); border-left:1px solid var(--border); border-right:1px solid var(--border); }
 .feed-header {
   display:flex; align-items:center; justify-content:space-between;
   padding:12px 24px; background:var(--surface);
@@ -237,6 +238,20 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); font-si
   animation: msgSlide .4s ease-out;
 }
 .sys-msg.step { border-left-color:var(--analyst); color:var(--text); font-weight:500; }
+.sys-msg.band-broadcast {
+  border-left-color:var(--precedent); background:rgba(176,106,240,.06);
+  color:var(--text); font-weight:500; display:flex; align-items:center; gap:8px;
+}
+.sys-msg.band-broadcast .broadcast-icon {
+  display:inline-flex; align-items:center; justify-content:center;
+  width:20px; height:20px; border-radius:4px; flex-shrink:0;
+  background:rgba(176,106,240,.12); color:var(--precedent);
+  font-size:10px; border:1px solid rgba(176,106,240,.2);
+}
+.sys-msg.agent-disagreement {
+  border-left-color:var(--risk); background:rgba(245,166,35,.06);
+  color:var(--text); font-weight:500;
+}
 
 /* ======================== */
 /*   Agent Report Cards     */
@@ -245,8 +260,9 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); font-si
 .report-card {
   background:var(--surface); border:1px solid var(--border2);
   border-left:3px solid var(--muted);
-  border-radius:6px; margin:14px 0; overflow:hidden;
+  border-radius:8px; margin:16px 0; overflow:hidden;
   animation: msgSlide .4s ease-out;
+  box-shadow:0 2px 12px rgba(0,0,0,.15);
 }
 @keyframes msgSlide {
   from { opacity:0; transform:translateY(12px); }
@@ -425,12 +441,20 @@ p.risk-flag, li.risk-flag { display:block; }
   transform: scale(1); opacity:1;
 }
 .risk-score-value.score-pop {
-  animation: scorePop .5s ease-out;
+  animation: scorePop .6s cubic-bezier(.34,1.56,.64,1);
 }
 @keyframes scorePop {
   0% { transform:scale(0.3); opacity:0; }
-  60% { transform:scale(1.15); opacity:1; }
+  50% { transform:scale(1.12); opacity:1; }
   100% { transform:scale(1); opacity:1; }
+}
+.risk-score-display.score-flash {
+  animation: riskFlash 1.2s ease-out;
+}
+@keyframes riskFlash {
+  0% { box-shadow: 0 0 0 0 rgba(240,82,82,.4); }
+  30% { box-shadow: 0 0 30px 4px rgba(240,82,82,.25); }
+  100% { box-shadow: none; }
 }
 .risk-score-value.critical { color:var(--da); }
 .risk-score-value.high { color:var(--risk); }
@@ -821,6 +845,71 @@ p.risk-flag, li.risk-flag { display:block; }
   background:linear-gradient(90deg, var(--analyst), var(--briefing));
   transition: width .5s ease;
 }
+.panel-outcome {
+  display:none; margin:12px 0; padding:14px;
+  background:var(--surface2); border:1px solid var(--border2); border-radius:6px;
+  animation: msgSlide .5s ease-out;
+}
+.panel-outcome.visible { display:block; }
+.panel-outcome-label {
+  font-family:var(--mono); font-size:9px; text-transform:uppercase;
+  letter-spacing:.12em; color:var(--muted); margin-bottom:10px;
+}
+.panel-outcome-row {
+  display:flex; justify-content:space-between; align-items:baseline;
+  padding:4px 0; font-family:var(--mono); font-size:11px;
+}
+.panel-outcome-row .po-label { color:var(--muted2); }
+.panel-outcome-row .po-value { font-weight:600; }
+.panel-outcome-row .po-critical { color:var(--da); }
+.panel-outcome-row .po-high { color:var(--risk); }
+.panel-outcome-row .po-score { color:var(--da); }
+.panel-outcome-row .po-exposure { color:var(--analyst); }
+.panel-outcome-verdict {
+  margin-top:10px; padding:8px 10px; border-radius:4px; border-left:3px solid;
+  font-family:var(--mono); font-size:10px; font-weight:600; line-height:1.4;
+}
+.panel-outcome-verdict.no-go { border-left-color:var(--da); background:rgba(240,82,82,.06); color:var(--da); }
+.panel-outcome-verdict.conditional { border-left-color:var(--risk); background:rgba(245,166,35,.06); color:var(--risk); }
+
+.zero-decisions-badge {
+  font-family:var(--mono); font-size:9px; letter-spacing:.08em;
+  color:var(--briefing); padding:3px 10px; border-radius:3px;
+  background:rgba(52,208,104,.08); border:1px solid rgba(52,208,104,.2);
+  white-space:nowrap;
+}
+
+.landing-banner {
+  position:fixed; top:49px; left:0; right:0; z-index:50;
+  background:linear-gradient(135deg, rgba(75,141,248,.08), rgba(52,208,104,.06));
+  border-bottom:1px solid rgba(75,141,248,.15);
+  padding:14px 28px; display:flex; justify-content:center;
+  animation: landingFadeIn .6s ease-out;
+  transition: opacity .5s ease, transform .5s ease;
+}
+.landing-banner.hidden {
+  opacity:0; transform:translateY(-10px); pointer-events:none;
+}
+@keyframes landingFadeIn {
+  from { opacity:0; transform:translateY(-10px); }
+  to { opacity:1; transform:translateY(0); }
+}
+.landing-content {
+  display:flex; align-items:center; gap:14px; max-width:800px;
+}
+.landing-icon {
+  font-size:16px; color:var(--analyst); flex-shrink:0;
+  animation:pulse 2s ease infinite;
+}
+.landing-text {
+  font-family:var(--sans); font-size:13px; color:var(--text);
+  line-height:1.4;
+}
+.landing-text strong { color:var(--analyst); }
+.landing-sub {
+  font-family:var(--mono); font-size:9px; text-transform:uppercase;
+  letter-spacing:.1em; color:var(--muted2); white-space:nowrap;
+}
 
 @media(max-width:1024px){
   .main { grid-template-columns:200px 1fr 260px; }
@@ -838,7 +927,7 @@ p.risk-flag, li.risk-flag { display:block; }
 <body>
 
 <div class="header">
-  <div class="logo">Sentinel<span>Ops</span></div>
+  <div class="logo">Sentinel<span>Ops</span><span class="logo-sub">Multi-Agent Decision Intelligence</span></div>
   <div class="header-right">
     <div class="mode-badge" id="modeBadge">DETECTING...</div>
     <div class="status-badge">
@@ -1004,6 +1093,7 @@ p.risk-flag, li.risk-flag { display:block; }
         <div class="exposure-value" id="exposureValue">&mdash;</div>
       </div>
       <div class="value-callout" id="valueCallout"></div>
+      <div class="panel-outcome" id="panelOutcome"></div>
       <div class="band-log-panel" id="bandLogPanel">
         <button class="band-log-toggle" onclick="toggleBandLog()">
           <span class="chevron">&#9654;</span>
@@ -1027,6 +1117,7 @@ p.risk-flag, li.risk-flag { display:block; }
   <span id="bottomStatus">Ready &mdash; 5 agents connected</span>
   <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
   <div class="pipeline-complete-badge" id="pipelineBadge"><span class="pc-dot"></span>Executive Brief Ready</div>
+  <span class="zero-decisions-badge">0 Autonomous Decisions &middot; Human Authority Retained</span>
   <span style="margin-left:auto">SentinelOps &middot; Band of Agents Hackathon 2026</span>
 </div>
 
@@ -1040,6 +1131,14 @@ p.risk-flag, li.risk-flag { display:block; }
       <button class="brief-close" onclick="closeBrief()">&times;</button>
     </div>
     <div class="brief-body" id="briefBody"></div>
+  </div>
+</div>
+
+<div class="landing-banner" id="landingBanner">
+  <div class="landing-content">
+    <div class="landing-icon">&#9670;</div>
+    <div class="landing-text">Watching <strong>five AI agents</strong> coordinate through <strong>Band</strong> to review an enterprise contract in real time</div>
+    <div class="landing-sub">Select a scenario and press Analyze to begin</div>
   </div>
 </div>
 
@@ -1235,7 +1334,7 @@ var SCENARIOS = {
     headline: "Amara's Decision",
     sub: "VP Legal & Compliance · Meridian Ventures Ltd · June 2026",
     story1: "Amara Diallo has 48 hours to sign a <strong>$1.8M partnership agreement</strong> with GlobalTech Solutions Inc. The contract is 74 pages. Her legal team flagged nothing. The board is expecting a signature. But something feels off — and she doesn’t have time to read every clause herself.",
-    story2: "SentinelOps will deploy <strong>five specialized agents</strong> through Band to review every clause, cross-reference institutional memory, stress-test the terms, and deliver an executive decision brief — in under 90 seconds. Amara retains full authority. No autonomous decisions will be made.",
+    story2: "SentinelOps will deploy <strong>five specialized agents</strong> through Band to review every clause, cross-reference institutional memory, stress-test the terms, and deliver an executive decision brief — in minutes, not days. Amara retains full authority. No autonomous decisions will be made.",
     stats: [
       { value: "74", label: "Pages" },
       { value: "10", label: "Key Clauses" },
@@ -1416,13 +1515,20 @@ function escapeHtml(text) {
   return d.innerHTML;
 }
 
-function addSystemMessage(text, isStep) {
+function addSystemMessage(text, isStep, extraClass) {
   var feed = document.getElementById('feed');
   var intro = document.getElementById('feedIntro');
   if (intro) intro.remove();
   var el = document.createElement('div');
-  el.className = 'sys-msg' + (isStep ? ' step' : '');
-  el.textContent = text;
+  var cls = 'sys-msg';
+  if (isStep) cls += ' step';
+  if (extraClass) cls += ' ' + extraClass;
+  el.className = cls;
+  if (extraClass === 'band-broadcast') {
+    el.innerHTML = '<span class="broadcast-icon">&#8644;</span> ' + text;
+  } else {
+    el.textContent = text;
+  }
   feed.appendChild(el);
   feed.scrollTop = feed.scrollHeight;
 }
@@ -1757,17 +1863,59 @@ function resetOutcomeCard() {
   var card = document.getElementById('outcomeCard');
   if (card) card.remove();
   lastRiskContent = '';
+  var po = document.getElementById('panelOutcome');
+  po.classList.remove('visible');
+  po.innerHTML = '';
+}
+
+function showPanelOutcome() {
+  var po = document.getElementById('panelOutcome');
+  var riskScore = document.getElementById('riskScore').textContent;
+  var exposureText = document.getElementById('exposureValue').textContent;
+  var html = '<div class="panel-outcome-label">Analysis Result</div>';
+  if (currentScenario === 'a') {
+    html += '<div class="panel-outcome-row"><span class="po-label">Risk Score</span><span class="po-value po-score">' + riskScore + '/10</span></div>';
+    html += '<div class="panel-outcome-row"><span class="po-label">Critical</span><span class="po-value po-critical">3</span></div>';
+    html += '<div class="panel-outcome-row"><span class="po-label">High</span><span class="po-value po-high">2</span></div>';
+    html += '<div class="panel-outcome-row"><span class="po-label">Exposure</span><span class="po-value po-exposure">' + exposureText + '</span></div>';
+    html += '<div class="panel-outcome-verdict no-go">DO NOT SIGN AS WRITTEN</div>';
+  } else {
+    html += '<div class="panel-outcome-row"><span class="po-label">Recommended</span><span class="po-value" style="color:var(--briefing)">Stratos Cloud (4.2)</span></div>';
+    html += '<div class="panel-outcome-row"><span class="po-label">Rejected</span><span class="po-value po-critical">Apex (8.9)</span></div>';
+    html += '<div class="panel-outcome-row"><span class="po-label">Exposure Avoided</span><span class="po-value po-exposure">' + exposureText + '</span></div>';
+    html += '<div class="panel-outcome-verdict conditional">SELECT STRATOS — 4 CONDITIONS</div>';
+  }
+  po.innerHTML = html;
+  po.classList.add('visible');
 }
 
 function setRiskScore(score, severity) {
   var el = document.getElementById('riskScore');
+  var display = document.getElementById('riskDisplay');
   el.classList.remove('critical', 'high', 'medium', 'low', 'score-pop');
-  el.textContent = score;
+  display.classList.remove('score-flash');
+  var target = parseFloat(score);
+  var duration = 1500;
+  var startTs = null;
   el.classList.add(severity);
-  void el.offsetWidth;
-  el.classList.add('score-pop');
+  function countUp(timestamp) {
+    if (!startTs) startTs = timestamp;
+    var progress = Math.min((timestamp - startTs) / duration, 1);
+    var eased = 1 - Math.pow(1 - progress, 3);
+    var current = (target * eased).toFixed(1);
+    el.textContent = current;
+    if (progress < 1) {
+      requestAnimationFrame(countUp);
+    } else {
+      el.textContent = score;
+      void el.offsetWidth;
+      el.classList.add('score-pop');
+      display.classList.add('score-flash');
+    }
+  }
+  requestAnimationFrame(countUp);
   document.getElementById('riskSub').textContent = SEVERITY_LABELS[severity] || severity;
-  document.getElementById('riskDisplay').style.borderColor = SEVERITY_BORDERS[severity] || 'rgba(239,68,68,.3)';
+  display.style.borderColor = SEVERITY_BORDERS[severity] || 'rgba(239,68,68,.3)';
 }
 
 function setMode(m) {
@@ -1846,12 +1994,16 @@ function handleLiveEvent(event) {
     var aName = agentNames[event.agent] || event.agent;
     if (event.agent === 'analyst') {
       addBandLogEntry(elapsed, aName, null, '→ Band room');
+      addSystemMessage("Band broadcast → Devil's Advocate + Precedent Agent activating in parallel", false, 'band-broadcast');
       addBandLogEntry(elapsed, 'Band', null, "broadcast → Devil's Advocate + Precedent (parallel)");
     } else if (event.agent === 'devils_advocate') {
       addBandLogEntry(elapsed, aName, 'Risk', 'findings delivered');
     } else if (event.agent === 'precedent') {
       addBandLogEntry(elapsed, aName, 'Risk', 'institutional memory delivered');
     } else if (event.agent === 'risk') {
+      if (currentScenario === 'b') {
+        addSystemMessage("Agent disagreement detected — Devil's Advocate champions Stratos Cloud, Precedent Agent raises scale concerns (47 employees). Briefing Agent will synthesize both positions.", false, 'agent-disagreement');
+      }
       addBandLogEntry(elapsed, aName, 'Briefing', 'scored matrix delivered');
     } else if (event.agent === 'briefing') {
       addBandLogEntry(elapsed, aName, 'Human', 'executive brief delivered');
@@ -1888,7 +2040,7 @@ function handleLiveEvent(event) {
       addSystemMessage('Pipeline complete. All 5 agents have reported. Executive brief ready.', false);
       document.getElementById('resetBtn').style.display = 'block';
       showPipelineComplete();
-      showOutcomeCard();
+      showOutcomeCard(); showPanelOutcome();
       setTimeout(function() { showLiveBrief(event.content); }, 2000);
     }
   } else if (event.type === 'pipeline_complete') {
@@ -1915,7 +2067,7 @@ function handleLiveEvent(event) {
     clearInterval(timerInterval);
     addSystemMessage('Pipeline complete. All 5 agents have reported. Executive brief ready.', false);
     showPipelineComplete();
-    showOutcomeCard();
+    showOutcomeCard(); showPanelOutcome();
   }
 }
 
@@ -2007,6 +2159,9 @@ function resetDashboard() {
   badge.classList.remove('ready');
 
   document.getElementById('briefTitle').textContent = DOC_INFO[currentScenario].briefTitle;
+
+  var banner = document.getElementById('landingBanner');
+  if (banner) banner.classList.remove('hidden');
 
   (async function() {
     var serverUp = await checkServer();
@@ -2103,6 +2258,7 @@ var DEMO = [
   [8000, 'complete', 'analyst'],
   [8200, 'progress', 25],
   [8200, 'bandlog', '00:08', 'Analyst', null, '→ Band room (findings posted)'],
+  [8800, 'bandbroadcast', 'Band broadcast → Devil\'s Advocate + Precedent Agent activating in parallel'],
   [9200, 'sysstep', 'Step 2 of 4 — Devil\'s Advocate and Precedent Agent are reviewing in parallel. DA attacks the contract; Precedent searches company history...'],
   [9500, 'bandlog', '00:09', 'Band', null, 'broadcast → Devil\'s Advocate + Precedent (parallel)'],
   [10000, 'activate', 'devils_advocate'],
@@ -2226,6 +2382,7 @@ var DEMO_B = [
   [8000, 'complete', 'analyst'],
   [8200, 'progress', 25],
   [8200, 'bandlog', '00:08', 'Analyst', null, '→ Band room (vendor analysis posted)'],
+  [8800, 'bandbroadcast', 'Band broadcast → Devil\'s Advocate + Precedent Agent activating in parallel'],
   [9200, 'sysstep', 'Step 2 of 4 — Devil\'s Advocate and Precedent Agent reviewing in parallel. DA challenges each vendor; Precedent searches vendor history...'],
   [9500, 'bandlog', '00:09', 'Band', null, 'broadcast → Devil\'s Advocate + Precedent (parallel)'],
   [10000, 'activate', 'devils_advocate'],
@@ -2264,6 +2421,7 @@ var DEMO_B = [
   [20000, 'bandlog', '00:20', 'Devil\'s Advocate', 'Risk', 'pro-Stratos position delivered'],
   [20000, 'bandlog', '00:20', 'Precedent', 'Risk', 'vendor history + concerns delivered'],
   [20200, 'progress', 60],
+  [20800, 'disagreement', 'Agent disagreement detected — Devil\'s Advocate champions Stratos Cloud, Precedent Agent raises scale concerns (47 employees). Briefing Agent will synthesize both positions.'],
   [21200, 'sysstep', 'Step 3 of 4 — Risk Agent is scoring all three vendors across eight risk dimensions...'],
   [22000, 'activate', 'risk'],
   [24000, 'progress', 70],
@@ -2416,8 +2574,10 @@ function startDemo() {
           animateExposure(EXPOSURE_DATA.b.value, EXPOSURE_DATA.b.label);
           break;
         case 'bandlog': addBandLogEntry(step[2], step[3], step[4], step[5]); break;
-        case 'brief': showBrief(); showPipelineComplete(); showOutcomeCard(); break;
-        case 'briefB': showBriefB(); showPipelineComplete(); showOutcomeCard(); break;
+        case 'bandbroadcast': addSystemMessage(step[2], false, 'band-broadcast'); break;
+        case 'disagreement': addSystemMessage(step[2], false, 'agent-disagreement'); break;
+        case 'brief': showBrief(); showPipelineComplete(); showOutcomeCard(); showPanelOutcome(); break;
+        case 'briefB': showBriefB(); showPipelineComplete(); showOutcomeCard(); showPanelOutcome(); break;
       }
     }, step[0]);
     demoTimeouts.push(id);
@@ -2435,6 +2595,8 @@ function startDemo() {
 async function startAnalysis() {
   document.getElementById('startBtn').disabled = true;
   document.getElementById('kbdHint').classList.add('hidden');
+  var banner = document.getElementById('landingBanner');
+  if (banner) banner.classList.add('hidden');
 
   var serverUp = await checkServer();
   showScenarioIntro(function() {
