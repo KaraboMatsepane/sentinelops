@@ -7,6 +7,7 @@ Posts events to the local dashboard server for live visualization.
 
 import logging
 import os
+import re
 import time
 from typing import Any, ClassVar
 
@@ -26,28 +27,77 @@ logger = logging.getLogger(__name__)
 
 DASHBOARD_URL = "http://localhost:8080/api/event"
 
+def strip_markdown(text: str) -> str:
+    """
+    Convert markdown to clean plain text for Band chat.
+    Band renders markdown as raw characters — this keeps the room readable.
+    The dashboard receives the original markdown separately for rich rendering.
+    """
+    # Remove markdown headers (### Header → Header)
+    text = re.sub(r'^#{1,6}\s+', '', text, flags=re.MULTILINE)
+
+    # Remove bold and italic (**text** → text, *text* → text)
+    text = re.sub(r'\*{1,3}(.+?)\*{1,3}', r'\1', text)
+
+    # Remove inline code (`code` → code)
+    text = re.sub(r'`(.+?)`', r'\1', text)
+
+    # Remove horizontal rules (--- or ═══)
+    text = re.sub(r'^[-═]{3,}\s*$', '', text, flags=re.MULTILINE)
+
+    # Convert markdown tables to plain text rows
+    # Keep the content, remove the pipe/dash table structure
+    def clean_table_row(match):
+        row = match.group(0)
+        # Skip separator rows (|---|---|)
+        if re.match(r'^\|[\s\-|:]+\|$', row.strip()):
+            return ''
+        # Extract cell content
+        cells = [c.strip() for c in row.strip().strip('|').split('|')]
+        return '  |  '.join(cells)
+
+    text = re.sub(r'^\|.+\|$', clean_table_row, text, flags=re.MULTILINE)
+
+    # Remove bullet list markers but keep content indented
+    text = re.sub(r'^[\s]*[-*•]\s+', '  · ', text, flags=re.MULTILINE)
+
+    # Remove numbered list markers formatting (keep numbers)
+    text = re.sub(r'^(\d+)\.\s+', r'\1. ', text, flags=re.MULTILINE)
+
+    # Collapse multiple blank lines to max two
+    text = re.sub(r'\n{3,}', '\n\n', text)
+
+    return text.strip()
 
 class ResilientAdapter(SimpleAdapter[HistoryProvider]):
     """
     Band adapter that tries multiple LLM providers in order.
     Integrates with the local dashboard server for live visualization.
+
+    Provider hierarchy:
+    1. AI/ML API (primary — powers Analyst, DA, Risk, Briefing)
+    2. Featherless AI (fallback — primary for Precedent Agent)
+    3. Hardcoded fallback response
+
+    Band chat: receives clean plain text (no markdown clutter)
+    Dashboard: receives original markdown for rich formatted rendering
     """
 
     SUPPORTED_EMIT: ClassVar[frozenset[Emit]] = frozenset()
     SUPPORTED_CAPABILITIES: ClassVar[frozenset[Capability]] = frozenset()
 
     def __init__(
-        self,
-        agent_name: str,
-        system_prompt: str,
-        fallback_response: str,
-        max_tokens: int = 2500,
-        aiml_model: str = "claude-sonnet-4-5-20250929",
-        featherless_model: str = "Qwen/Qwen3-30B-A3B-Instruct-2507",
-        respond_to: list[str] | None = None,
-        wait_for_all: list[str] | None = None,
-        mention_targets: list[str] | None = None,
-        trigger_phrase: str | None = None,
+            self,
+            agent_name: str,
+            system_prompt: str,
+            fallback_response: str,
+            max_tokens: int = 2500,
+            aiml_model: str = "claude-sonnet-4-5-20250929",
+            featherless_model: str = "Qwen/Qwen3-30B-A3B-Instruct-2507",
+            respond_to: list[str] | None = None,
+            wait_for_all: list[str] | None = None,
+            mention_targets: list[str] | None = None,
+            trigger_phrase: str | None = None,
     ):
         super().__init__(history_converter=None, features=AdapterFeatures())
         self.agent_name = agent_name
@@ -109,20 +159,22 @@ class ResilientAdapter(SimpleAdapter[HistoryProvider]):
             return resp.json()["choices"][0]["message"]["content"]
 
     async def _notify_dashboard(self, content: str, provider: str):
+        """Send full markdown content to dashboard for rich rendering."""
         try:
             async with httpx.AsyncClient(timeout=5.0) as client:
                 resp = await client.post(DASHBOARD_URL, json={
                     "agent": self.agent_name,
                     "type": "message",
-                    "content": content,
+                    "content": content,       # full markdown — dashboard renders this
                     "provider": provider,
                     "timestamp": time.time(),
                 })
-                logger.info("[%s] Dashboard event posted (status %d)", self.agent_name, resp.status_code)
+                logger.info("[%s] Dashboard notified (status %d)", self.agent_name, resp.status_code)
         except Exception as e:
-            logger.warning("[%s] Failed to post dashboard event: %s", self.agent_name, e)
+            logger.warning("[%s] Dashboard notification failed: %s", self.agent_name, e)
 
     async def _notify_dashboard_status(self, status: str):
+        """Send agent status update to dashboard."""
         try:
             async with httpx.AsyncClient(timeout=5.0) as client:
                 resp = await client.post(DASHBOARD_URL, json={
@@ -131,9 +183,9 @@ class ResilientAdapter(SimpleAdapter[HistoryProvider]):
                     "status": status,
                     "timestamp": time.time(),
                 })
-                logger.debug("[%s] Dashboard status '%s' posted (status %d)", self.agent_name, status, resp.status_code)
+                logger.debug("[%s] Status '%s' sent (status %d)", self.agent_name, status, resp.status_code)
         except Exception as e:
-            logger.warning("[%s] Failed to post dashboard status: %s", self.agent_name, e)
+            logger.warning("[%s] Status notification failed: %s", self.agent_name, e)
 
     def _should_respond(self, msg: PlatformMessage) -> bool:
         if not self.respond_to:
@@ -152,15 +204,15 @@ class ResilientAdapter(SimpleAdapter[HistoryProvider]):
         await self._notify_dashboard_status("connected")
 
     async def on_message(
-        self,
-        msg: PlatformMessage,
-        tools: AgentToolsProtocol,
-        history: Any,
-        participants_msg: str | None,
-        contacts_msg: str | None,
-        *,
-        is_session_bootstrap: bool,
-        room_id: str,
+            self,
+            msg: PlatformMessage,
+            tools: AgentToolsProtocol,
+            history: Any,
+            participants_msg: str | None,
+            contacts_msg: str | None,
+            *,
+            is_session_bootstrap: bool,
+            room_id: str,
     ) -> None:
         sender = msg.sender_name or "unknown"
         logger.info("[%s] Message from %s (%s)", self.agent_name, sender, msg.sender_type)
@@ -173,11 +225,8 @@ class ResilientAdapter(SimpleAdapter[HistoryProvider]):
         )
 
         if not is_trigger and not self._should_respond(msg):
-            logger.info("[%s] Ignoring message from %s (not in respond_to)", self.agent_name, sender)
+            logger.info("[%s] Ignoring message from %s", self.agent_name, sender)
             return
-
-        if is_trigger:
-            logger.info("[%s] Trigger phrase matched — accepting message from %s", self.agent_name, sender)
 
         if self.wait_for_all:
             if room_id not in self._received_from:
@@ -191,7 +240,7 @@ class ResilientAdapter(SimpleAdapter[HistoryProvider]):
             required = set(self.wait_for_all)
             if not required.issubset(received):
                 still_waiting = required - received
-                logger.info("[%s] Waiting for: %s", self.agent_name, still_waiting)
+                logger.info("[%s] Still waiting for: %s", self.agent_name, still_waiting)
                 return
 
             combined = "\n\n---\n\n".join(
@@ -227,18 +276,22 @@ class ResilientAdapter(SimpleAdapter[HistoryProvider]):
                 logger.info("[%s] Trying Featherless AI...", self.agent_name)
                 text = await self._call_featherless(messages)
                 provider_used = "featherless"
-                logger.info("[%s] Featherless AI succeeded (%d chars)", self.agent_name, len(text))
+                logger.info("[%s] Featherless succeeded (%d chars)", self.agent_name, len(text))
             except Exception as e:
                 logger.warning("[%s] Featherless AI failed: %s", self.agent_name, e)
 
         if text is None:
-            logger.warning("[%s] All providers failed, using fallback", self.agent_name)
+            logger.warning("[%s] All providers failed — using fallback", self.agent_name)
             text = self.fallback_response
             provider_used = "fallback"
 
         self._history[room_id].append({"role": "assistant", "content": text})
 
-        await tools.send_message(text, mentions=self.mention_targets)
+        # Send plain text to Band (readable in the chat room)
+        band_text = strip_markdown(text)
+        await tools.send_message(band_text, mentions=self.mention_targets)
+
+        # Send full markdown to dashboard (rich rendering)
         await self._notify_dashboard(text, provider_used)
         await self._notify_dashboard_status("complete")
 
