@@ -149,6 +149,13 @@ class DashboardHandler(SimpleHTTPRequestHandler):
                 event.setdefault("timestamp", time.time())
                 with events_lock:
                     events.append(event)
+                    if event.get("agent") == "sentinelops-briefing" and event.get("type") == "message":
+                        events.append({
+                            "type": "pipeline_complete",
+                            "agent": "system",
+                            "content": event.get("content", ""),
+                            "timestamp": time.time(),
+                        })
                 logger.info("Event received: agent=%s type=%s", event.get("agent", "?"), event.get("type", "?"))
             except json.JSONDecodeError:
                 logger.warning("Malformed event body: %s", body[:200])

@@ -25,6 +25,10 @@ from band.core.types import (
 
 logger = logging.getLogger(__name__)
 
+if os.environ.get("SENTINELOPS_CLEAN"):
+    for _noisy in ("httpx", "band", "phoenix_channels"):
+        logging.getLogger(_noisy).setLevel(logging.WARNING)
+
 DASHBOARD_URL = "http://localhost:8080/api/event"
 
 def strip_markdown(text: str) -> str:

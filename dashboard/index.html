@@ -1301,6 +1301,22 @@ function handleLiveEvent(event) {
       document.getElementById('resetBtn').style.display = 'block';
       setTimeout(function() { showLiveBrief(event.content); }, 2000);
     }
+  } else if (event.type === 'pipeline_complete') {
+    if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
+    Object.keys(AGENTS).forEach(function(key) { setAgentStatus(key, 'complete'); });
+    setProgress(100);
+    var content = event.content || '';
+    var scoreMatch = content.match(/(\d+\.?\d*)\s*\/\s*10/);
+    if (scoreMatch) {
+      setRiskScore(scoreMatch[1], getSeverityFromScore(scoreMatch[1]));
+    }
+    showLiveBrief(content);
+    document.getElementById('resetBtn').style.display = 'block';
+    setBottomStatus('Analysis complete — 5 agents, 0 autonomous decisions');
+    document.getElementById('liveDot').classList.remove('live');
+    document.getElementById('liveLabel').textContent = 'COMPLETE';
+    clearInterval(timerInterval);
+    addSystemMessage('Pipeline complete. All 5 agents have reported. Executive brief ready.', false);
   }
 }
 
