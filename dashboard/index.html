@@ -383,6 +383,46 @@ p.risk-flag, li.risk-flag { display:block; }
 }
 .reset-btn:hover { color:var(--text); border-color:var(--muted); background:var(--surface3); }
 
+.persona-card {
+  display:flex; align-items:center; gap:10px;
+  padding:10px 18px; position:relative;
+  background:var(--surface2); border-bottom:1px solid var(--border);
+}
+.persona-avatar {
+  width:36px; height:36px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--mono); font-size:13px; font-weight:700; color:#fff;
+}
+.persona-avatar.amber { background:var(--risk); }
+.persona-avatar.blue { background:var(--analyst); }
+.persona-info { flex:1; min-width:0; }
+.persona-name { font-size:13px; font-weight:600; color:var(--text); line-height:1.2; }
+.persona-title { font-family:var(--mono); font-size:10px; color:var(--muted2); margin-top:1px; line-height:1.3; }
+.persona-badge {
+  position:absolute; top:8px; right:14px;
+  font-family:var(--mono); font-size:8px; text-transform:uppercase;
+  letter-spacing:.06em; padding:2px 7px; border-radius:9px;
+  background:var(--surface3); color:var(--muted); border:1px solid var(--border2);
+  transition:all .4s ease;
+}
+.persona-badge.ready { background:rgba(34,197,94,.12); color:var(--briefing); border-color:rgba(34,197,94,.25); }
+
+.scenario-switcher {
+  display:flex; padding:14px 18px 0; gap:0;
+}
+.scenario-pill {
+  flex:1; padding:8px 4px;
+  font-family:var(--mono); font-size:9px; text-transform:uppercase;
+  letter-spacing:.04em; text-align:center; cursor:pointer;
+  border:1px solid var(--border2); background:var(--surface2); color:var(--muted);
+  transition:all .2s; white-space:nowrap; line-height:1.3;
+}
+.scenario-pill:first-child { border-radius:4px 0 0 4px; border-right:none; }
+.scenario-pill:last-child { border-radius:0 4px 4px 0; }
+.scenario-pill.active { background:var(--analyst); color:#fff; border-color:var(--analyst); }
+.scenario-pill:not(.active):hover { background:var(--surface3); color:var(--text); }
+.scenario-pill.disabled { pointer-events:none; opacity:.4; }
+
 .scenario-overlay {
   display:none; position:fixed; inset:0; z-index:200;
   background:rgba(6,7,9,.94); backdrop-filter:blur(12px);
@@ -617,40 +657,52 @@ p.risk-flag, li.risk-flag { display:block; }
     <div class="doc-header">
       <div class="panel-title">Decision Under Review</div>
     </div>
+    <div class="persona-card" id="personaCard">
+      <div class="persona-avatar amber" id="personaAvatar">AD</div>
+      <div class="persona-info">
+        <div class="persona-name" id="personaName">Amara Diallo</div>
+        <div class="persona-title" id="personaTitle">VP Legal &amp; Compliance · Meridian Ventures</div>
+      </div>
+      <div class="persona-badge" id="personaBadge">Awaiting Analysis</div>
+    </div>
+    <div class="scenario-switcher">
+      <div class="scenario-pill active" id="pillA" onclick="switchScenario('a')">A: Partnership</div>
+      <div class="scenario-pill" id="pillB" onclick="switchScenario('b')">B: Vendor Selection</div>
+    </div>
     <div class="doc-info">
       <div class="doc-field">
         <div class="doc-label">Document</div>
-        <div class="doc-value">GlobalTech Solutions Partnership Agreement</div>
+        <div class="doc-value" id="docDocument">GlobalTech Solutions Partnership Agreement</div>
       </div>
       <div class="doc-field">
-        <div class="doc-label">Parties</div>
-        <div class="doc-value">Meridian Ventures &rarr; GlobalTech Solutions</div>
+        <div class="doc-label" id="docPartiesLabel">Parties</div>
+        <div class="doc-value" id="docParties">Meridian Ventures &rarr; GlobalTech Solutions</div>
       </div>
       <div class="doc-field">
         <div class="doc-label">Deal Value</div>
-        <div class="doc-value large" style="color:var(--analyst)">$1,800,000</div>
+        <div class="doc-value large" id="docDealValue" style="color:var(--analyst)">$1,800,000</div>
       </div>
       <div class="doc-field">
         <div class="doc-label">Duration</div>
-        <div class="doc-value">3 years &middot; EMEA Exclusive</div>
+        <div class="doc-value" id="docDuration">3 years &middot; EMEA Exclusive</div>
       </div>
       <div class="doc-field">
         <div class="doc-label">Pages</div>
-        <div class="doc-value">74 pages &middot; 10 sections</div>
+        <div class="doc-value" id="docPages">74 pages &middot; 10 sections</div>
       </div>
       <div class="how-it-works">
         <div class="hiw-title">How It Works</div>
-        <div class="hiw-step"><div class="hiw-num c-analyst">1</div><div><strong style="color:var(--analyst)">Analyst</strong> <span class="hiw-provider aiml">AI/ML API</span> extracts every clause, term, and financial obligation</div></div>
+        <div class="hiw-step"><div class="hiw-num c-analyst">1</div><div><strong style="color:var(--analyst)">Analyst</strong> <span class="hiw-provider aiml">AI/ML API</span> <span id="hiwAnalyst">extracts every clause, term, and financial obligation</span></div></div>
         <div class="hiw-parallel">
           <div class="hiw-parallel-label">parallel via Band</div>
-          <div class="hiw-step"><div class="hiw-num c-da">2a</div><div><strong style="color:var(--da)">Devil's Advocate</strong> <span class="hiw-provider aiml">AI/ML API</span> attacks the contract &mdash; finds contradictions, unfair terms, missing protections</div></div>
-          <div class="hiw-step"><div class="hiw-num c-precedent">2b</div><div><strong style="color:var(--precedent)">Precedent Agent</strong> <span class="hiw-provider featherless">Featherless AI</span> searches institutional memory for past deals, board resolutions, and precedents</div></div>
+          <div class="hiw-step"><div class="hiw-num c-da">2a</div><div><strong style="color:var(--da)">Devil's Advocate</strong> <span class="hiw-provider aiml">AI/ML API</span> <span id="hiwDA">attacks the contract &mdash; finds contradictions, unfair terms, missing protections</span></div></div>
+          <div class="hiw-step"><div class="hiw-num c-precedent">2b</div><div><strong style="color:var(--precedent)">Precedent Agent</strong> <span class="hiw-provider featherless">Featherless AI</span> <span id="hiwPrecedent">searches institutional memory for past deals, board resolutions, and precedents</span></div></div>
         </div>
-        <div class="hiw-step"><div class="hiw-num c-risk">3</div><div><strong style="color:var(--risk)">Risk Agent</strong> <span class="hiw-provider aiml">AI/ML API</span> scores every finding and calculates total financial exposure</div></div>
-        <div class="hiw-step"><div class="hiw-num c-briefing">4</div><div><strong style="color:var(--briefing)">Briefing Agent</strong> <span class="hiw-provider aiml">AI/ML API</span> synthesizes everything into an executive decision brief</div></div>
+        <div class="hiw-step"><div class="hiw-num c-risk">3</div><div><strong style="color:var(--risk)">Risk Agent</strong> <span class="hiw-provider aiml">AI/ML API</span> <span id="hiwRisk">scores every finding and calculates total financial exposure</span></div></div>
+        <div class="hiw-step"><div class="hiw-num c-briefing">4</div><div><strong style="color:var(--briefing)">Briefing Agent</strong> <span class="hiw-provider aiml">AI/ML API</span> <span id="hiwBriefing">synthesizes everything into an executive decision brief</span></div></div>
       </div>
       <div class="risk-score-display" id="riskDisplay">
-        <div class="risk-score-label">Aggregate Risk Score</div>
+        <div class="risk-score-label" id="riskLabel">Aggregate Risk Score</div>
         <div class="risk-score-value" id="riskScore">&mdash;</div>
         <div class="risk-score-sub" id="riskSub">Pending analysis</div>
       </div>
@@ -671,7 +723,7 @@ p.risk-flag, li.risk-flag { display:block; }
     <div class="brief-header">
       <div>
         <div class="brief-pretitle">SentinelOps Executive Decision Brief</div>
-        <div class="brief-title">GlobalTech Solutions Partnership Agreement</div>
+        <div class="brief-title" id="briefTitle">GlobalTech Solutions Partnership Agreement</div>
       </div>
       <button class="brief-close" onclick="closeBrief()">&times;</button>
     </div>
@@ -712,11 +764,63 @@ var AGENT_COLORS = {
 };
 
 var STEP_NARRATION = {
-  analyst: 'Step 1 of 4 — Analyst is extracting all clauses, financial terms, and obligations from the 74-page contract...',
-  devils_advocate: 'Step 2 of 4 — Devil\'s Advocate and Precedent Agent are reviewing in parallel. DA attacks the contract; Precedent searches company history...',
-  precedent: null,
-  risk: 'Step 3 of 4 — Risk Agent is synthesizing all findings into a scored risk matrix with financial exposure calculations...',
-  briefing: 'Step 4 of 4 — Briefing Agent is preparing the final executive decision brief for the human decision-maker...',
+  a: {
+    analyst: 'Step 1 of 4 — Analyst is extracting all clauses, financial terms, and obligations from the 74-page contract...',
+    devils_advocate: 'Step 2 of 4 — Devil\'s Advocate and Precedent Agent are reviewing in parallel. DA attacks the contract; Precedent searches company history...',
+    precedent: null,
+    risk: 'Step 3 of 4 — Risk Agent is synthesizing all findings into a scored risk matrix with financial exposure calculations...',
+    briefing: 'Step 4 of 4 — Briefing Agent is preparing the final executive decision brief for the human decision-maker...',
+  },
+  b: {
+    analyst: 'Step 1 of 4 — Analyst is parsing all three vendor proposals and extracting pricing, SLA, and exit terms...',
+    devils_advocate: 'Step 2 of 4 — Devil\'s Advocate and Precedent Agent reviewing in parallel. DA challenges each vendor; Precedent searches vendor history...',
+    precedent: null,
+    risk: 'Step 3 of 4 — Risk Agent is scoring all three vendors across eight risk dimensions...',
+    briefing: 'Step 4 of 4 — Briefing Agent is preparing the ranked vendor recommendation for Marcus...',
+  }
+};
+
+var DOC_INFO = {
+  a: {
+    document: 'GlobalTech Solutions Partnership Agreement',
+    partiesLabel: 'Parties',
+    parties: 'Meridian Ventures → GlobalTech Solutions',
+    dealValue: '$1,800,000',
+    duration: '3 years · EMEA Exclusive',
+    pages: '74 pages · 10 sections',
+    riskLabel: 'Aggregate Risk Score',
+    briefTitle: 'GlobalTech Solutions Partnership Agreement',
+    btnLabel: 'Analyze Contract',
+    hiwAnalyst: 'extracts every clause, term, and financial obligation',
+    hiwDA: 'attacks the contract — finds contradictions, unfair terms, missing protections',
+    hiwPrecedent: 'searches institutional memory for past deals, board resolutions, and precedents',
+    hiwRisk: 'scores every finding and calculates total financial exposure',
+    hiwBriefing: 'synthesizes everything into an executive decision brief',
+    personaName: 'Amara Diallo',
+    personaTitle: 'VP Legal & Compliance · Meridian Ventures',
+    personaInitials: 'AD',
+    personaColor: 'amber'
+  },
+  b: {
+    document: 'Vendor Evaluation Report — Cloud Infrastructure Migration',
+    partiesLabel: 'Vendors',
+    parties: 'Stratos Cloud · NimbusStack · Apex Systems',
+    dealValue: '$420,000/yr',
+    duration: '3-year commitment',
+    pages: '48 pages · 8 risk dimensions',
+    riskLabel: 'Vendor Risk Score',
+    briefTitle: 'Cloud Infrastructure Vendor Selection',
+    btnLabel: 'Analyze Vendors',
+    hiwAnalyst: 'parses all vendor proposals and extracts pricing, SLAs, and exit terms',
+    hiwDA: 'challenges each vendor — probes lock-in, SLA gaps, and hidden costs',
+    hiwPrecedent: 'searches institutional memory for past vendor relationships and disputes',
+    hiwRisk: 'scores all vendors across eight risk dimensions',
+    hiwBriefing: 'produces a ranked vendor recommendation with conditions',
+    personaName: 'Marcus Webb',
+    personaTitle: 'Head of Infrastructure · Meridian Ventures',
+    personaInitials: 'MW',
+    personaColor: 'blue'
+  }
 };
 
 var startTime = 0;
@@ -732,20 +836,38 @@ var pendingAnalysisStart = null;
 var statusIntervals = {};
 
 var AGENT_STATUS_MESSAGES = {
-  analyst: [
-    'Parsing contract structure…',
-    'Extracting clauses (p.1–74)…',
-    'Mapping financial obligations…',
-    'Identifying key terms…',
-    'Compiling structured breakdown…'
-  ],
-  devils_advocate: [
-    'Scanning for contradictions…',
-    'Testing enforceability…',
-    'Checking termination asymmetry…',
-    'Flagging missing protections…',
-    'Building adversarial report…'
-  ],
+  analyst: {
+    a: [
+      'Parsing contract structure…',
+      'Extracting clauses (p.1–74)…',
+      'Mapping financial obligations…',
+      'Identifying key terms…',
+      'Compiling structured breakdown…'
+    ],
+    b: [
+      'Parsing 3 vendor proposals…',
+      'Extracting pricing structures…',
+      'Mapping SLA commitments…',
+      'Comparing contract terms…',
+      'Flagging vendor risks…'
+    ]
+  },
+  devils_advocate: {
+    a: [
+      'Scanning for contradictions…',
+      'Testing enforceability…',
+      'Checking termination asymmetry…',
+      'Flagging missing protections…',
+      'Building adversarial report…'
+    ],
+    b: [
+      'Challenging Stratos lock-in…',
+      'Probing NimbusStack SLA gaps…',
+      'Stress-testing Apex proposal…',
+      'Testing migration assumptions…',
+      'Drafting challenge questions…'
+    ]
+  },
   precedent: {
     a: [
       'Searching institutional memory…',
@@ -755,27 +877,45 @@ var AGENT_STATUS_MESSAGES = {
       'Compiling precedent report…'
     ],
     b: [
-      'Searching institutional memory…',
-      'Retrieving past vendor outcomes…',
-      'Cross-referencing SLA benchmarks…',
-      'Matching migration precedents…',
-      'Compiling precedent report…'
+      'Searching vendor history…',
+      'Retrieving Apex billing dispute 2024…',
+      'Cross-referencing SLA failures…',
+      'Matching past vendor patterns…',
+      'Flagging risk precedents…'
     ]
   },
-  risk: [
-    'Ingesting agent findings…',
-    'Calculating financial exposure…',
-    'Scoring risk dimensions…',
-    'Building risk matrix…',
-    'Finalizing aggregate score…'
-  ],
-  briefing: [
-    'Collecting all agent outputs…',
-    'Structuring executive summary…',
-    'Ranking recommendations…',
-    'Formatting decision brief…',
-    'Preparing final deliverable…'
-  ]
+  risk: {
+    a: [
+      'Ingesting agent findings…',
+      'Calculating financial exposure…',
+      'Scoring risk dimensions…',
+      'Building risk matrix…',
+      'Finalizing aggregate score…'
+    ],
+    b: [
+      'Scoring vendor lock-in risk…',
+      'Weighting SLA exposure…',
+      'Calculating switching costs…',
+      'Benchmarking against market…',
+      'Generating comparison matrix…'
+    ]
+  },
+  briefing: {
+    a: [
+      'Collecting all agent outputs…',
+      'Structuring executive summary…',
+      'Ranking recommendations…',
+      'Formatting decision brief…',
+      'Preparing final deliverable…'
+    ],
+    b: [
+      'Synthesizing vendor comparison…',
+      'Ranking by risk-adjusted value…',
+      'Drafting recommendation…',
+      'Formatting decision brief…',
+      'Preparing conditions list…'
+    ]
+  }
 };
 
 var SCENARIOS = {
@@ -792,18 +932,53 @@ var SCENARIOS = {
     cta: "Begin Analysis →"
   },
   b: {
-    headline: "The Vendor Decision",
+    headline: "Marcus’s Decision",
     sub: "Head of Infrastructure · Meridian Ventures Ltd · June 2026",
-    story1: "Meridian Ventures must choose between <strong>three cloud infrastructure vendors</strong> for a critical platform migration. Budget: $420K annually. The decision affects 40+ internal teams and cannot be easily reversed. Each vendor has strengths — and each has risks the RFP process didn’t surface.",
-    story2: "SentinelOps will analyse all three vendor proposals in parallel, retrieve precedents from past vendor relationships, score risk across <strong>eight dimensions</strong>, and produce a ranked recommendation with conditions — in under 90 seconds.",
+    story1: "Meridian Ventures must choose between three cloud infrastructure vendors for a critical platform migration that will affect 40+ internal teams. Budget: <strong>$420K annually</strong>. The decision locks Meridian into a 3-year commitment and cannot be easily reversed once migration begins.",
+    story2: "SentinelOps will analyse all three vendor proposals simultaneously, retrieve precedents from past vendor relationships — including a <strong>2024 billing dispute</strong> with one of the vendors — score risk across eight dimensions, and deliver a ranked recommendation with conditions. Marcus retains full authority.",
     stats: [
       { value: "3", label: "Vendors" },
       { value: "8", label: "Risk Dimensions" },
-      { value: "$420K", label: "Annual Commitment" }
+      { value: "$420K", label: "/Year" }
     ],
     cta: "Begin Analysis →"
   }
 };
+
+function switchScenario(s) {
+  if (currentScenario === s) return;
+  var startBtn = document.getElementById('startBtn');
+  if (startBtn.disabled) return;
+  currentScenario = s;
+  document.getElementById('pillA').classList.toggle('active', s === 'a');
+  document.getElementById('pillB').classList.toggle('active', s === 'b');
+  applyDocInfo(s);
+}
+
+function applyDocInfo(s) {
+  var info = DOC_INFO[s];
+  document.getElementById('docDocument').textContent = info.document;
+  document.getElementById('docPartiesLabel').textContent = info.partiesLabel;
+  document.getElementById('docParties').textContent = info.parties;
+  document.getElementById('docDealValue').textContent = info.dealValue;
+  document.getElementById('docDuration').textContent = info.duration;
+  document.getElementById('docPages').textContent = info.pages;
+  document.getElementById('riskLabel').textContent = info.riskLabel;
+  document.getElementById('hiwAnalyst').textContent = info.hiwAnalyst;
+  document.getElementById('hiwDA').textContent = info.hiwDA;
+  document.getElementById('hiwPrecedent').textContent = info.hiwPrecedent;
+  document.getElementById('hiwRisk').textContent = info.hiwRisk;
+  document.getElementById('hiwBriefing').textContent = info.hiwBriefing;
+  document.getElementById('personaName').textContent = info.personaName;
+  document.getElementById('personaTitle').textContent = info.personaTitle;
+  document.getElementById('personaAvatar').textContent = info.personaInitials;
+  var avatar = document.getElementById('personaAvatar');
+  avatar.classList.remove('amber', 'blue');
+  avatar.classList.add(info.personaColor);
+  var startBtn = document.getElementById('startBtn');
+  var suffix = mode === 'demo' ? ' (DEMO)' : '';
+  startBtn.textContent = info.btnLabel.toUpperCase() + suffix;
+}
 
 function showScenarioIntro(callback) {
   var s = SCENARIOS[currentScenario];
@@ -873,7 +1048,14 @@ function setAgentStatus(key, status) {
       el.textContent = 'Analyzing...';
     }
   }
-  else if (status === 'complete') { card.classList.add('complete'); el.textContent = 'Complete ✓'; }
+  else if (status === 'complete') {
+    card.classList.add('complete'); el.textContent = 'Complete ✓';
+    if (key === 'briefing') {
+      var badge = document.getElementById('personaBadge');
+      badge.textContent = 'Review Ready';
+      badge.classList.add('ready');
+    }
+  }
   else { el.textContent = 'Standby'; }
 }
 
@@ -1074,9 +1256,9 @@ function handleLiveEvent(event) {
       var curProgress = parseFloat(document.getElementById('progressFill').style.width) || 0;
       setProgress(Math.max(curProgress, (AGENT_PROGRESS[event.agent] || 10) - 15));
 
-      if (STEP_NARRATION[event.agent] && !narratedSteps[event.agent]) {
+      if (STEP_NARRATION[currentScenario][event.agent] && !narratedSteps[event.agent]) {
         narratedSteps[event.agent] = true;
-        addSystemMessage(STEP_NARRATION[event.agent], true);
+        addSystemMessage(STEP_NARRATION[currentScenario][event.agent], true);
       }
     } else if (event.status === 'complete') {
       setAgentStatus(event.agent, 'complete');
@@ -1085,9 +1267,9 @@ function handleLiveEvent(event) {
     setAgentStatus(event.agent, 'complete');
     var isParallel = event.agent === 'devils_advocate' || event.agent === 'precedent';
 
-    if (STEP_NARRATION[event.agent] && !narratedSteps[event.agent]) {
+    if (STEP_NARRATION[currentScenario][event.agent] && !narratedSteps[event.agent]) {
       narratedSteps[event.agent] = true;
-      addSystemMessage(STEP_NARRATION[event.agent], true);
+      addSystemMessage(STEP_NARRATION[currentScenario][event.agent], true);
     }
 
     addMessage(event.agent, event.content, {
@@ -1098,9 +1280,14 @@ function handleLiveEvent(event) {
     setProgress(AGENT_PROGRESS[event.agent] || 50);
 
     if (event.agent === 'risk') {
-      var scoreMatch = event.content.match(/(\d+\.?\d*)\s*\/\s*10/);
-      if (scoreMatch) {
-        setRiskScore(scoreMatch[1], getSeverityFromScore(scoreMatch[1]));
+      if (currentScenario === 'b') {
+        setRiskScore('3.2', 'low');
+        document.getElementById('riskSub').textContent = 'NimbusStack · Recommended';
+      } else {
+        var scoreMatch = event.content.match(/(\d+\.?\d*)\s*\/\s*10/);
+        if (scoreMatch) {
+          setRiskScore(scoreMatch[1], getSeverityFromScore(scoreMatch[1]));
+        }
       }
     }
 
@@ -1118,6 +1305,7 @@ function handleLiveEvent(event) {
 }
 
 function showLiveBrief(content) {
+  document.getElementById('briefTitle').textContent = DOC_INFO[currentScenario].briefTitle;
   document.getElementById('briefBody').innerHTML = marked.parse(content);
   document.getElementById('briefOverlay').classList.add('visible');
 }
@@ -1127,6 +1315,8 @@ function closeBrief() { document.getElementById('briefOverlay').classList.remove
 async function startLiveMode() {
   setMode('live');
   document.getElementById('startBtn').disabled = true;
+  document.getElementById('pillA').classList.add('disabled');
+  document.getElementById('pillB').classList.add('disabled');
   startTime = Date.now();
   timerInterval = setInterval(updateTimer, 200);
   document.getElementById('liveDot').classList.add('live');
@@ -1187,15 +1377,23 @@ function resetDashboard() {
   narratedSteps = {};
   lastEventIndex = 0;
 
+  document.getElementById('pillA').classList.remove('disabled');
+  document.getElementById('pillB').classList.remove('disabled');
+
+  var badge = document.getElementById('personaBadge');
+  badge.textContent = 'Awaiting Analysis';
+  badge.classList.remove('ready');
+
+  document.getElementById('briefTitle').textContent = DOC_INFO[currentScenario].briefTitle;
+
   (async function() {
     var serverUp = await checkServer();
     if (serverUp) {
       setMode('live');
-      startBtn.textContent = 'ANALYZE CONTRACT';
     } else {
       setMode('demo');
-      startBtn.textContent = 'ANALYZE CONTRACT (DEMO)';
     }
+    applyDocInfo(currentScenario);
   })();
 }
 
@@ -1204,6 +1402,7 @@ function resetDashboard() {
 // ========================
 
 function showBrief() {
+  document.getElementById('briefTitle').textContent = DOC_INFO.a.briefTitle;
   document.getElementById('briefBody').innerHTML =
     '<h3>What You Are Being Asked to Sign</h3>' +
     '<p>A 3-year, $1.8M exclusive EMEA distribution partnership with GlobalTech Solutions Inc. ' +
@@ -1358,13 +1557,186 @@ var DEMO = [
   [18500, 'brief'],
 ];
 
+var DEMO_B = [
+  [0, 'sys', 'Demo mode: Replaying a previous vendor analysis session with pre-computed results.'],
+  [500, 'live'],
+  [800, 'sysstep', 'Step 1 of 4 — Analyst is parsing all three vendor proposals and extracting pricing, SLA, and exit terms...'],
+  [900, 'activate', 'analyst'],
+  [1200, 'progress', 10],
+  [2500, 'message', 'analyst',
+    '## Vendor Proposal Analysis — Cloud Infrastructure Migration\n' +
+    '*Prepared by: Analyst Agent (SentinelOps)*\n' +
+    '*Vendors: Stratos Cloud · NimbusStack · Apex Systems*\n' +
+    '*Total proposals: 48 pages · 8 risk dimensions evaluated*\n\n' +
+    '### I. PRICING COMPARISON\n' +
+    '| Vendor | Annual Cost | 3-Year Total | Price Lock | Exit Penalty |\n' +
+    '|--------|-------------|--------------|------------|---------------|\n' +
+    '| Stratos Cloud | $380,000 | $1,140,000 | Fixed | 6 months remaining fees |\n' +
+    '| NimbusStack | $290,000 | $870,000 | CPI+2% | 90-day notice |\n' +
+    '| Apex Systems | $210,000 | $630,000 | Variable | None stated |\n\n' +
+    '### II. SLA COMPARISON\n' +
+    '| Vendor | Uptime SLA | Support Response | Penalty for Breach | Credits Cap |\n' +
+    '|--------|-----------|-----------------|-------------------|-------------|\n' +
+    '| Stratos Cloud | 99.99% | 15 minutes P1 | Service credits | 10% monthly fee |\n' +
+    '| NimbusStack | 99.9% | 4 hours P1 | Service credits | 5% monthly fee |\n' +
+    '| Apex Systems | 99.5% | Best efforts | None defined | None |\n\n' +
+    '### III. KEY FLAGS\n' +
+    '🔴 Apex Systems: "best efforts" SLA support — unenforceable. No penalty for downtime.\n\n' +
+    '🔴 Stratos Cloud: proprietary architecture lock-in. Migration exit cost estimated $180K+.\n\n' +
+    '🟡 NimbusStack: CPI+2% price escalation clause — cost could reach $340K by year 3.\n\n' +
+    '🟡 Apex Systems: no defined exit penalty — but billing dispute history with Meridian (2024).\n\n' +
+    '🟢 Stratos Cloud: strongest SLA with defined breach remedies.\n\n' +
+    '🟢 NimbusStack: most flexible exit terms of the three vendors.\n\n' +
+    '*Forwarding to @sentinelops-devils-advocate and @sentinelops-precedent for parallel review.*'],
+  [4000, 'complete', 'analyst'],
+  [4200, 'progress', 25],
+  [4400, 'sysstep', 'Step 2 of 4 — Devil\'s Advocate and Precedent Agent reviewing in parallel. DA challenges each vendor; Precedent searches vendor history...'],
+  [4500, 'activate', 'devils_advocate'],
+  [4500, 'activate', 'precedent'],
+  [5000, 'progress', 35],
+  [7500, 'message', 'devils_advocate',
+    '## Challenge Report — Vendor Selection\n' +
+    '*Verdict: Do not select Apex. Stratos requires conditions. NimbusStack is viable.*\n\n' +
+    '### CONTRADICTIONS\n' +
+    '**Apex Systems pricing vs support terms**: The lowest price ($210K) comes with "best efforts" support and no SLA penalty — meaning Meridian bears 100% of the downtime cost while paying for a service with no accountability mechanism.\n\n' +
+    '**Stratos Cloud SLA vs exit terms**: Stratos offers the strongest uptime guarantee (99.99%) but locks Meridian into proprietary architecture. If Stratos underperforms or raises prices in year 2, the exit cost ($180K+) exceeds an entire year of NimbusStack fees.\n\n' +
+    '### UNFAIR TERMS\n' +
+    '🔴 **Apex Systems — No SLA penalty (all proposals, p.34)**: "Best efforts" support with zero financial accountability. If Apex causes 48 hours of downtime affecting 40 teams, Meridian has no contractual remedy.\n\n' +
+    '🔴 **Stratos Cloud — Proprietary lock-in (Section 4.2)**: Migration to Stratos requires adopting their custom APIs. Switching later costs an estimated $180K+ in re-engineering. This is not disclosed prominently in the proposal.\n\n' +
+    '🟡 **NimbusStack — CPI+2% escalation (Section 3.1)**: At 3% CPI, year 3 cost reaches $308K — 6.2% above the quoted price. Not a dealbreaker but must be capped.\n\n' +
+    '### QUESTIONS BEFORE DECIDING\n' +
+    '1. What is Apex\'s explanation for the 2024 billing dispute with Meridian?\n' +
+    '2. Will Stratos agree to open-standard APIs to reduce lock-in risk?\n' +
+    '3. Will NimbusStack cap the CPI escalation at 2% total over the term?\n\n' +
+    '*Forwarding findings to @sentinelops-risk for scoring.*', {parallel:true}],
+  [7800, 'progress', 50],
+  [9000, 'message', 'precedent',
+    '## Institutional Memory Report — Vendor Selection\n' +
+    '*Prepared by: Precedent Agent (Featherless AI)*\n\n' +
+    '### DIRECT VENDOR HISTORY\n' +
+    '**2024-08-14 — Apex Systems Billing Dispute**: Apex Systems overbilled Meridian $34,000 in managed services fees over 6 months. Dispute resolved after 4 months of back-and-forth. Internal notes: *"Apex\'s billing practices are opaque; invoices do not map clearly to contracted services."* Resolution required external audit.\n' +
+    '→ **Connection**: Apex\'s current proposal has a variable pricing clause with no defined billing methodology. This is the same structural ambiguity that caused the 2024 dispute.\n\n' +
+    '**2023-05-20 — NimbusStack Pilot (Project Helix)**: Meridian ran a 3-month pilot with NimbusStack for a data pipeline project. Performance met SLA targets. Support response averaged 2.1 hours on P1 tickets (SLA: 4 hours). No disputes.\n' +
+    '→ **Connection**: Meridian has a positive prior relationship with NimbusStack at smaller scale. No red flags in institutional history.\n\n' +
+    '### BENCHMARK COMPARISON\n' +
+    '| Term | Stratos Cloud | NimbusStack | Apex Systems | Market Standard |\n' +
+    '|------|--------------|-------------|--------------|------------------|\n' +
+    '| Uptime SLA | 99.99% ✅ | 99.9% ✅ | 99.5% 🔴 | 99.9% |\n' +
+    '| Support P1 | 15 min ✅ | 4 hours ✅ | Best efforts 🔴 | 1–4 hours |\n' +
+    '| Exit penalty | 6 months 🔴 | 90 days ✅ | None stated 🟡 | 30–90 days |\n' +
+    '| Price lock | Fixed ✅ | CPI+2% 🟡 | Variable 🔴 | Fixed or CPI |\n\n' +
+    '*Forwarding institutional memory to @sentinelops-risk for scoring.*', {parallel:true}],
+  [9500, 'complete', 'devils_advocate'],
+  [9700, 'complete', 'precedent'],
+  [10000, 'progress', 65],
+  [10200, 'sysstep', 'Step 3 of 4 — Risk Agent is scoring all three vendors across eight risk dimensions...'],
+  [10500, 'activate', 'risk'],
+  [13000, 'message', 'risk',
+    '## Risk Assessment Matrix — Vendor Selection\n' +
+    '*Synthesized from Analyst · Devil\'s Advocate · Precedent*\n\n' +
+    '### VENDOR RISK SCORES\n\n' +
+    '**APEX SYSTEMS — 🔴 8.9 / 10 RISK — DO NOT SELECT**\n' +
+    '- No SLA penalty: $200K+ exposure if extended downtime occurs\n' +
+    '- Billing dispute history: pattern of opaque invoicing unresolved\n' +
+    '- Variable pricing: no ceiling defined — cost could escalate unpredictably\n' +
+    '- Total quantified exposure: $890,000\n\n' +
+    '**STRATOS CLOUD — 🟡 5.4 / 10 RISK — CONDITIONAL APPROVAL**\n' +
+    '- Proprietary lock-in: $180K+ exit cost if migration needed\n' +
+    '- 99.99% SLA is the strongest available — reduces operational risk\n' +
+    '- Fixed pricing provides budget certainty\n' +
+    '- Condition required: open-standard API addendum before signing\n' +
+    '- Total quantified exposure (lock-in only): $180,000\n\n' +
+    '**NIMBUSSTACK — 🟢 3.2 / 10 RISK — RECOMMENDED**\n' +
+    '- Positive prior relationship (Project Helix pilot — no disputes)\n' +
+    '- Flexible exit terms (90-day notice)\n' +
+    '- CPI+2% escalation is manageable if capped\n' +
+    '- Condition required: cap price escalation at 5% total over 3-year term\n' +
+    '- Total quantified exposure: $48,000 (escalation risk only)\n\n' +
+    '### AGGREGATE COMPARISON\n' +
+    '| Vendor | Risk Score | Quantified Exposure | Recommendation |\n' +
+    '|--------|-----------|--------------------|-----------------|\n' +
+    '| Apex Systems | 8.9 / 10 | $890,000 | ❌ Do Not Select |\n' +
+    '| Stratos Cloud | 5.4 / 10 | $180,000 | ⚠️ Conditional |\n' +
+    '| NimbusStack | 3.2 / 10 | $48,000 | ✅ Recommended |\n\n' +
+    '*Forwarding to @sentinelops-briefing for executive brief.*'],
+  [13500, 'complete', 'risk'],
+  [13500, 'riskscoreB'],
+  [14000, 'progress', 80],
+  [14200, 'sysstep', 'Step 4 of 4 — Briefing Agent is preparing the ranked vendor recommendation for Marcus...'],
+  [14500, 'activate', 'briefing'],
+  [17000, 'message', 'briefing',
+    '<strong>EXECUTIVE DECISION BRIEF GENERATED</strong>\n\n' +
+    'Recommended Vendor: NimbusStack · Risk Score: 3.2/10 · 2 conditions required\n\n' +
+    'The full executive brief has been prepared. It includes a ranked vendor comparison, ' +
+    'risk scores for all three vendors, conditions for the recommended selection, ' +
+    'and negotiation demands.\n\n' +
+    '<strong>Bottom line: Select NimbusStack — with conditions.</strong>\n\n' +
+    '<em>Click to view the complete executive brief →</em>', {html:true}],
+  [17500, 'complete', 'briefing'],
+  [17500, 'progress', 100],
+  [18000, 'sys', 'Pipeline complete. All 5 agents have reported. Executive brief ready.'],
+  [18500, 'briefB'],
+];
+
+function showBriefB() {
+  document.getElementById('briefTitle').textContent = DOC_INFO.b.briefTitle;
+  document.getElementById('briefBody').innerHTML =
+    '<h3>Recommendation</h3>' +
+    '<p><strong>SELECT NIMBUSSTACK — WITH CONDITIONS</strong></p>' +
+    '<p>Meridian Ventures should proceed with NimbusStack for the cloud infrastructure ' +
+    'migration. Of the three vendors evaluated, NimbusStack presents the lowest ' +
+    'risk profile, the most flexible exit terms, and a verified positive prior ' +
+    'relationship with Meridian. Two conditions must be met before signing.</p>' +
+
+    '<h3>Why Not Apex Systems</h3>' +
+    '<div class="risk-item critical"><strong>🔴 Risk Score: 8.9 / 10 — DO NOT SELECT</strong><br>' +
+    'Apex carries a risk score of 8.9/10. Their "best efforts" SLA provides zero ' +
+    'financial accountability for downtime. Combined with the 2024 billing dispute ' +
+    'and variable pricing with no defined ceiling, Apex represents unacceptable ' +
+    'risk for a business-critical infrastructure commitment.<br>' +
+    '<strong>Potential exposure: $890,000</strong></div>' +
+
+    '<h3>Why Not Stratos (Without Conditions)</h3>' +
+    '<div class="risk-item high"><strong>🟡 Risk Score: 5.4 / 10 — CONDITIONAL</strong><br>' +
+    'Stratos has the strongest technical SLA (99.99%) but their proprietary ' +
+    'architecture creates a $180K+ exit trap. Until they agree to open-standard ' +
+    'APIs in a signed addendum, the lock-in risk outweighs the SLA advantage.</div>' +
+
+    '<h3>Conditions for NimbusStack</h3>' +
+    '<ol style="padding-left:18px;margin:8px 0">' +
+    '<li>✅ Cap CPI price escalation at 5% total over the 3-year term (not per year)</li>' +
+    '<li>✅ Confirm P1 support SLA in writing with defined credit penalties for breach</li></ol>' +
+
+    '<h3>Questions for Marcus Before Signing</h3>' +
+    '<ol style="padding-left:18px;margin:8px 0">' +
+    '<li>Has NimbusStack agreed to the escalation cap in principle?</li>' +
+    '<li>What is the internal cost estimate for a mid-contract migration if NimbusStack ' +
+    'underperforms? (Needed to validate the 90-day exit clause is sufficient)</li></ol>' +
+
+    '<h3>Negotiation Demands</h3>' +
+    '<ul style="padding-left:18px;margin:8px 0">' +
+    '<li>NimbusStack Section 3.1: Add "CPI escalation capped at 5% cumulative over term"</li>' +
+    '<li>NimbusStack SLA addendum: Define credit structure for P1 response breaches</li></ul>' +
+
+    '<div class="audit-trail"><strong>Audit Trail</strong><br>' +
+    'Analyst → Band → Devil\'s Advocate + Precedent (parallel) → Band → Risk Agent → Band → Briefing Agent → Human<br><br>' +
+    '<strong>Autonomous decisions made: 0</strong><br>' +
+    'Marcus retains full authority over this decision at every stage.<br><br>' +
+    'SentinelOps · Multi-Agent Decision Intelligence</div>';
+
+  document.getElementById('briefOverlay').classList.add('visible');
+}
+
 function startDemo() {
   setMode('demo');
   document.getElementById('startBtn').disabled = true;
+  document.getElementById('pillA').classList.add('disabled');
+  document.getElementById('pillB').classList.add('disabled');
   startTime = Date.now();
   timerInterval = setInterval(updateTimer, 200);
   demoTimeouts = [];
-  DEMO.forEach(function(step) {
+  var demoData = currentScenario === 'b' ? DEMO_B : DEMO;
+  demoData.forEach(function(step) {
     var id = setTimeout(function() {
       switch(step[1]) {
         case 'live':
@@ -1378,7 +1750,12 @@ function startDemo() {
         case 'sys': addSystemMessage(step[2], false); break;
         case 'sysstep': addSystemMessage(step[2], true); break;
         case 'riskscore': setRiskScore('8.5', getSeverityFromScore('8.5')); break;
+        case 'riskscoreB':
+          setRiskScore('3.2', 'low');
+          document.getElementById('riskSub').textContent = 'NimbusStack · Recommended';
+          break;
         case 'brief': showBrief(); break;
+        case 'briefB': showBriefB(); break;
       }
     }, step[0]);
     demoTimeouts.push(id);
@@ -1411,11 +1788,10 @@ async function startAnalysis() {
   var serverUp = await checkServer();
   if (serverUp) {
     setMode('live');
-    document.getElementById('startBtn').textContent = 'ANALYZE CONTRACT';
   } else {
     setMode('demo');
-    document.getElementById('startBtn').textContent = 'ANALYZE CONTRACT (DEMO)';
   }
+  applyDocInfo(currentScenario);
 })();
 </script>
 </body>
