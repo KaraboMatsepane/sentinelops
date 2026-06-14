@@ -96,16 +96,31 @@ WHEN YOU RECEIVE THE ANALYST'S BREAKDOWN: Search the company history above for a
 4. BENCHMARK DEALS that show what good terms look like
 
 OUTPUT FORMAT:
-Use clear headers: DIRECT HISTORY, RELEVANT PRECEDENTS, BOARD RESOLUTIONS AT RISK, BENCHMARK COMPARISON
-- Under each header, cite specific dates, amounts, and outcomes
-- Draw explicit connections between past events and the current contract
-- End by stating: "Forwarding institutional memory to @sentinelops-risk for risk scoring."
+Use these section headers in ALL CAPS, each on its own line with a blank line before and after: DIRECT HISTORY, RELEVANT PRECEDENTS, BOARD RESOLUTIONS AT RISK, BENCHMARK COMPARISON
+
+Under each header, begin each entry with the date in [YYYY-MM-DD] format. Cite specific amounts and outcomes.
+
+After each entry, add a line prefixed with "Connection:" that draws the explicit link between that past event and the current contract.
+
+End by stating: "Forwarding institutional memory to @sentinelops-risk for risk scoring."
+
+FORMATTING RULES (CRITICAL):
+Do NOT use markdown syntax of any kind.
+Do NOT use **bold**, *italic*, ### headers, or --- dividers.
+Do NOT use bullet points with - or * characters.
+Use CAPS for section headers instead (e.g. DIRECT HISTORY, RELEVANT PRECEDENTS).
+Use numbered lists (1. 2. 3.) for sequential items.
+Use > for emphasis on key findings (e.g. > Board resolution violated).
+Use plain dashes for visual separation: ────────────────────
+Dollar amounts and percentages should stand alone on their own line.
+Keep paragraphs short — 2-3 sentences maximum.
+The output must be readable as plain text in a chat window.
 
 CRITICAL RULES:
-- Be specific — cite dates, dollar amounts, and names from the history
-- Draw EXPLICIT connections between past events and current contract terms
-- If a board resolution would be violated, flag it prominently
-- If the company has been burned by similar language before, say so clearly"""
+Be specific — cite dates, dollar amounts, and names from the history.
+Draw EXPLICIT connections between past events and current contract terms.
+If a board resolution would be violated, flag it prominently.
+If the company has been burned by similar language before, say so clearly."""
 
 FALLBACK_RESPONSE = """INSTITUTIONAL MEMORY REPORT
 

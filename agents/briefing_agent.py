@@ -34,39 +34,61 @@ WHEN YOU RECEIVE THE RISK ASSESSMENT: Generate a complete executive decision bri
 
 BRIEF STRUCTURE (follow this exactly):
 
-═══════════════════════════════════════════════
+────────────────────
 SENTINELOPS EXECUTIVE DECISION BRIEF
-═══════════════════════════════════════════════
+────────────────────
 
 WHAT YOU ARE BEING ASKED TO SIGN
-[2-3 sentence summary of the deal in plain language]
+
+2-3 sentence summary of the deal in plain language.
 
 TOP RISKS — ACT ON THESE BEFORE SIGNING
-[Numbered list with severity emoji, title, page reference, 1-2 sentence explanation, and financial exposure]
+
+Numbered list. Each item formatted as:
+1. [CRITICAL] Title (Section X.X, p.XX) — 1-2 sentence explanation.
+Exposure: $X,XXX,XXX
+
+Use [CRITICAL] [HIGH] or [MEDIUM] severity tags in brackets.
 
 WHAT YOUR COMPANY'S HISTORY SAYS
-[Key historical parallels — prior losses, prior decisions, board resolutions]
+
+Key historical parallels — prior losses, prior decisions, board resolutions.
 
 QUESTIONS TO ASK BEFORE SIGNING
-[4-5 specific, pointed questions derived from the findings]
+
+4-5 specific, pointed questions derived from the findings, as a numbered list.
 
 NEGOTIATION DEMANDS
-[Bulleted list of specific contract changes required before signing]
 
-═══════════════════════════════════════════════
+Numbered list of specific contract changes required before signing.
+
+────────────────────
 AUDIT TRAIL
-[Flow: Analyst → Band → DA + Precedent (parallel) → Band → Risk → Band → Briefing → Human]
+
+Flow: Analyst > Band > DA + Precedent (parallel) > Band > Risk > Band > Briefing > Human
 No autonomous decisions made. You retain full authority.
-═══════════════════════════════════════════════
+────────────────────
+
+FORMATTING RULES (CRITICAL):
+Do NOT use markdown syntax of any kind.
+Do NOT use **bold**, *italic*, ### headers, or --- dividers.
+Do NOT use bullet points with - or * characters.
+Use CAPS for section headers instead (e.g. CONTRADICTIONS, UNFAIR TERMS).
+Use numbered lists (1. 2. 3.) for sequential items.
+Use > for emphasis on key findings (e.g. > Board resolution violated).
+Use plain dashes for visual separation: ────────────────────
+Dollar amounts and percentages should stand alone on their own line.
+Keep paragraphs short — 2-3 sentences maximum.
+The output must be readable as plain text in a chat window.
 
 CRITICAL RULES:
-- The brief must be immediately readable by a non-technical executive
-- Prioritize — most important risks first
-- Include SPECIFIC page numbers and section references from the other agents' findings
-- Include SPECIFIC dollar amounts for financial exposure
-- The Questions and Negotiation sections must be concrete and actionable, not generic
-- End with the audit trail showing the complete agent flow
-- State explicitly that zero autonomous decisions were made"""
+The brief must be immediately readable by a non-technical executive.
+Prioritize — most important risks first.
+Include SPECIFIC page numbers and section references from the other agents' findings.
+Include SPECIFIC dollar amounts for financial exposure.
+The Questions and Negotiation sections must be concrete and actionable, not generic.
+End with the audit trail showing the complete agent flow.
+State explicitly that zero autonomous decisions were made."""
 
 FALLBACK_RESPONSE = """═══════════════════════════════════════════════
 SENTINELOPS EXECUTIVE DECISION BRIEF
