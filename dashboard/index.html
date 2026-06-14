@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SentinelOps — Multi-Agent Decision Intelligence</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
 <style>
 :root {
   --bg: #060709;
@@ -112,7 +113,8 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); font-si
   letter-spacing:.08em; color:var(--muted); margin-top:3px;
   transition: color .3s;
 }
-.agent-card.active .agent-status { color:var(--text); }
+.agent-card.active .agent-status { color:var(--risk); font-size:9px; }
+.agent-card.complete .agent-status { color:#22c55e; font-size:9px; }
 .provider-tag {
   font-family:var(--mono); font-size:8px; letter-spacing:.06em;
   padding:1px 5px; border-radius:2px; margin-top:2px; display:inline-block;
@@ -159,68 +161,123 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); font-si
 }
 .sys-msg.step { border-left-color:var(--analyst); color:var(--text); font-weight:500; }
 
-.msg {
-  display:flex; gap:14px; padding:16px 0;
-  border-bottom:1px solid var(--border);
+/* ======================== */
+/*   Agent Report Cards     */
+/* ======================== */
+
+.report-card {
+  background:var(--surface); border:1px solid var(--border2);
+  border-left:3px solid var(--muted);
+  border-radius:6px; margin:14px 0; overflow:hidden;
   animation: msgSlide .4s ease-out;
 }
 @keyframes msgSlide {
   from { opacity:0; transform:translateY(12px); }
   to { opacity:1; transform:translateY(0); }
 }
-.msg:last-child { border-bottom:none; }
-.msg-avatar {
-  width:32px; height:32px; border-radius:6px;
+.card-top-bar {
+  display:flex; align-items:center; gap:10px;
+  padding:10px 16px;
+  background:var(--surface2); border-bottom:1px solid var(--border);
+}
+.card-avatar {
+  width:28px; height:28px; border-radius:5px;
   display:flex; align-items:center; justify-content:center;
-  font-family:var(--mono); font-size:11px; font-weight:600;
-  flex-shrink:0; margin-top:2px;
+  font-family:var(--mono); font-size:10px; font-weight:600; flex-shrink:0;
 }
-.msg[data-agent="analyst"] .msg-avatar { background:var(--analyst-dim); color:var(--analyst); }
-.msg[data-agent="devils_advocate"] .msg-avatar { background:var(--da-dim); color:var(--da); }
-.msg[data-agent="precedent"] .msg-avatar { background:var(--precedent-dim); color:var(--precedent); }
-.msg[data-agent="risk"] .msg-avatar { background:var(--risk-dim); color:var(--risk); }
-.msg[data-agent="briefing"] .msg-avatar { background:var(--briefing-dim); color:var(--briefing); }
-
-.msg-body { flex:1; min-width:0; }
-.msg-header { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
-.msg-name { font-size:13px; font-weight:600; }
-.msg[data-agent="analyst"] .msg-name { color:var(--analyst); }
-.msg[data-agent="devils_advocate"] .msg-name { color:var(--da); }
-.msg[data-agent="precedent"] .msg-name { color:var(--precedent); }
-.msg[data-agent="risk"] .msg-name { color:var(--risk); }
-.msg[data-agent="briefing"] .msg-name { color:var(--briefing); }
-
-.msg-time {
+.card-agent-name { font-size:13px; font-weight:600; }
+.card-top-bar .provider-tag { margin-top:0; }
+.card-timestamp {
   font-family:var(--mono); font-size:9px; letter-spacing:.08em;
-  color:var(--muted); text-transform:uppercase;
+  color:var(--muted); text-transform:uppercase; margin-left:auto;
 }
-.msg-content {
-  font-size:13px; color:rgba(228,231,240,.75); line-height:1.7;
-  white-space:pre-wrap; word-break:break-word;
-  max-height:200px; overflow:hidden; position:relative;
-  transition: max-height .3s ease;
-}
-.msg-content.expanded { max-height:none; }
-.msg-content strong { color:var(--text); font-weight:600; }
-.msg-content .highlight {
-  background:rgba(239,68,68,.1); border-left:2px solid var(--da);
-  padding:4px 10px; margin:6px 0; display:block; border-radius:0 3px 3px 0;
-}
-.msg-content .risk-high { color:var(--da); font-weight:600; }
-.msg-content .risk-med { color:var(--risk); font-weight:600; }
-.msg-expand {
-  font-family:var(--mono); font-size:10px; color:var(--analyst);
-  cursor:pointer; margin-top:6px; letter-spacing:.05em;
-  display:none;
-}
-.msg-expand:hover { text-decoration:underline; }
 .msg-parallel-badge {
   display:inline-flex; align-items:center; gap:5px;
   font-family:var(--mono); font-size:9px; letter-spacing:.08em;
-  padding:2px 8px; border-radius:2px; margin-left:8px;
+  padding:2px 8px; border-radius:2px;
   background:rgba(168,85,247,.1); color:var(--precedent);
   border:1px solid rgba(168,85,247,.2);
 }
+
+/* Card content area */
+.card-content {
+  padding:16px 18px; font-size:13px;
+  color:rgba(228,231,240,.75); line-height:1.7;
+  word-break:break-word; overflow:hidden; position:relative;
+}
+.card-content.html-content { white-space:pre-wrap; }
+.card-content.collapsed { max-height:200px; }
+.card-content.collapsed::after {
+  content:''; position:absolute; bottom:0; left:0; right:0;
+  height:60px; background:linear-gradient(transparent, var(--surface));
+  pointer-events:none;
+}
+.card-content strong { color:var(--text); font-weight:600; }
+.card-content .highlight {
+  background:rgba(239,68,68,.1); border-left:2px solid var(--da);
+  padding:6px 12px; margin:8px 0; display:block; border-radius:0 4px 4px 0;
+}
+.card-content .risk-high { color:var(--da); font-weight:600; }
+.card-content .risk-med { color:var(--risk); font-weight:600; }
+.card-content p { margin:0 0 8px; }
+.card-content p:last-child { margin-bottom:0; }
+.card-content h1, .card-content h2, .card-content h3, .card-content h4 {
+  font-family:var(--mono); font-size:11px; text-transform:uppercase;
+  letter-spacing:.12em; color:var(--card-accent-muted, var(--muted2));
+  margin:20px 0 8px; padding:14px 0 6px;
+  border-top:1px solid var(--border2); border-bottom:1px solid var(--border);
+  font-weight:600;
+}
+.card-content > :first-child { margin-top:0; padding-top:0; border-top:none; }
+.card-content ul, .card-content ol { padding-left:18px; margin:6px 0; }
+.card-content li { margin-bottom:3px; }
+.card-content blockquote {
+  border-left:2px solid var(--border2); padding-left:12px;
+  color:var(--muted2); margin:8px 0;
+}
+.card-content code {
+  font-family:var(--mono); font-size:12px; background:var(--surface2);
+  padding:1px 5px; border-radius:3px; border:1px solid var(--border);
+}
+.card-content pre {
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:4px; padding:10px 14px; margin:8px 0; overflow-x:auto;
+}
+.card-content pre code { background:none; border:none; padding:0; }
+.card-content em { color:var(--muted2); }
+
+/* Tables */
+.card-content table {
+  width:100%; border-collapse:collapse; margin:10px 0; font-size:12px;
+}
+.card-content thead th {
+  background:var(--surface2); font-family:var(--mono); font-size:10px;
+  text-transform:uppercase; letter-spacing:.08em; color:var(--muted2);
+  padding:8px 12px; border:1px solid var(--border); text-align:left;
+}
+.card-content tbody td {
+  padding:8px 12px; border:1px solid var(--border);
+}
+.card-content tbody tr:nth-child(even) { background:rgba(13,15,20,.5); }
+
+/* Risk flag badges */
+.risk-flag { padding:6px 10px; margin:6px 0; border-radius:4px; border-left:3px solid; }
+p.risk-flag, li.risk-flag { display:block; }
+.risk-flag-red { background:rgba(239,68,68,.06); border-left-color:var(--da); }
+.risk-flag-amber { background:rgba(245,158,11,.06); border-left-color:var(--risk); }
+.risk-flag-green { background:rgba(34,197,94,.06); border-left-color:var(--briefing); }
+
+/* Highlighted numbers */
+.highlight-number { font-family:var(--mono); font-weight:600; }
+
+/* Card expand/collapse */
+.card-expand {
+  padding:8px 16px; font-family:var(--mono); font-size:10px;
+  color:var(--analyst); cursor:pointer; letter-spacing:.05em;
+  border-top:1px solid var(--border); text-align:center;
+  background:var(--surface2); transition:background .2s;
+}
+.card-expand:hover { background:var(--surface3); text-decoration:underline; }
 
 .doc-panel {
   background:var(--surface); border-left:1px solid var(--border);
@@ -255,10 +312,25 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); font-si
   display:flex; align-items:center; justify-content:center;
   margin-top:1px;
 }
-.hiw-step:nth-child(2) .hiw-num { background:var(--analyst-dim); color:var(--analyst); }
-.hiw-step:nth-child(3) .hiw-num { background:var(--da-dim); color:var(--da); }
-.hiw-step:nth-child(4) .hiw-num { background:var(--risk-dim); color:var(--risk); }
-.hiw-step:nth-child(5) .hiw-num { background:var(--briefing-dim); color:var(--briefing); }
+.hiw-num.c-analyst { background:var(--analyst-dim); color:var(--analyst); }
+.hiw-num.c-da { background:var(--da-dim); color:var(--da); }
+.hiw-num.c-precedent { background:var(--precedent-dim); color:var(--precedent); }
+.hiw-num.c-risk { background:var(--risk-dim); color:var(--risk); }
+.hiw-num.c-briefing { background:var(--briefing-dim); color:var(--briefing); }
+.hiw-parallel {
+  border-left:2px solid var(--precedent-dim); margin:4px 0 4px 7px;
+  padding-left:10px; position:relative;
+}
+.hiw-parallel-label {
+  font-family:var(--mono); font-size:8px; text-transform:uppercase;
+  letter-spacing:.1em; color:var(--precedent); margin-bottom:6px;
+}
+.hiw-provider {
+  font-family:var(--mono); font-size:7px; letter-spacing:.04em;
+  padding:1px 4px; border-radius:2px; margin-left:4px; vertical-align:middle;
+}
+.hiw-provider.aiml { background:rgba(59,130,246,.1); color:var(--analyst); border:1px solid rgba(59,130,246,.15); }
+.hiw-provider.featherless { background:rgba(168,85,247,.1); color:var(--precedent); border:1px solid rgba(168,85,247,.15); }
 
 .risk-score-display {
   background:var(--surface2); border:1px solid var(--border2);
@@ -271,9 +343,22 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); font-si
 }
 .risk-score-value {
   font-family:var(--mono); font-size:42px; font-weight:700;
-  color:var(--muted); line-height:1; transition: color .5s;
+  color:var(--muted); line-height:1;
+  transition: color .5s, transform .4s ease-out, opacity .4s ease-out;
+  transform: scale(1); opacity:1;
+}
+.risk-score-value.score-pop {
+  animation: scorePop .5s ease-out;
+}
+@keyframes scorePop {
+  0% { transform:scale(0.3); opacity:0; }
+  60% { transform:scale(1.15); opacity:1; }
+  100% { transform:scale(1); opacity:1; }
 }
 .risk-score-value.critical { color:var(--da); }
+.risk-score-value.high { color:var(--risk); }
+.risk-score-value.medium { color:var(--precedent); }
+.risk-score-value.low { color:var(--briefing); }
 .risk-score-sub {
   font-family:var(--mono); font-size:10px; color:var(--muted);
   margin-top:4px; text-transform:uppercase; letter-spacing:.1em;
@@ -289,6 +374,68 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); font-si
 }
 .start-btn:hover { transform:translateY(-1px); box-shadow:0 4px 20px rgba(59,130,246,.3); }
 .start-btn:disabled { opacity:.3; cursor:not-allowed; transform:none; box-shadow:none; }
+.reset-btn {
+  display:none; width:calc(100% - 36px); margin:0 18px 18px;
+  padding:12px; border:1px solid var(--border2); border-radius:6px; cursor:pointer;
+  font-family:var(--mono); font-size:11px; font-weight:600;
+  text-transform:uppercase; letter-spacing:.1em;
+  background:var(--surface2); color:var(--muted2); transition:all .2s;
+}
+.reset-btn:hover { color:var(--text); border-color:var(--muted); background:var(--surface3); }
+
+.scenario-overlay {
+  display:none; position:fixed; inset:0; z-index:200;
+  background:rgba(6,7,9,.94); backdrop-filter:blur(12px);
+  justify-content:center; align-items:center;
+  padding:40px 20px; overflow-y:auto;
+  transition:opacity .3s ease;
+}
+.scenario-overlay.visible { display:flex; }
+.scenario-modal {
+  background:var(--surface); border:1px solid var(--border2);
+  border-radius:10px; max-width:600px; width:100%;
+  padding:40px 36px 32px; position:relative;
+  box-shadow:0 0 80px rgba(59,130,246,.06);
+}
+.scenario-headline {
+  font-family:var(--sans); font-size:30px; font-weight:700;
+  color:var(--text); line-height:1.2; margin-bottom:6px;
+}
+.scenario-sub {
+  font-family:var(--mono); font-size:11px; letter-spacing:.08em;
+  color:var(--muted2); text-transform:uppercase; margin-bottom:28px;
+}
+.scenario-story {
+  font-size:15px; line-height:1.7; color:rgba(228,231,240,.7);
+  margin-bottom:16px;
+}
+.scenario-story:last-of-type { margin-bottom:28px; }
+.scenario-story strong { color:var(--text); font-weight:600; }
+.scenario-stats {
+  display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;
+  margin-bottom:28px;
+}
+.scenario-stat {
+  text-align:center; padding:14px 8px;
+  background:var(--surface2); border:1px solid var(--border2); border-radius:6px;
+}
+.scenario-stat-value {
+  font-family:var(--mono); font-size:20px; font-weight:700;
+  color:var(--analyst); line-height:1; margin-bottom:4px;
+}
+.scenario-stat-label {
+  font-family:var(--mono); font-size:9px; text-transform:uppercase;
+  letter-spacing:.1em; color:var(--muted);
+}
+.scenario-cta {
+  display:block; width:100%; padding:16px;
+  border:none; border-radius:6px; cursor:pointer;
+  font-family:var(--mono); font-size:14px; font-weight:600;
+  letter-spacing:.06em;
+  background:linear-gradient(135deg, var(--analyst), #2563eb);
+  color:#fff; transition:all .2s;
+}
+.scenario-cta:hover { transform:translateY(-1px); box-shadow:0 4px 24px rgba(59,130,246,.35); }
 
 .brief-overlay {
   display:none; position:fixed; inset:0; z-index:100;
@@ -395,6 +542,7 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); font-si
         <div class="agent-info">
           <div class="agent-name">Analyst</div>
           <div class="agent-role">Step 1 &middot; The Mapper</div>
+          <div class="provider-tag">AI/ML API</div>
           <div class="agent-status" id="status-analyst">Standby</div>
         </div>
       </div>
@@ -403,6 +551,7 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); font-si
         <div class="agent-info">
           <div class="agent-name">Devil's Advocate</div>
           <div class="agent-role">Step 2a &middot; The Challenger</div>
+          <div class="provider-tag">AI/ML API</div>
           <div class="agent-status" id="status-da">Standby</div>
         </div>
       </div>
@@ -411,6 +560,7 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); font-si
         <div class="agent-info">
           <div class="agent-name">Precedent</div>
           <div class="agent-role">Step 2b &middot; The Historian</div>
+          <div class="provider-tag featherless">Featherless AI</div>
           <div class="agent-status" id="status-precedent">Standby</div>
         </div>
       </div>
@@ -419,6 +569,7 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); font-si
         <div class="agent-info">
           <div class="agent-name">Risk</div>
           <div class="agent-role">Step 3 &middot; The Scorer</div>
+          <div class="provider-tag">AI/ML API</div>
           <div class="agent-status" id="status-risk">Standby</div>
         </div>
       </div>
@@ -427,6 +578,7 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); font-si
         <div class="agent-info">
           <div class="agent-name">Briefing</div>
           <div class="agent-role">Step 4 &middot; The Communicator</div>
+          <div class="provider-tag">AI/ML API</div>
           <div class="agent-status" id="status-briefing">Standby</div>
         </div>
       </div>
@@ -488,10 +640,14 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); font-si
       </div>
       <div class="how-it-works">
         <div class="hiw-title">How It Works</div>
-        <div class="hiw-step"><div class="hiw-num">1</div><div><strong style="color:var(--analyst)">Analyst</strong> extracts every clause, term, and financial obligation</div></div>
-        <div class="hiw-step"><div class="hiw-num">2</div><div><strong style="color:var(--da)">Devil's Advocate</strong> attacks the contract &mdash; finds contradictions, unfair terms, missing protections</div></div>
-        <div class="hiw-step"><div class="hiw-num">3</div><div><strong style="color:var(--risk)">Risk Agent</strong> scores every finding and calculates total financial exposure</div></div>
-        <div class="hiw-step"><div class="hiw-num">4</div><div><strong style="color:var(--briefing)">Briefing Agent</strong> synthesizes everything into an executive decision brief</div></div>
+        <div class="hiw-step"><div class="hiw-num c-analyst">1</div><div><strong style="color:var(--analyst)">Analyst</strong> <span class="hiw-provider aiml">AI/ML API</span> extracts every clause, term, and financial obligation</div></div>
+        <div class="hiw-parallel">
+          <div class="hiw-parallel-label">parallel via Band</div>
+          <div class="hiw-step"><div class="hiw-num c-da">2a</div><div><strong style="color:var(--da)">Devil's Advocate</strong> <span class="hiw-provider aiml">AI/ML API</span> attacks the contract &mdash; finds contradictions, unfair terms, missing protections</div></div>
+          <div class="hiw-step"><div class="hiw-num c-precedent">2b</div><div><strong style="color:var(--precedent)">Precedent Agent</strong> <span class="hiw-provider featherless">Featherless AI</span> searches institutional memory for past deals, board resolutions, and precedents</div></div>
+        </div>
+        <div class="hiw-step"><div class="hiw-num c-risk">3</div><div><strong style="color:var(--risk)">Risk Agent</strong> <span class="hiw-provider aiml">AI/ML API</span> scores every finding and calculates total financial exposure</div></div>
+        <div class="hiw-step"><div class="hiw-num c-briefing">4</div><div><strong style="color:var(--briefing)">Briefing Agent</strong> <span class="hiw-provider aiml">AI/ML API</span> synthesizes everything into an executive decision brief</div></div>
       </div>
       <div class="risk-score-display" id="riskDisplay">
         <div class="risk-score-label">Aggregate Risk Score</div>
@@ -500,6 +656,7 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); font-si
       </div>
     </div>
     <button class="start-btn" id="startBtn" onclick="startAnalysis()">Analyze Contract</button>
+    <button class="reset-btn" id="resetBtn" onclick="resetDashboard()">&#8634; Run Again</button>
   </div>
 </div>
 
@@ -522,7 +679,20 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); font-si
   </div>
 </div>
 
+<div class="scenario-overlay" id="scenarioOverlay">
+  <div class="scenario-modal">
+    <div class="scenario-headline" id="scenarioHeadline"></div>
+    <div class="scenario-sub" id="scenarioSub"></div>
+    <div class="scenario-story" id="scenarioStory1"></div>
+    <div class="scenario-story" id="scenarioStory2"></div>
+    <div class="scenario-stats" id="scenarioStats"></div>
+    <button class="scenario-cta" id="scenarioCta" onclick="dismissScenarioIntro()"></button>
+  </div>
+</div>
+
 <script>
+marked.setOptions({ breaks: true, gfm: true });
+
 var AGENTS = {
   analyst: { name:'Analyst', role:'The Mapper', avatar:'AN', card:'card-analyst', status:'status-analyst' },
   devils_advocate: { name:"Devil's Advocate", role:'The Challenger', avatar:'DA', card:'card-da', status:'status-da' },
@@ -532,6 +702,14 @@ var AGENTS = {
 };
 
 var AGENT_PROGRESS = { analyst: 25, devils_advocate: 45, precedent: 55, risk: 75, briefing: 100 };
+
+var AGENT_COLORS = {
+  analyst:         { accent:'#3b82f6', dim:'var(--analyst-dim)',   muted:'rgba(59,130,246,.7)' },
+  devils_advocate: { accent:'#ef4444', dim:'var(--da-dim)',        muted:'rgba(239,68,68,.7)' },
+  precedent:       { accent:'#a855f7', dim:'var(--precedent-dim)', muted:'rgba(168,85,247,.7)' },
+  risk:            { accent:'#f59e0b', dim:'var(--risk-dim)',      muted:'rgba(245,158,11,.7)' },
+  briefing:        { accent:'#22c55e', dim:'var(--briefing-dim)',  muted:'rgba(34,197,94,.7)' }
+};
 
 var STEP_NARRATION = {
   analyst: 'Step 1 of 4 — Analyst is extracting all clauses, financial terms, and obligations from the 74-page contract...',
@@ -547,6 +725,125 @@ var mode = 'detecting';
 var lastEventIndex = 0;
 var pollInterval = null;
 var narratedSteps = {};
+var demoTimeouts = [];
+var feedIntroHtml = '';
+var currentScenario = 'a';
+var pendingAnalysisStart = null;
+var statusIntervals = {};
+
+var AGENT_STATUS_MESSAGES = {
+  analyst: [
+    'Parsing contract structure…',
+    'Extracting clauses (p.1–74)…',
+    'Mapping financial obligations…',
+    'Identifying key terms…',
+    'Compiling structured breakdown…'
+  ],
+  devils_advocate: [
+    'Scanning for contradictions…',
+    'Testing enforceability…',
+    'Checking termination asymmetry…',
+    'Flagging missing protections…',
+    'Building adversarial report…'
+  ],
+  precedent: {
+    a: [
+      'Searching institutional memory…',
+      'Matching prior vendor history…',
+      'Cross-referencing board resolutions…',
+      'Comparing contract benchmarks…',
+      'Compiling precedent report…'
+    ],
+    b: [
+      'Searching institutional memory…',
+      'Retrieving past vendor outcomes…',
+      'Cross-referencing SLA benchmarks…',
+      'Matching migration precedents…',
+      'Compiling precedent report…'
+    ]
+  },
+  risk: [
+    'Ingesting agent findings…',
+    'Calculating financial exposure…',
+    'Scoring risk dimensions…',
+    'Building risk matrix…',
+    'Finalizing aggregate score…'
+  ],
+  briefing: [
+    'Collecting all agent outputs…',
+    'Structuring executive summary…',
+    'Ranking recommendations…',
+    'Formatting decision brief…',
+    'Preparing final deliverable…'
+  ]
+};
+
+var SCENARIOS = {
+  a: {
+    headline: "Amara's Decision",
+    sub: "VP Legal & Compliance · Meridian Ventures Ltd · June 2026",
+    story1: "Amara Diallo has 48 hours to sign a <strong>$1.8M partnership agreement</strong> with GlobalTech Solutions Inc. The contract is 74 pages. Her legal team flagged nothing. The board is expecting a signature. But something feels off — and she doesn’t have time to read every clause herself.",
+    story2: "SentinelOps will deploy <strong>five specialized agents</strong> through Band to review every clause, cross-reference institutional memory, stress-test the terms, and deliver an executive decision brief — in under 90 seconds. Amara retains full authority. No autonomous decisions will be made.",
+    stats: [
+      { value: "74", label: "Pages" },
+      { value: "10", label: "Key Clauses" },
+      { value: "$1.8M", label: "At Stake" }
+    ],
+    cta: "Begin Analysis →"
+  },
+  b: {
+    headline: "The Vendor Decision",
+    sub: "Head of Infrastructure · Meridian Ventures Ltd · June 2026",
+    story1: "Meridian Ventures must choose between <strong>three cloud infrastructure vendors</strong> for a critical platform migration. Budget: $420K annually. The decision affects 40+ internal teams and cannot be easily reversed. Each vendor has strengths — and each has risks the RFP process didn’t surface.",
+    story2: "SentinelOps will analyse all three vendor proposals in parallel, retrieve precedents from past vendor relationships, score risk across <strong>eight dimensions</strong>, and produce a ranked recommendation with conditions — in under 90 seconds.",
+    stats: [
+      { value: "3", label: "Vendors" },
+      { value: "8", label: "Risk Dimensions" },
+      { value: "$420K", label: "Annual Commitment" }
+    ],
+    cta: "Begin Analysis →"
+  }
+};
+
+function showScenarioIntro(callback) {
+  var s = SCENARIOS[currentScenario];
+  document.getElementById('scenarioHeadline').textContent = s.headline;
+  document.getElementById('scenarioSub').textContent = s.sub;
+  document.getElementById('scenarioStory1').innerHTML = s.story1;
+  document.getElementById('scenarioStory2').innerHTML = s.story2;
+  var statsHtml = '';
+  for (var i = 0; i < s.stats.length; i++) {
+    statsHtml += '<div class="scenario-stat"><div class="scenario-stat-value">' +
+      s.stats[i].value + '</div><div class="scenario-stat-label">' +
+      s.stats[i].label + '</div></div>';
+  }
+  document.getElementById('scenarioStats').innerHTML = statsHtml;
+  document.getElementById('scenarioCta').textContent = s.cta;
+  pendingAnalysisStart = callback;
+  var overlay = document.getElementById('scenarioOverlay');
+  overlay.classList.remove('fading');
+  overlay.style.opacity = '0';
+  overlay.classList.add('visible');
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() {
+      overlay.style.opacity = '1';
+    });
+  });
+}
+
+function dismissScenarioIntro() {
+  var overlay = document.getElementById('scenarioOverlay');
+  overlay.style.opacity = '0';
+  setTimeout(function() {
+    overlay.classList.remove('visible');
+    overlay.style.opacity = '';
+    if (pendingAnalysisStart) {
+      var cb = pendingAnalysisStart;
+      pendingAnalysisStart = null;
+      cb();
+    }
+  }, 300);
+}
 
 function updateTimer() {
   var elapsed = Math.floor((Date.now() - startTime) / 1000);
@@ -560,8 +857,23 @@ function setAgentStatus(key, status) {
   var el = document.getElementById(AGENTS[key].status);
   if (!card || !el) return;
   card.classList.remove('active','complete');
-  if (status === 'active') { card.classList.add('active'); el.textContent = 'Analyzing...'; }
-  else if (status === 'complete') { card.classList.add('complete'); el.textContent = 'Complete'; }
+  if (statusIntervals[key]) { clearInterval(statusIntervals[key]); statusIntervals[key] = null; }
+  if (status === 'active') {
+    card.classList.add('active');
+    var msgs = AGENT_STATUS_MESSAGES[key];
+    if (msgs && !Array.isArray(msgs)) msgs = msgs[currentScenario] || msgs.a;
+    if (msgs && msgs.length) {
+      var idx = 0;
+      el.textContent = msgs[0];
+      statusIntervals[key] = setInterval(function() {
+        idx = (idx + 1) % msgs.length;
+        el.textContent = msgs[idx];
+      }, 2500);
+    } else {
+      el.textContent = 'Analyzing...';
+    }
+  }
+  else if (status === 'complete') { card.classList.add('complete'); el.textContent = 'Complete ✓'; }
   else { el.textContent = 'Standby'; }
 }
 
@@ -582,59 +894,134 @@ function addSystemMessage(text, isStep) {
   feed.scrollTop = feed.scrollHeight;
 }
 
+function postProcessContent(html, agentKey, isHtml) {
+  var colors = AGENT_COLORS[agentKey] || AGENT_COLORS.analyst;
+
+  if (!isHtml) {
+    var tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    var blocks = tmp.querySelectorAll('p, li');
+    for (var i = 0; i < blocks.length; i++) {
+      var text = blocks[i].textContent;
+      if (text.indexOf('🔴') !== -1 || text.indexOf('❌') !== -1) {
+        blocks[i].classList.add('risk-flag', 'risk-flag-red');
+      } else if (text.indexOf('🟡') !== -1) {
+        blocks[i].classList.add('risk-flag', 'risk-flag-amber');
+      } else if (text.indexOf('🟢') !== -1 || text.indexOf('✅') !== -1) {
+        blocks[i].classList.add('risk-flag', 'risk-flag-green');
+      }
+    }
+    html = tmp.innerHTML;
+  }
+
+  html = html.replace(/>([^<]+)</g, function(match, text) {
+    var result = text
+      .replace(/\$[\d,]+(?:\.\d+)?[KMB]?\+?/g, '<span class="highlight-number" style="color:' + colors.accent + '">$&</span>')
+      .replace(/(\d+\.?\d*)\s*\/\s*10/g, '<span class="highlight-number" style="color:' + colors.accent + '">$&</span>')
+      .replace(/(\d+(?:\.\d+)?)%/g, '<span class="highlight-number" style="color:' + colors.accent + '">$&</span>');
+    return '>' + result + '<';
+  });
+
+  return html;
+}
+
 function addMessage(agentKey, content, extra) {
   var feed = document.getElementById('feed');
   var intro = document.getElementById('feedIntro');
   if (intro) intro.remove();
   var elapsed = Math.floor((Date.now() - startTime) / 1000);
   var ts = 'T+' + String(Math.floor(elapsed/60)).padStart(2,'0') + ':' + String(elapsed%60).padStart(2,'0');
-  var parallel = extra && extra.parallel ? '<span class="msg-parallel-badge">&#9889; Parallel</span>' : '';
-  var providerTag = '';
-  if (extra && extra.provider) {
-    var cls = extra.provider === 'featherless' ? ' featherless' : extra.provider === 'fallback' ? ' fallback' : '';
-    providerTag = '<span class="provider-tag' + cls + '" style="margin-left:8px">' + extra.provider.toUpperCase() + '</span>';
-  }
+  var colors = AGENT_COLORS[agentKey] || AGENT_COLORS.analyst;
   var isHtml = extra && extra.html;
-  var rawContent = isHtml ? content : escapeHtml(content);
-  var needsTruncation = (content || '').length > 600;
+  var rawContent = isHtml ? content : marked.parse(content);
+  var processedContent = postProcessContent(rawContent, agentKey, isHtml);
+  var contentClass = 'card-content' + (isHtml ? ' html-content' : '');
   var msgId = 'msg-' + Date.now() + '-' + Math.random().toString(36).substring(2,5);
 
-  var msg = document.createElement('div');
-  msg.className = 'msg';
-  msg.setAttribute('data-agent', agentKey);
-  msg.innerHTML =
-    '<div class="msg-avatar">' + (AGENTS[agentKey]?.avatar||'SY') + '</div>' +
-    '<div class="msg-body"><div class="msg-header"><span class="msg-name">' +
-    (AGENTS[agentKey]?.name||'System') + '</span>' + parallel + providerTag +
-    '<span class="msg-time">' + ts + '</span></div>' +
-    '<div class="msg-content' + (needsTruncation ? '' : ' expanded') + '" id="' + msgId + '">' + rawContent + '</div>' +
-    (needsTruncation ? '<div class="msg-expand" style="display:block" onclick="toggleExpand(\'' + msgId + '\',this)">Show full analysis</div>' : '') +
-    '</div>';
-  feed.appendChild(msg);
+  var parallel = extra && extra.parallel ? '<span class="msg-parallel-badge">&#9889; Parallel</span>' : '';
+  var providerName = '';
+  if (extra && extra.provider) {
+    providerName = extra.provider;
+  } else {
+    providerName = agentKey === 'precedent' ? 'featherless' : 'aiml';
+  }
+  var provCls = providerName === 'featherless' ? ' featherless' : providerName === 'fallback' ? ' fallback' : '';
+  var provLabel = providerName === 'featherless' ? 'Featherless AI' : providerName === 'aiml' ? 'AI/ML API' : providerName.toUpperCase();
+  var providerTag = '<span class="provider-tag' + provCls + '">' + provLabel + '</span>';
+
+  var card = document.createElement('div');
+  card.className = 'report-card';
+  card.style.borderLeftColor = colors.accent;
+  card.style.setProperty('--card-accent-muted', colors.muted);
+  card.innerHTML =
+    '<div class="card-top-bar">' +
+      '<div class="card-avatar" style="background:' + colors.dim + ';color:' + colors.accent + '">' + (AGENTS[agentKey]?.avatar||'SY') + '</div>' +
+      '<span class="card-agent-name" style="color:' + colors.accent + '">' + (AGENTS[agentKey]?.name||'System') + '</span>' +
+      parallel + providerTag +
+      '<span class="card-timestamp">' + ts + '</span>' +
+    '</div>' +
+    '<div class="' + contentClass + '" id="' + msgId + '">' + processedContent + '</div>';
+  feed.appendChild(card);
+
+  var contentEl = document.getElementById(msgId);
+  if (contentEl && contentEl.scrollHeight > 400) {
+    contentEl.classList.add('collapsed');
+    var expandBtn = document.createElement('div');
+    expandBtn.className = 'card-expand';
+    expandBtn.textContent = 'Show full analysis ↓';
+    expandBtn.onclick = function() { toggleCardExpand(msgId, expandBtn); };
+    card.appendChild(expandBtn);
+  }
+
   feed.scrollTop = feed.scrollHeight;
 }
 
-function toggleExpand(id, btn) {
+function toggleCardExpand(id, btn) {
   var el = document.getElementById(id);
   if (!el) return;
-  if (el.classList.contains('expanded')) {
-    el.classList.remove('expanded');
-    btn.textContent = 'Show full analysis';
+  if (el.classList.contains('collapsed')) {
+    el.classList.remove('collapsed');
+    btn.textContent = 'Collapse ↑';
   } else {
-    el.classList.add('expanded');
-    btn.textContent = 'Collapse';
+    el.classList.add('collapsed');
+    btn.textContent = 'Show full analysis ↓';
   }
 }
 
 function setProgress(p) { document.getElementById('progressFill').style.width = p + '%'; }
 function setBottomStatus(t) { document.getElementById('bottomStatus').textContent = t; }
 
-function setRiskScore(score, label) {
+function getSeverityFromScore(score) {
+  var n = parseFloat(score);
+  if (n >= 8) return 'critical';
+  if (n >= 6) return 'high';
+  if (n >= 4) return 'medium';
+  return 'low';
+}
+
+var SEVERITY_LABELS = {
+  critical: 'EXTREME — Do not sign as written',
+  high: 'HIGH — Significant concerns identified',
+  medium: 'MODERATE — Review flagged items',
+  low: 'LOW — Minor issues only'
+};
+
+var SEVERITY_BORDERS = {
+  critical: 'rgba(239,68,68,.3)',
+  high: 'rgba(245,158,11,.3)',
+  medium: 'rgba(168,85,247,.3)',
+  low: 'rgba(34,197,94,.3)'
+};
+
+function setRiskScore(score, severity) {
   var el = document.getElementById('riskScore');
+  el.classList.remove('critical', 'high', 'medium', 'low', 'score-pop');
   el.textContent = score;
-  el.classList.add('critical');
-  document.getElementById('riskSub').textContent = label;
-  document.getElementById('riskDisplay').style.borderColor = 'rgba(239,68,68,.3)';
+  el.classList.add(severity);
+  void el.offsetWidth;
+  el.classList.add('score-pop');
+  document.getElementById('riskSub').textContent = SEVERITY_LABELS[severity] || severity;
+  document.getElementById('riskDisplay').style.borderColor = SEVERITY_BORDERS[severity] || 'rgba(239,68,68,.3)';
 }
 
 function setMode(m) {
@@ -713,7 +1100,7 @@ function handleLiveEvent(event) {
     if (event.agent === 'risk') {
       var scoreMatch = event.content.match(/(\d+\.?\d*)\s*\/\s*10/);
       if (scoreMatch) {
-        setRiskScore(scoreMatch[1], 'EXTREME — Do not sign as written');
+        setRiskScore(scoreMatch[1], getSeverityFromScore(scoreMatch[1]));
       }
     }
 
@@ -724,13 +1111,14 @@ function handleLiveEvent(event) {
       clearInterval(timerInterval);
       if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
       addSystemMessage('Pipeline complete. All 5 agents have reported. Executive brief ready.', false);
+      document.getElementById('resetBtn').style.display = 'block';
       setTimeout(function() { showLiveBrief(event.content); }, 2000);
     }
   }
 }
 
 function showLiveBrief(content) {
-  document.getElementById('briefBody').textContent = content;
+  document.getElementById('briefBody').innerHTML = marked.parse(content);
   document.getElementById('briefOverlay').classList.add('visible');
 }
 
@@ -762,6 +1150,53 @@ async function startLiveMode() {
     setBottomStatus('Trigger failed — falling back to demo mode');
     setTimeout(function() { startDemo(); }, 1500);
   }
+}
+
+function resetDashboard() {
+  closeBrief();
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
+  demoTimeouts.forEach(function(id) { clearTimeout(id); });
+  demoTimeouts = [];
+  Object.keys(statusIntervals).forEach(function(key) {
+    if (statusIntervals[key]) { clearInterval(statusIntervals[key]); statusIntervals[key] = null; }
+  });
+
+  var feed = document.getElementById('feed');
+  feed.innerHTML = feedIntroHtml;
+
+  Object.keys(AGENTS).forEach(function(key) { setAgentStatus(key, 'standby'); });
+
+  setProgress(0);
+  document.getElementById('timer').textContent = 'T+00:00';
+  setBottomStatus('Ready — 5 agents connected');
+
+  var riskEl = document.getElementById('riskScore');
+  riskEl.textContent = '—';
+  riskEl.classList.remove('critical', 'high', 'medium', 'low', 'score-pop');
+  document.getElementById('riskSub').textContent = 'Pending analysis';
+  document.getElementById('riskDisplay').style.borderColor = '';
+
+  document.getElementById('liveDot').classList.remove('live');
+  document.getElementById('liveLabel').textContent = 'STANDBY';
+
+  var startBtn = document.getElementById('startBtn');
+  startBtn.disabled = false;
+  document.getElementById('resetBtn').style.display = 'none';
+
+  narratedSteps = {};
+  lastEventIndex = 0;
+
+  (async function() {
+    var serverUp = await checkServer();
+    if (serverUp) {
+      setMode('live');
+      startBtn.textContent = 'ANALYZE CONTRACT';
+    } else {
+      setMode('demo');
+      startBtn.textContent = 'ANALYZE CONTRACT (DEMO)';
+    }
+  })();
 }
 
 // ========================
@@ -928,8 +1363,9 @@ function startDemo() {
   document.getElementById('startBtn').disabled = true;
   startTime = Date.now();
   timerInterval = setInterval(updateTimer, 200);
+  demoTimeouts = [];
   DEMO.forEach(function(step) {
-    setTimeout(function() {
+    var id = setTimeout(function() {
       switch(step[1]) {
         case 'live':
           document.getElementById('liveDot').classList.add('live');
@@ -941,12 +1377,16 @@ function startDemo() {
         case 'progress': setProgress(step[2]); break;
         case 'sys': addSystemMessage(step[2], false); break;
         case 'sysstep': addSystemMessage(step[2], true); break;
-        case 'riskscore': setRiskScore('8.5', 'EXTREME — Do not sign as written'); break;
+        case 'riskscore': setRiskScore('8.5', getSeverityFromScore('8.5')); break;
         case 'brief': showBrief(); break;
       }
     }, step[0]);
+    demoTimeouts.push(id);
   });
-  setTimeout(function() { clearInterval(timerInterval); }, 20000);
+  demoTimeouts.push(setTimeout(function() {
+    clearInterval(timerInterval);
+    document.getElementById('resetBtn').style.display = 'block';
+  }, 20000));
 }
 
 // ========================
@@ -957,14 +1397,17 @@ async function startAnalysis() {
   document.getElementById('startBtn').disabled = true;
 
   var serverUp = await checkServer();
-  if (serverUp) {
-    startLiveMode();
-  } else {
-    startDemo();
-  }
+  showScenarioIntro(function() {
+    if (serverUp) {
+      startLiveMode();
+    } else {
+      startDemo();
+    }
+  });
 }
 
 (async function() {
+  feedIntroHtml = document.getElementById('feed').innerHTML;
   var serverUp = await checkServer();
   if (serverUp) {
     setMode('live');
