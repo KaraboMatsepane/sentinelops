@@ -1,6 +1,6 @@
-# SentinelOps — System Prompt Documentation
+# SentinelOps - System Prompt Documentation
 
-Each agent has a deeply distinct voice and role. The prompts are designed to produce genuinely different analytical perspectives — not five copies of the same analysis.
+Each agent has a deeply distinct voice and role. The prompts are designed to produce genuinely different analytical perspectives - not five copies of the same analysis.
 
 ---
 

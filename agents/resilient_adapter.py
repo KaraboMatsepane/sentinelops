@@ -8,91 +8,34 @@ Posts events to the local dashboard server for live visualization.
 
 import logging
 import os
-import re
-import time
-from typing import Any, ClassVar
+from typing import Any
 
 import httpx
 
 from band.core.protocols import AgentToolsProtocol
-from band.core.simple_adapter import SimpleAdapter
-from band.core.types import (
-    AdapterFeatures,
-    Emit,
-    Capability,
-    PlatformMessage,
-    HistoryProvider,
-)
+from band.core.types import PlatformMessage
+
+from base_adapter import BaseAdapter, strip_markdown  # noqa: F401 - re-export strip_markdown
 
 logger = logging.getLogger(__name__)
 
-if os.environ.get("SENTINELOPS_CLEAN"):
-    for _noisy in ("httpx", "band", "phoenix_channels"):
-        logging.getLogger(_noisy).setLevel(logging.WARNING)
 
-DASHBOARD_URL = "http://localhost:8080/api/event"
-
-def strip_markdown(text: str) -> str:
-    """
-    Convert markdown to clean plain text for Band chat.
-    Band renders markdown as raw characters — this keeps the room readable.
-    The dashboard receives the original markdown separately for rich rendering.
-    """
-    # Remove markdown headers (### Header → Header)
-    text = re.sub(r'^#{1,6}\s+', '', text, flags=re.MULTILINE)
-
-    # Remove bold and italic (**text** → text, *text* → text)
-    text = re.sub(r'\*{1,3}(.+?)\*{1,3}', r'\1', text)
-
-    # Remove inline code (`code` → code)
-    text = re.sub(r'`(.+?)`', r'\1', text)
-
-    # Remove horizontal rules (--- or ═══)
-    text = re.sub(r'^[-═]{3,}\s*$', '', text, flags=re.MULTILINE)
-
-    # Convert markdown tables to plain text rows
-    # Keep the content, remove the pipe/dash table structure
-    def clean_table_row(match):
-        row = match.group(0)
-        # Skip separator rows (|---|---|)
-        if re.match(r'^\|[\s\-|:]+\|$', row.strip()):
-            return ''
-        # Extract cell content
-        cells = [c.strip() for c in row.strip().strip('|').split('|')]
-        return '  |  '.join(cells)
-
-    text = re.sub(r'^\|.+\|$', clean_table_row, text, flags=re.MULTILINE)
-
-    # Remove bullet list markers but keep content indented
-    text = re.sub(r'^[\s]*[-*•]\s+', '  · ', text, flags=re.MULTILINE)
-
-    # Remove numbered list markers formatting (keep numbers)
-    text = re.sub(r'^(\d+)\.\s+', r'\1. ', text, flags=re.MULTILINE)
-
-    # Collapse multiple blank lines to max two
-    text = re.sub(r'\n{3,}', '\n\n', text)
-
-    return text.strip()
-
-class ResilientAdapter(SimpleAdapter[HistoryProvider]):
+class ResilientAdapter(BaseAdapter):
     """
     Band adapter that tries multiple LLM providers in configurable order.
-    Integrates with the local dashboard server for live visualization.
 
     Provider order is configurable via provider_order parameter:
-    - Default: ["aiml", "featherless"] (AI/ML API first)
-    - Precedent Agent: ["featherless", "aiml"] (Featherless AI first)
-    - Final fallback: hardcoded response if all providers fail
+   - Default: ["aiml", "featherless"] (AI/ML API first)
+   - Precedent Agent: ["featherless", "aiml"] (Featherless AI first)
+   - Final fallback: hardcoded response if all providers fail
 
     Band chat: receives clean plain text (no markdown clutter)
     Dashboard: receives original markdown for rich formatted rendering
     """
 
-    SUPPORTED_EMIT: ClassVar[frozenset[Emit]] = frozenset()
-    SUPPORTED_CAPABILITIES: ClassVar[frozenset[Capability]] = frozenset()
-
     def __init__(
             self,
+            *,
             agent_name: str,
             system_prompt: str,
             fallback_response: str,
@@ -105,19 +48,19 @@ class ResilientAdapter(SimpleAdapter[HistoryProvider]):
             trigger_phrase: str | None = None,
             provider_order: list[str] | None = None,
     ):
-        super().__init__(history_converter=None, features=AdapterFeatures())
-        self.agent_name = agent_name
+        super().__init__(
+            agent_name=agent_name,
+            fallback_response=fallback_response,
+            max_tokens=max_tokens,
+            respond_to=respond_to,
+            mention_targets=mention_targets,
+        )
         self._system_prompt = system_prompt
-        self.fallback_response = fallback_response
-        self.max_tokens = max_tokens
         self.aiml_model = aiml_model
         self.featherless_model = featherless_model
-        self.respond_to = respond_to
         self.wait_for_all = wait_for_all
-        self.mention_targets = mention_targets
         self.trigger_phrase = trigger_phrase
         self.provider_order = provider_order or ["aiml", "featherless"]
-        self._history: dict[str, list[dict[str, str]]] = {}
         self._received_from: dict[str, dict[str, str]] = {}
 
     async def _call_aiml(self, messages: list[dict]) -> str:
@@ -164,51 +107,6 @@ class ResilientAdapter(SimpleAdapter[HistoryProvider]):
             )
             resp.raise_for_status()
             return resp.json()["choices"][0]["message"]["content"]
-
-    async def _notify_dashboard(self, content: str, provider: str):
-        """Send full markdown content to dashboard for rich rendering."""
-        try:
-            async with httpx.AsyncClient(timeout=5.0) as client:
-                resp = await client.post(DASHBOARD_URL, json={
-                    "agent": self.agent_name,
-                    "type": "message",
-                    "content": content,       # full markdown — dashboard renders this
-                    "provider": provider,
-                    "timestamp": time.time(),
-                })
-                logger.info("[%s] Dashboard notified (status %d)", self.agent_name, resp.status_code)
-        except Exception as e:
-            logger.warning("[%s] Dashboard notification failed: %s", self.agent_name, e)
-
-    async def _notify_dashboard_status(self, status: str):
-        """Send agent status update to dashboard."""
-        try:
-            async with httpx.AsyncClient(timeout=5.0) as client:
-                resp = await client.post(DASHBOARD_URL, json={
-                    "agent": self.agent_name,
-                    "type": "status",
-                    "status": status,
-                    "timestamp": time.time(),
-                })
-                logger.debug("[%s] Status '%s' sent (status %d)", self.agent_name, status, resp.status_code)
-        except Exception as e:
-            logger.warning("[%s] Status notification failed: %s", self.agent_name, e)
-
-    def _should_respond(self, msg: PlatformMessage) -> bool:
-        if not self.respond_to:
-            return True
-        sender = (msg.sender_name or "").lower()
-        sender_type = (msg.sender_type or "").lower()
-        for pattern in self.respond_to:
-            p = pattern.lower()
-            if p in sender or p == sender_type:
-                return True
-        return False
-
-    async def on_started(self, agent_name: str, agent_description: str) -> None:
-        await super().on_started(agent_name, agent_description)
-        logger.info("Resilient adapter started for %s", agent_name)
-        await self._notify_dashboard_status("connected")
 
     async def on_message(
             self,
@@ -290,20 +188,12 @@ class ResilientAdapter(SimpleAdapter[HistoryProvider]):
                 logger.warning("[%s] %s failed: %s", self.agent_name, display_name, e)
 
         if text is None:
-            logger.warning("[%s] All providers failed — using fallback", self.agent_name)
+            logger.warning("[%s] All providers failed - using fallback", self.agent_name)
             text = self.fallback_response
             provider_used = "fallback"
 
-        self._history[room_id].append({"role": "assistant", "content": text})
-
-        # Send plain text to Band (readable in the chat room)
-        band_text = strip_markdown(text)
-        await tools.send_message(band_text, mentions=self.mention_targets)
-
-        # Send full markdown to dashboard (rich rendering)
-        await self._notify_dashboard(text, provider_used)
-        await self._notify_dashboard_status("complete")
+        await self._send_and_notify(tools, text, provider_used, room_id)
 
     async def on_cleanup(self, room_id: str) -> None:
-        self._history.pop(room_id, None)
+        await super().on_cleanup(room_id)
         self._received_from.pop(room_id, None)

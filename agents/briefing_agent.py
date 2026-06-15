@@ -1,9 +1,16 @@
 """
-SentinelOps — Briefing Agent (Agent 5)
+SentinelOps - Briefing Agent (Agent 5)
 Role: The Communicator
 
 Final agent. Reads the Risk Agent's assessment and synthesizes
 a complete executive decision brief for the human decision-maker.
+
+Supports two scenarios:
+  A. Executive decision brief for contract reviews
+  B. Ranked vendor recommendation for vendor evaluations
+
+Also supports human-in-the-loop follow-up questions after the
+pipeline completes, via the BriefingAdapter subclass.
 
 Run with: python agents/briefing_agent.py
 """
@@ -11,10 +18,14 @@ Run with: python agents/briefing_agent.py
 import asyncio
 import logging
 import os
+from typing import Any
 
 from dotenv import load_dotenv
 from band import Agent
 from band.config import load_agent_config
+
+from band.core.protocols import AgentToolsProtocol
+from band.core.types import PlatformMessage
 
 from resilient_adapter import ResilientAdapter
 
@@ -28,11 +39,16 @@ SYSTEM_PROMPT = """You are the Briefing Agent in SentinelOps, a multi-agent deci
 
 YOUR ROLE: The Communicator. You are the last agent to speak. You read everything the Analyst, Devil's Advocate, Precedent Agent, and Risk Agent have posted, and you synthesize it all into a clear, professional executive decision brief. Your output is what the human decision-maker reads. It must be immediately useful, scannable, and actionable.
 
-YOUR VOICE: Like an executive assistant who writes for CEOs. Concise, professional, structured. You know the decision-maker has 5 minutes. Every word earns its place. You write for humans, not machines. You prioritize — the most important thing goes first. You make it impossible to miss the key findings.
+YOUR VOICE: Like an executive assistant who writes for CEOs. Concise, professional, structured. You know the decision-maker has 5 minutes. Every word earns its place. You write for humans, not machines. You prioritize - the most important thing goes first. You make it impossible to miss the key findings.
 
-WHEN YOU RECEIVE THE RISK ASSESSMENT: Generate a complete executive decision brief.
+SCENARIO DETECTION:
+Analyze the Risk Agent's assessment to determine the scenario:
 
-BRIEF STRUCTURE (follow this exactly):
+SCENARIO A - CONTRACT REVIEW: If the risk assessment covers a single contract or partnership agreement, generate a complete executive decision brief following the CONTRACT BRIEF STRUCTURE below.
+
+SCENARIO B - VENDOR EVALUATION: If the risk assessment covers multiple vendors or a vendor comparison, generate a ranked vendor recommendation following the VENDOR BRIEF STRUCTURE below.
+
+CONTRACT BRIEF STRUCTURE (Scenario A):
 
 ────────────────────
 SENTINELOPS EXECUTIVE DECISION BRIEF
@@ -42,17 +58,17 @@ WHAT YOU ARE BEING ASKED TO SIGN
 
 2-3 sentence summary of the deal in plain language.
 
-TOP RISKS — ACT ON THESE BEFORE SIGNING
+TOP RISKS - ACT ON THESE BEFORE SIGNING
 
 Numbered list. Each item formatted as:
-1. [CRITICAL] Title (Section X.X, p.XX) — 1-2 sentence explanation.
+1. [CRITICAL] Title (Section X.X, p.XX) - 1-2 sentence explanation.
 Exposure: $X,XXX,XXX
 
 Use [CRITICAL] [HIGH] or [MEDIUM] severity tags in brackets.
 
 WHAT YOUR COMPANY'S HISTORY SAYS
 
-Key historical parallels — prior losses, prior decisions, board resolutions.
+Key historical parallels - prior losses, prior decisions, board resolutions.
 
 QUESTIONS TO ASK BEFORE SIGNING
 
@@ -61,6 +77,47 @@ QUESTIONS TO ASK BEFORE SIGNING
 NEGOTIATION DEMANDS
 
 Numbered list of specific contract changes required before signing.
+
+────────────────────
+AUDIT TRAIL
+
+Flow: Analyst > Band > DA + Precedent (parallel) > Band > Risk > Band > Briefing > Human
+No autonomous decisions made. You retain full authority.
+────────────────────
+
+VENDOR BRIEF STRUCTURE (Scenario B):
+
+────────────────────
+SENTINELOPS VENDOR RECOMMENDATION BRIEF
+────────────────────
+
+EVALUATION SUMMARY
+
+2-3 sentence overview of what was evaluated and the scope.
+
+VENDOR RANKINGS
+
+Ranked list of vendors from recommended to least recommended:
+1. [RECOMMENDED] Vendor Name - Risk Score: X.X/10
+   Key strengths and conditions for selection.
+
+2. [CONDITIONAL] Vendor Name - Risk Score: X.X/10
+   Key concerns and what would need to change.
+
+3. [NOT RECOMMENDED] Vendor Name - Risk Score: X.X/10
+   Primary disqualifying factors.
+
+CONDITIONS FOR TOP PICK
+
+Numbered list of specific conditions that must be met before proceeding with the recommended vendor.
+
+RISKS ACROSS ALL VENDORS
+
+Common risks or concerns that apply regardless of vendor choice.
+
+QUESTIONS TO ASK VENDORS
+
+4-5 specific questions to pose to shortlisted vendors.
 
 ────────────────────
 AUDIT TRAIL
@@ -78,17 +135,27 @@ Use numbered lists (1. 2. 3.) for sequential items.
 Use > for emphasis on key findings (e.g. > Board resolution violated).
 Use plain dashes for visual separation: ────────────────────
 Dollar amounts and percentages should stand alone on their own line.
-Keep paragraphs short — 2-3 sentences maximum.
+Keep paragraphs short - 2-3 sentences maximum.
 The output must be readable as plain text in a chat window.
 
 CRITICAL RULES:
 The brief must be immediately readable by a non-technical executive.
-Prioritize — most important risks first.
+Prioritize - most important risks first.
 Include SPECIFIC page numbers and section references from the other agents' findings.
 Include SPECIFIC dollar amounts for financial exposure.
-The Questions and Negotiation sections must be concrete and actionable, not generic.
+The Questions and Negotiation/Conditions sections must be concrete and actionable, not generic.
 End with the audit trail showing the complete agent flow.
 State explicitly that zero autonomous decisions were made."""
+
+FOLLOWUP_PROMPT = """You are the Briefing Agent in SentinelOps. The analysis pipeline has completed and the executive brief has been delivered. The human decision-maker is now asking follow-up questions.
+
+You have access to the full conversation history including all agent reports. Answer questions directly, citing specific findings, page numbers, section references, and dollar amounts from the analysis. Be concise and actionable.
+
+If asked about a specific risk, explain it in detail with the relevant context.
+If asked for recommendations, provide specific, numbered action items.
+If asked to compare options, use a structured format.
+
+Always remind the user that final decisions remain with them - you provide analysis, not authority."""
 
 FALLBACK_RESPONSE = """═══════════════════════════════════════════════
 SENTINELOPS EXECUTIVE DECISION BRIEF
@@ -98,21 +165,21 @@ Risk Score: 8.5/10 · Analysis: 5 agents · 0 autonomous decisions
 ═══════════════════════════════════════════════
 
 WHAT YOU ARE BEING ASKED TO SIGN
-A 3-year, $1.8M exclusive EMEA distribution partnership with GlobalTech Solutions Inc. Meridian Ventures has a $600K annual minimum commitment and a $500K liability cap — 27.8% of deal value.
+A 3-year, $1.8M exclusive EMEA distribution partnership with GlobalTech Solutions Inc. Meridian Ventures has a $600K annual minimum commitment and a $500K liability cap - 27.8% of deal value.
 
-TOP RISKS — ACT ON THESE BEFORE SIGNING
-1. 🔴 CRITICAL: Board Resolution BRD-2023-47 Violation (Section 4.1, p.27) — Automatic IP transfer to GlobalTech. Your board prohibited this in September 2023. This contract cannot be signed without board approval.
+TOP RISKS - ACT ON THESE BEFORE SIGNING
+1. 🔴 CRITICAL: Board Resolution BRD-2023-47 Violation (Section 4.1, p.27) - Automatic IP transfer to GlobalTech. Your board prohibited this in September 2023. This contract cannot be signed without board approval.
 
-2. 🔴 CRITICAL: We Rejected This Vendor 12 Months Ago (April 2025) — Meridian evaluated GlobalTech and chose not to proceed. Documented reasons — surprise penalty clauses, declining EMEA performance — are present in this contract.
+2. 🔴 CRITICAL: We Rejected This Vendor 12 Months Ago (April 2025) - Meridian evaluated GlobalTech and chose not to proceed. Documented reasons - surprise penalty clauses, declining EMEA performance - are present in this contract.
 
-3. 🔴 CRITICAL: 5+ Year Exclusivity Lock-In (p.34 + p.67) — 3-year exclusivity plus 24-month post-termination extension. NovaCorp precedent: $780K lost in identical structure.
+3. 🔴 CRITICAL: 5+ Year Exclusivity Lock-In (p.34 + p.67) - 3-year exclusivity plus 24-month post-termination extension. NovaCorp precedent: $780K lost in identical structure.
 
-4. 🟡 HIGH: Liability Cap Leaves $1.3M Exposed (p.52) — $500K cap on $1.8M deal = 27.8% coverage. Vertex benchmark: 100%. Recovery gap: $1,300,000.
+4. 🟡 HIGH: Liability Cap Leaves $1.3M Exposed (p.52) - $500K cap on $1.8M deal = 27.8% coverage. Vertex benchmark: 100%. Recovery gap: $1,300,000.
 
-5. 🟡 HIGH: "Best Efforts" Is Legally Unenforceable (p.12) — No KPIs, no benchmarks, no definition. DataStream precedent: identical language, $340K lost with zero remedy.
+5. 🟡 HIGH: "Best Efforts" Is Legally Unenforceable (p.12) - No KPIs, no benchmarks, no definition. DataStream precedent: identical language, $340K lost with zero remedy.
 
 WHAT YOUR COMPANY'S HISTORY SAYS
-You have been burned by "best efforts" language before — DataStream, 2022, $340K lost. You have been burned by open-ended exclusivity — NovaCorp, 2021, $780K lost. You evaluated this exact vendor 12 months ago and chose not to proceed. This contract has all three problems.
+You have been burned by "best efforts" language before - DataStream, 2022, $340K lost. You have been burned by open-ended exclusivity - NovaCorp, 2021, $780K lost. You evaluated this exact vendor 12 months ago and chose not to proceed. This contract has all three problems.
 
 QUESTIONS TO ASK BEFORE SIGNING
 1. What is in Schedule C? Penalty clauses must be disclosed before any signature.
@@ -123,7 +190,7 @@ QUESTIONS TO ASK BEFORE SIGNING
 NEGOTIATION DEMANDS
 • Define "best efforts" with specific quarterly KPIs and mutual minimums (p.12)
 • Remove or cap post-termination exclusivity to 6 months maximum (p.67)
-• Raise liability cap to 100% of deal value — $1,800,000 (p.52)
+• Raise liability cap to 100% of deal value - $1,800,000 (p.52)
 • Add change-of-control clause: Meridian exits if GlobalTech is acquired
 • Require full Schedule C disclosure before any signature
 • Equalize termination rights: both parties get 90-day exit
@@ -138,18 +205,56 @@ SentinelOps · Multi-Agent Decision Intelligence
 ═══════════════════════════════════════════════"""
 
 
+class BriefingAdapter(ResilientAdapter):
+    """Extended adapter that handles both pipeline output and user follow-ups."""
+
+    def __init__(self, followup_prompt, **kwargs):
+        self._followup_prompt = followup_prompt
+        self._pipeline_complete = {}  # room_id -> bool
+        super().__init__(**kwargs)
+
+    async def on_message(self, msg, tools, history, *args,
+                         is_session_bootstrap, room_id, **kw):
+        sender = msg.sender_name or ""
+
+        if self._pipeline_complete.get(room_id):
+            is_risk = "sentinelops-risk" in sender.lower()
+            if not is_risk:
+                original_prompt = self._system_prompt
+                original_respond_to = self.respond_to
+                self._system_prompt = self._followup_prompt
+                self.respond_to = None
+                try:
+                    await super().on_message(msg, tools, history, *args,
+                                             is_session_bootstrap=is_session_bootstrap,
+                                             room_id=room_id, **kw)
+                finally:
+                    self._system_prompt = original_prompt
+                    self.respond_to = original_respond_to
+                return
+
+        # Normal pipeline processing
+        await super().on_message(msg, tools, history, *args,
+                                 is_session_bootstrap=is_session_bootstrap,
+                                 room_id=room_id, **kw)
+
+        # Mark pipeline as complete after generating the brief
+        self._pipeline_complete[room_id] = True
+
+
 async def main():
     load_dotenv()
 
     agent_id, api_key = load_agent_config("briefing")
     logger.info("Briefing Agent starting up...")
 
-    adapter = ResilientAdapter(
+    adapter = BriefingAdapter(
+        followup_prompt=FOLLOWUP_PROMPT,
         agent_name="briefing",
         system_prompt=SYSTEM_PROMPT,
         fallback_response=FALLBACK_RESPONSE,
         max_tokens=3500,
-        respond_to=["sentinelops-risk"],
+        respond_to=["sentinelops-risk", "User"],
         mention_targets=["karabomatsepane16"],
     )
 
@@ -161,7 +266,7 @@ async def main():
         rest_url=os.getenv("THENVOI_REST_URL"),
     )
 
-    logger.info("Briefing Agent connected. Final agent — generates executive brief.")
+    logger.info("Briefing Agent connected. Final agent - generates executive brief and handles follow-ups.")
     await agent.run()
 
 if __name__ == "__main__":

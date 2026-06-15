@@ -1,5 +1,14 @@
+# Band SDK - agent coordination platform
 band-sdk[anthropic]
-python-dotenv
-requests
-pyyaml
+
+# LLM integration frameworks (cross-framework demonstration)
+langchain>=0.3.0
+langchain-openai>=0.3.0
+openai>=1.0.0
+
+# HTTP client and environment
 httpx>=0.27.0
+python-dotenv
+
+# Configuration
+pyyaml

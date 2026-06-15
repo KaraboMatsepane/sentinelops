@@ -7,15 +7,17 @@
       "title": "GlobalTech Solutions Payment Dispute",
       "detail": "GlobalTech Solutions filed a payment dispute against Meridian portfolio company TechBridge Ltd for $142,000 in alleged unpaid licensing fees. Dispute escalated to legal proceedings before settling out of court for $89,000 in June 2023. TechBridge CEO noted GlobalTech's aggressive billing practices and lack of transparency in fee calculation.",
       "outcome": "Settled. TechBridge no longer works with GlobalTech.",
-      "relevance": "HIGH — same vendor now proposing a larger deal with Meridian directly"
+      "relevance": "HIGH",
+      "scenarios": ["a"]
     },
     {
       "date": "2022-11-08",
       "type": "contract_lesson",
-      "title": "DataStream Partnership — Best Efforts Clause Failure",
+      "title": "DataStream Partnership - Best Efforts Clause Failure",
       "detail": "Partnership agreement with DataStream Inc used identical 'best efforts' language. When DataStream underperformed, Meridian attempted to claim breach of contract. Legal team found the clause unenforceable because 'best efforts' was never defined. Meridian received no remedy and lost $340,000 in expected revenues.",
       "outcome": "Negative. Legal lesson: always define 'best efforts' with specific KPIs.",
-      "relevance": "HIGH — same undefined 'best efforts' language appears in current contract"
+      "relevance": "HIGH",
+      "scenarios": ["a"]
     },
     {
       "date": "2023-09-20",
@@ -23,7 +25,8 @@
       "title": "Board Resolution: IP Transfer Restrictions",
       "detail": "Board unanimously passed resolution BRD-2023-47 prohibiting any contract that transfers IP rights to third parties without board approval and valuation. Resolution was passed after the Apex Technologies incident where a partnership agreement inadvertently transferred rights to a key algorithm.",
       "outcome": "Board resolution in effect. Requires explicit approval for IP transfer clauses.",
-      "relevance": "HIGH — current contract Section 4.1 transfers all IP improvements to GlobalTech automatically"
+      "relevance": "HIGH",
+      "scenarios": ["a"]
     },
     {
       "date": "2021-06-12",
@@ -31,7 +34,8 @@
       "title": "NovaCorp Exclusivity Trap",
       "detail": "Signed 3-year exclusivity agreement with NovaCorp that prevented Meridian from distributing competing products. NovaCorp was acquired 14 months in and the acquirer deprioritized the product line. Meridian was locked out of competitors for the remaining 20 months, losing an estimated $780,000 in alternative distribution revenue.",
       "outcome": "Negative. Lesson: exclusivity agreements need change-of-control clauses and market activity minimums from partner.",
-      "relevance": "MEDIUM — current contract has 3-year exclusivity plus 24-month post-term extension with no change-of-control protection"
+      "relevance": "MEDIUM",
+      "scenarios": ["a"]
     },
     {
       "date": "2024-01-30",
@@ -39,21 +43,68 @@
       "title": "Successful High-Value Deal: Vertex Systems",
       "detail": "Successfully negotiated $2.1M partnership with Vertex Systems. Key terms that protected Meridian: defined performance minimums on both sides, clear liability cap at 100% of deal value, 90-day termination right for both parties, and explicit IP ownership retained by Meridian. Deal closed in 6 weeks.",
       "outcome": "Positive. This is the template for what a good partnership contract looks like.",
-      "relevance": "MEDIUM — current contract deviates significantly from the Vertex template on liability, termination, and IP"
+      "relevance": "MEDIUM",
+      "scenarios": ["a", "b"]
     },
     {
       "date": "2025-04-03",
       "type": "market_intel",
       "title": "GlobalTech Solutions Market Reputation",
-      "detail": "Due diligence file from failed 2025 partnership discussion with GlobalTech (abandoned at LOI stage). Notes from that process: GlobalTech has a pattern of adding penalty clauses in Schedule C that are not disclosed until late in negotiations. Three other companies in our network reported surprise penalty activations. GlobalTech's EMEA performance has been declining — they may be seeking distribution partners to compensate.",
+      "detail": "Due diligence file from failed 2025 partnership discussion with GlobalTech (abandoned at LOI stage). Notes from that process: GlobalTech has a pattern of adding penalty clauses in Schedule C that are not disclosed until late in negotiations. Three other companies in our network reported surprise penalty activations. GlobalTech's EMEA performance has been declining - they may be seeking distribution partners to compensate.",
       "outcome": "Previous discussion abandoned. Reason: terms were unfavorable.",
-      "relevance": "HIGH — Meridian previously chose NOT to partner with GlobalTech and the reasons are documented"
+      "relevance": "HIGH",
+      "scenarios": ["a"]
+    },
+    {
+      "date": "2024-06-18",
+      "type": "vendor_dispute",
+      "title": "Apex Systems Billing Dispute",
+      "detail": "Apex Systems overbilled Meridian by $34,000 over six months for staging environment hosting. Invoicing was opaque - line items did not match contracted rates. Took 4 months of escalation to resolve. Apex eventually issued a credit but never explained the discrepancy. Finance team flagged Apex's billing practices as 'unreliable' in the vendor review.",
+      "outcome": "Resolved with credit. Apex billing practices flagged as unreliable by finance team.",
+      "relevance": "HIGH",
+      "scenarios": ["b"]
+    },
+    {
+      "date": "2023-08-15",
+      "type": "vendor_success",
+      "title": "NimbusStack Project Helix Pilot",
+      "detail": "Meridian ran a 6-month pilot with NimbusStack for Project Helix (internal analytics platform). Performance was solid - 99.92% uptime, responsive support, clean invoicing. However, the pilot surfaced two concerns: P1 support response averaged 3.5 hours (vs. contracted 4 hours, but slower than expected), and their auto-scaling struggled during a traffic spike that exceeded 2x baseline.",
+      "outcome": "Positive overall. NimbusStack is a known quantity. Support speed and burst capacity are the main concerns.",
+      "relevance": "HIGH",
+      "scenarios": ["b"]
+    },
+    {
+      "date": "2025-11-22",
+      "type": "board_decision",
+      "title": "Board Directive: Infrastructure Risk Reduction",
+      "detail": "After the Q4 2025 production outage (14 hours downtime, estimated $210,000 in lost revenue and SLA penalties to enterprise clients), the board directed Infrastructure to migrate off self-hosted servers within 12 months. Board specifically emphasized reliability - 99.99% uptime was stated as the target. Board chair noted: 'We cannot have another outage like this. Our enterprise contracts depend on it.'",
+      "outcome": "Board directive in effect. 99.99% uptime target is a board-level requirement, not just a preference.",
+      "relevance": "HIGH",
+      "scenarios": ["b"]
+    },
+    {
+      "date": "2025-03-10",
+      "type": "market_intel",
+      "title": "Stratos Cloud Due Diligence",
+      "detail": "Infrastructure team conducted preliminary research on Stratos Cloud. Findings: founded 2019, 47 employees, strong technical team but small for enterprise support at scale. No prior relationship with Meridian. Three reference customers reported excellent uptime and SLA enforcement. However, one reference noted that Stratos's proprietary toolchain makes migration away from them expensive ($150K-200K estimated).",
+      "outcome": "No prior relationship. Strong SLA reputation but potential vendor lock-in.",
+      "relevance": "MEDIUM",
+      "scenarios": ["b"]
+    },
+    {
+      "date": "2024-09-05",
+      "type": "contract_lesson",
+      "title": "CloudFirst Variable Pricing Lesson",
+      "detail": "Meridian signed a variable-pricing hosting contract with CloudFirst in 2022. By 2024, costs had escalated 40% beyond initial projections due to usage-based pricing with no ceiling. Finance team spent significant effort forecasting and managing costs. CFO mandated that all future cloud contracts must have either fixed pricing or a defined cost ceiling.",
+      "outcome": "Negative. CFO mandate: no cloud contracts without price caps or fixed pricing.",
+      "relevance": "HIGH",
+      "scenarios": ["b"]
     }
   ],
   "summary": {
-    "total_entries": 6,
-    "high_relevance": 4,
-    "medium_relevance": 2,
-    "key_warning": "Meridian has prior negative history with GlobalTech Solutions and has institutional knowledge suggesting this deal carries elevated risk"
+    "total_entries": 11,
+    "high_relevance": 7,
+    "medium_relevance": 4,
+    "key_warning": "Meridian has prior negative history with GlobalTech Solutions and documented issues with Apex Systems billing. NimbusStack is a known positive relationship. Board mandates 99.99% uptime and price caps on cloud contracts."
   }
 }

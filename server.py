@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-SentinelOps — Dashboard Server
+SentinelOps - Dashboard Server
 
 Serves the live dashboard and collects real-time events from agents.
 Agents POST events to /api/event as they process messages through Band.
@@ -45,7 +45,13 @@ NO_CACHE_HEADERS = {
 }
 
 
-def trigger_analysis():
+TRIGGER_MESSAGES = {
+    "a": "@sentinelops-analyst Analyze the GlobalTech Solutions Partnership Agreement (Scenario A). Extract all key clauses, financial terms, and flag anything unusual.",
+    "b": "@sentinelops-analyst Analyze the Cloud Infrastructure Vendor proposals (Scenario B - vendor selection). Parse all three vendor proposals, extract pricing, SLAs, exit terms, and flag anything unusual.",
+}
+
+
+def trigger_analysis(scenario="a"):
     """Send a trigger message to the Band room via REST API."""
     try:
         sys.path.insert(0, os.path.join(os.path.dirname(__file__), "agents"))
@@ -55,17 +61,18 @@ def trigger_analysis():
         analyst_id, _ = load_agent_config("analyst")
         _, briefing_key = load_agent_config("briefing")
         rest_url = os.getenv("THENVOI_REST_URL", "https://app.band.ai/")
+        content = TRIGGER_MESSAGES.get(scenario, TRIGGER_MESSAGES["a"])
 
         async def send():
             client = AsyncRestClient(api_key=briefing_key, base_url=rest_url)
             await client.agent_api_messages.create_agent_chat_message(
                 chat_id=ROOM_ID,
                 message=ChatMessageRequest(
-                    content="@sentinelops-analyst Analyze the GlobalTech Solutions Partnership Agreement (Scenario A). Extract all key clauses, financial terms, and flag anything unusual.",
+                    content=content,
                     mentions=[ChatMessageRequestMentionsItem(id=analyst_id)],
                 ),
             )
-            logger.info("Trigger message sent to Band room")
+            logger.info("Trigger message sent to Band room (scenario %s)", scenario.upper())
 
         loop = asyncio.new_event_loop()
         loop.run_until_complete(send())
@@ -73,6 +80,37 @@ def trigger_analysis():
         return True
     except Exception as e:
         logger.error("Failed to trigger analysis: %s", e)
+        return False
+
+
+def send_followup(question):
+    """Send a human follow-up question to the Band room via the analyst agent."""
+    try:
+        sys.path.insert(0, os.path.join(os.path.dirname(__file__), "agents"))
+        from band.client.rest import AsyncRestClient, ChatMessageRequest, ChatMessageRequestMentionsItem
+        from band.config import load_agent_config
+
+        briefing_id, _ = load_agent_config("briefing")
+        _, analyst_key = load_agent_config("analyst")
+        rest_url = os.getenv("THENVOI_REST_URL", "https://app.band.ai/")
+
+        async def send():
+            client = AsyncRestClient(api_key=analyst_key, base_url=rest_url)
+            await client.agent_api_messages.create_agent_chat_message(
+                chat_id=ROOM_ID,
+                message=ChatMessageRequest(
+                    content=f"@sentinelops-briefing {question}",
+                    mentions=[ChatMessageRequestMentionsItem(id=briefing_id)],
+                ),
+            )
+            logger.info("Follow-up question sent to Band room")
+
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(send())
+        loop.close()
+        return True
+    except Exception as e:
+        logger.error("Failed to send follow-up: %s", e)
         return False
 
 
@@ -166,13 +204,45 @@ class DashboardHandler(SimpleHTTPRequestHandler):
             return
 
         if self.path == "/api/trigger":
+            length = int(self.headers.get("Content-Length", 0))
+            body = self.rfile.read(length) if length else b"{}"
+            try:
+                payload = json.loads(body) if body.strip() else {}
+            except json.JSONDecodeError:
+                payload = {}
+            scenario = payload.get("scenario", "a")
             with events_lock:
                 events.clear()
-            success = trigger_analysis()
+            success = trigger_analysis(scenario)
             self.send_response(200)
             _send_api_headers(self)
             self.end_headers()
-            self.wfile.write(json.dumps({"triggered": success}).encode())
+            self.wfile.write(json.dumps({"triggered": success, "scenario": scenario}).encode())
+            return
+
+        if self.path == "/api/followup":
+            length = int(self.headers.get("Content-Length", 0))
+            body = self.rfile.read(length)
+            try:
+                payload = json.loads(body)
+                question = payload.get("question", "")
+            except json.JSONDecodeError:
+                question = ""
+            if question:
+                with events_lock:
+                    events.append({
+                        "type": "followup_question",
+                        "agent": "human",
+                        "content": question,
+                        "timestamp": time.time(),
+                    })
+                success = send_followup(question)
+            else:
+                success = False
+            self.send_response(200)
+            _send_api_headers(self)
+            self.end_headers()
+            self.wfile.write(json.dumps({"sent": success}).encode())
             return
 
         self.send_error(404)
@@ -195,7 +265,7 @@ def main():
 
     print(f"""
 \033[1m╔══════════════════════════════════════════════════╗
-║       SentinelOps — Dashboard Server             ║
+║       SentinelOps - Dashboard Server             ║
 ╚══════════════════════════════════════════════════╝\033[0m
 
   Dashboard:  http://localhost:{port}

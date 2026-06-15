@@ -17,7 +17,7 @@
         "3-year price lock guarantee"
       ],
       "concerns": [
-        "Proprietary architecture — migration exit cost estimated $180K+",
+        "Proprietary architecture - migration exit cost estimated $180K+",
         "No existing relationship with Meridian",
         "Requires custom API adoption (lock-in risk)",
         "6 months remaining fees as exit penalty"
@@ -28,12 +28,12 @@
       "annual_cost": 290000,
       "proposal_highlights": [
         "Positive prior relationship (Project Helix pilot, 2023)",
-        "Flexible exit terms — 90-day notice",
+        "Flexible exit terms - 90-day notice",
         "Multi-region deployment (EU + US East)",
         "Open-source compatible stack"
       ],
       "concerns": [
-        "SLA is 99.9% — ten times more allowed downtime than Stratos",
+        "SLA is 99.9% - ten times more allowed downtime than Stratos",
         "CPI+2% price escalation clause",
         "4-hour P1 support response (vs 15 min for Stratos)",
         "Cost could reach $340K by year 3 under escalation"
@@ -43,13 +43,13 @@
       "name": "Apex Systems",
       "annual_cost": 210000,
       "proposal_highlights": [
-        "Most established — 12 years, 500+ enterprise clients",
+        "Most established - 12 years, 500+ enterprise clients",
         "99.99% uptime with proactive monitoring",
         "Full compliance suite: SOC 2 II, ISO 27001, HIPAA",
         "Meridian already uses Apex for staging environment"
       ],
       "concerns": [
-        "Best efforts SLA support — no financial accountability for downtime",
+        "Best efforts SLA support - no financial accountability for downtime",
         "2024 billing dispute with Meridian ($34K overbilling over 6 months)",
         "Variable pricing with no defined ceiling",
         "Opaque invoicing practices documented in prior dispute"

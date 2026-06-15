@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-SentinelOps — Demo Runner
+SentinelOps - Demo Runner
 Launches the dashboard server and all 5 agents.
 
 Usage: python run_demo.py
@@ -71,14 +71,14 @@ def stream_output_clean(pipe, name):
         if not text:
             continue
 
-        if "Resilient adapter started" in text:
+        if "adapter started" in text:
             with _agents_lock:
                 _agents_connected += 1
                 if _agents_connected == 5:
                     _clean_log("✓", "All 5 agents connected")
             continue
 
-        if "Trying AI/ML API" in text:
+        if "Trying" in text and ("AI/ML" in text or "LangChain" in text or "Featherless" in text or "OpenAI" in text):
             if name in ("Devil's Advocate", "Precedent"):
                 with _parallel_lock:
                     if not _parallel_announced:
@@ -92,21 +92,21 @@ def stream_output_clean(pipe, name):
             m = re.search(r"\((\d+) chars\)", text)
             chars = m.group(1) if m else "?"
             if name == "Briefing":
-                _clean_log("✓", "Pipeline complete — Executive brief generated")
+                _clean_log("✓", "Pipeline complete - Executive brief generated")
             else:
-                _clean_log("✓", f"{display} complete — {chars} chars")
+                _clean_log("✓", f"{display} complete - {chars} chars")
             continue
 
-        if "AI/ML API failed" in text:
-            _clean_log("⚠", f"{display}: AI/ML API failed, trying fallback...")
+        if "failed" in text and ("AI/ML" in text or "LangChain" in text):
+            _clean_log("⚠", f"{display}: provider failed, trying fallback...")
             continue
 
         if "Featherless" in text and "failed" in text:
             _clean_log("⚠", f"{display}: Featherless failed, trying fallback...")
             continue
 
-        if "All providers failed" in text:
-            _clean_log("⚠", f"{display} — all providers failed, using hardcoded response")
+        if "All providers failed" in text or "All LangChain providers failed" in text:
+            _clean_log("⚠", f"{display} - all providers failed, using hardcoded response")
             continue
 
         if name == "Server" and "Event received" in text and "type=message" in text:
@@ -156,7 +156,7 @@ def main():
 
     print(f"""
 {BOLD}╔══════════════════════════════════════════════════╗
-║          SentinelOps — Demo Runner               ║
+║          SentinelOps - Demo Runner               ║
 ║     Multi-Agent Decision Intelligence            ║
 ╚══════════════════════════════════════════════════╝{RESET}
 """)
