@@ -148,6 +148,9 @@ class BaseAdapter(SimpleAdapter[HistoryProvider]):
         """Send plain text to Band and markdown to dashboard, then mark complete."""
         self._history[room_id].append({"role": "assistant", "content": text})
         band_text = strip_markdown(text)
-        await tools.send_message(band_text, mentions=self.mention_targets)
+        try:
+            await tools.send_message(band_text, mentions=self.mention_targets)
+        except Exception as e:
+            logger.warning("[%s] Band send failed: %s", self.agent_name, e)
         await self._notify_dashboard(text, provider)
         await self._notify_dashboard_status("complete")

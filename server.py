@@ -132,6 +132,8 @@ class DashboardHandler(SimpleHTTPRequestHandler):
         if parsed.path == "/":
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
+            for k, v in NO_CACHE_HEADERS.items():
+                self.send_header(k, v)
             self.end_headers()
             html_path = os.path.join(os.path.dirname(__file__), "dashboard", "index.html")
             with open(html_path, "rb") as f:

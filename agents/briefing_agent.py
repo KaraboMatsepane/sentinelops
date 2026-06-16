@@ -238,8 +238,9 @@ class BriefingAdapter(ResilientAdapter):
                                  is_session_bootstrap=is_session_bootstrap,
                                  room_id=room_id, **kw)
 
-        # Mark pipeline as complete after generating the brief
-        self._pipeline_complete[room_id] = True
+        # Only mark pipeline complete for real messages, not bootstrap replays
+        if not is_session_bootstrap:
+            self._pipeline_complete[room_id] = True
 
 
 async def main():
