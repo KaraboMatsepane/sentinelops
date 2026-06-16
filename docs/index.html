@@ -2438,7 +2438,13 @@ function handleLiveEvent(event) {
   }
 
   if (event.type === 'message') {
-    var agent = event.agent;
+
+    var agent = event.agent || '';
+    if (agent === 'sentinelops-analyst') agent = 'analyst';
+    if (agent === 'sentinelops-devils-advocate') agent = 'devils_advocate';
+    if (agent === 'sentinelops-precedent') agent = 'precedent';
+    if (agent === 'sentinelops-risk') agent = 'risk';
+    if (agent === 'sentinelops-briefing') agent = 'briefing';
 
     var card = AGENTS[agent] ? document.getElementById(AGENTS[agent].card) : null;
     if (card && !card.classList.contains('active')) {
