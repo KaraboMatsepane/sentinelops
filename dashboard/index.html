@@ -3,7 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SentinelOps - Multi-Agent Decision Intelligence</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>SentinelOps v2 - Multi-Agent Decision Intelligence</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
@@ -1363,7 +1366,7 @@ button:focus-visible, input:focus-visible, .scenario-pill:focus-visible {
   <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
   <div class="pipeline-complete-badge" id="pipelineBadge"><span class="pc-dot"></span>Executive Brief Ready</div>
   <span class="zero-decisions-badge">0 Autonomous Decisions &middot; Human Authority Retained</span>
-  <span style="margin-left:auto">SentinelOps &middot; Band of Agents Hackathon 2026</span>
+  <span style="margin-left:auto">SentinelOps v2 &middot; Band of Agents Hackathon 2026</span>
 </div>
 
 <div class="brief-overlay" id="briefOverlay">
@@ -1395,6 +1398,7 @@ button:focus-visible, input:focus-visible, .scenario-pill:focus-visible {
 </div>
 
 <script>
+console.log('%c[SentinelOps v2] Dashboard code loaded', 'background:#238636;color:white;font-weight:bold;padding:4px 8px;border-radius:4px');
 marked.setOptions({ breaks: true, gfm: true });
 
 var AGENTS = {
@@ -2371,136 +2375,132 @@ async function triggerLive() {
   }
 }
 
+var _polling = false;
 async function pollEvents() {
+  if (_polling) return;
+  _polling = true;
   try {
     var resp = await fetch('/api/events?after=' + lastEventIndex + '&_=' + Date.now(), { cache: 'no-store' });
     var events = await resp.json();
+    if (events.length > 0) console.log('[SentinelOps Live] Polled', events.length, 'events, after=' + lastEventIndex);
     for (var i = 0; i < events.length; i++) {
       handleLiveEvent(events[i]);
       lastEventIndex++;
     }
   } catch(e) {
     console.error('Poll error:', e);
+  } finally {
+    _polling = false;
+  }
+}
+
+function completePipeline(briefContent) {
+  if (pipelineComplete) return;
+  Object.keys(AGENTS).forEach(function(key) { setAgentStatus(key, 'complete'); });
+  setProgress(100);
+  setBottomStatus('Analysis complete — 5 agents, 0 autonomous decisions');
+  document.getElementById('liveDot').classList.remove('live');
+  document.getElementById('liveLabel').textContent = 'COMPLETE';
+  clearInterval(timerInterval);
+  if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
+  addSystemMessage('Pipeline complete. All 5 agents have reported. Executive brief ready.', false);
+  addSystemMessage('You can now ask follow-up questions below. The Briefing Agent will respond using the full analysis context.', false);
+  document.getElementById('resetBtn').style.display = 'block';
+  showPipelineComplete();
+  showOutcomeCard(); showPanelOutcome(); showConsensusPanel(); showAuditDownload();
+  showFollowupBar();
+  if (briefContent) {
+    setTimeout(function() { showLiveBrief(briefContent); }, 2000);
+  }
+  if (!followupPollInterval) {
+    followupPollInterval = setInterval(pollEvents, 2000);
   }
 }
 
 function handleLiveEvent(event) {
+  if (!event || !event.type) return;
+  console.log('[SentinelOps Live] Event:', event.type, event.agent || '', event.status || '');
+
   if (event.type === 'status') {
     if (event.status === 'active') {
       setAgentStatus(event.agent, 'active');
-      setBottomStatus(AGENTS[event.agent]?.name + ' analyzing...');
+      setBottomStatus((AGENTS[event.agent] ? AGENTS[event.agent].name : event.agent) + ' analyzing...');
       var curProgress = parseFloat(document.getElementById('progressFill').style.width) || 0;
       setProgress(Math.max(curProgress, (AGENT_PROGRESS[event.agent] || 10) - 15));
-
-      if (STEP_NARRATION[currentScenario][event.agent] && !narratedSteps[event.agent]) {
+      if (STEP_NARRATION[currentScenario] && STEP_NARRATION[currentScenario][event.agent] && !narratedSteps[event.agent]) {
         narratedSteps[event.agent] = true;
         addSystemMessage(STEP_NARRATION[currentScenario][event.agent], true);
       }
     } else if (event.status === 'complete') {
       setAgentStatus(event.agent, 'complete');
     }
-  } else if (event.type === 'message') {
-    setAgentStatus(event.agent, 'complete');
-    var isParallel = event.agent === 'devils_advocate' || event.agent === 'precedent';
+    return;
+  }
 
-    if (STEP_NARRATION[currentScenario][event.agent] && !narratedSteps[event.agent]) {
-      narratedSteps[event.agent] = true;
-      addSystemMessage(STEP_NARRATION[currentScenario][event.agent], true);
+  if (event.type === 'message') {
+    var agent = event.agent;
+
+    var card = AGENTS[agent] ? document.getElementById(AGENTS[agent].card) : null;
+    if (card && !card.classList.contains('active')) {
+      setAgentStatus(agent, 'active');
+      if (STEP_NARRATION[currentScenario] && STEP_NARRATION[currentScenario][agent] && !narratedSteps[agent]) {
+        narratedSteps[agent] = true;
+        addSystemMessage(STEP_NARRATION[currentScenario][agent], true);
+      }
     }
 
-    addMessage(event.agent, event.content, {
-      parallel: isParallel,
-      provider: event.provider || null
-    });
+    var isParallel = agent === 'devils_advocate' || agent === 'precedent';
+    addMessage(agent, event.content, { parallel: isParallel, provider: event.provider || null });
+    setProgress(AGENT_PROGRESS[agent] || 50);
+    setTimeout(function() { setAgentStatus(agent, 'complete'); }, 800);
 
     var elapsed = document.getElementById('timer').textContent.replace('T+', '');
     var agentNames = { analyst:'Analyst', devils_advocate:"Devil's Advocate", precedent:'Precedent', risk:'Risk', briefing:'Briefing' };
-    var aName = agentNames[event.agent] || event.agent;
-    if (event.agent === 'analyst') {
+    var aName = agentNames[agent] || agent;
+    if (agent === 'analyst') {
       addBandLogEntry(elapsed, aName, null, '→ Band room');
       addSystemMessage("Band broadcast → Devil's Advocate + Precedent Agent activating in parallel", false, 'band-broadcast');
       addBandLogEntry(elapsed, 'Band', null, "broadcast → Devil's Advocate + Precedent (parallel)");
-    } else if (event.agent === 'devils_advocate') {
+    } else if (agent === 'devils_advocate') {
       addBandLogEntry(elapsed, aName, 'Risk', 'findings delivered');
-    } else if (event.agent === 'precedent') {
+    } else if (agent === 'precedent') {
       addBandLogEntry(elapsed, aName, 'Risk', 'institutional memory delivered');
-    } else if (event.agent === 'risk') {
+    } else if (agent === 'risk') {
       if (currentScenario === 'b') {
         addSystemMessage("Agent disagreement detected - Devil's Advocate champions Stratos Cloud, Precedent Agent raises scale concerns (47 employees). Briefing Agent will synthesize both positions.", false, 'agent-disagreement');
       }
       addBandLogEntry(elapsed, aName, 'Briefing', 'scored matrix delivered');
-    } else if (event.agent === 'briefing') {
+    } else if (agent === 'briefing') {
       addBandLogEntry(elapsed, aName, 'Human', 'executive brief delivered');
     }
 
-    setProgress(AGENT_PROGRESS[event.agent] || 50);
-
-    if (event.agent === 'risk') {
+    if (agent === 'risk') {
       if (currentScenario === 'b') {
         setRiskScore('4.2', 'moderate');
         document.getElementById('riskSub').textContent = 'Stratos Cloud · Recommended with Conditions';
         animateExposure(EXPOSURE_DATA.b.value, EXPOSURE_DATA.b.label);
       } else {
         var scoreMatch = event.content.match(/(\d+\.?\d*)\s*\/\s*10/);
-        if (scoreMatch) {
-          setRiskScore(scoreMatch[1], getSeverityFromScore(scoreMatch[1]));
-          showEscalation(scoreMatch[1]);
-        }
-        var exposureMatch = event.content.match(/[Tt]otal\s+(?:quantifiable\s+)?exposure[:\s]*\$?([\d,]+)/i);
-        if (exposureMatch) {
-          var exposureNum = parseInt(exposureMatch[1].replace(/,/g, ''), 10);
-          animateExposure(exposureNum, EXPOSURE_DATA.a.label);
-        } else {
-          animateExposure(EXPOSURE_DATA.a.value, EXPOSURE_DATA.a.label);
-        }
+        var score = scoreMatch ? scoreMatch[1] : '8.5';
+        setRiskScore(score, getSeverityFromScore(score));
+        showEscalation(score);
+        animateExposure(EXPOSURE_DATA.a.value, EXPOSURE_DATA.a.label);
       }
     }
 
-    if (event.agent === 'briefing' && !pipelineComplete) {
-      setBottomStatus('Analysis complete -5 agents, 0 autonomous decisions');
-      document.getElementById('liveDot').classList.remove('live');
-      document.getElementById('liveLabel').textContent = 'COMPLETE';
-      clearInterval(timerInterval);
-      if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
-      addSystemMessage('Pipeline complete. All 5 agents have reported. Executive brief ready.', false);
-      addSystemMessage('You can now ask follow-up questions below. The Briefing Agent will respond using the full analysis context.', false);
-      document.getElementById('resetBtn').style.display = 'block';
-      showPipelineComplete();
-      showOutcomeCard(); showPanelOutcome(); showConsensusPanel(); showAuditDownload();
-      showFollowupBar();
-      setTimeout(function() { showLiveBrief(event.content); }, 2000);
-    } else if (event.agent === 'briefing' && pipelineComplete) {
+    if (agent === 'briefing' && !pipelineComplete) {
+      completePipeline(event.content);
+    } else if (agent === 'briefing' && pipelineComplete) {
       addMessage('briefing', event.content, { provider: event.provider || null });
     }
-  } else if (event.type === 'followup_question') {
-    // Already displayed locally when user sent it - skip duplicate
-  } else if (event.type === 'pipeline_complete') {
-    if (!pollInterval) return;
-    clearInterval(pollInterval); pollInterval = null;
-    Object.keys(AGENTS).forEach(function(key) { setAgentStatus(key, 'complete'); });
-    setProgress(100);
-    var content = event.content || '';
-    var scoreMatch = content.match(/(\d+\.?\d*)\s*\/\s*10/);
-    if (scoreMatch) {
-      setRiskScore(scoreMatch[1], getSeverityFromScore(scoreMatch[1]));
+    return;
+  }
+
+  if (event.type === 'pipeline_complete') {
+    if (!pipelineComplete) {
+      completePipeline(event.content || '');
     }
-    var exposureMatch = content.match(/[Tt]otal\s+(?:quantifiable\s+)?exposure[:\s]*\$?([\d,]+)/i);
-    if (exposureMatch) {
-      animateExposure(parseInt(exposureMatch[1].replace(/,/g, ''), 10), EXPOSURE_DATA[currentScenario].label);
-    } else {
-      animateExposure(EXPOSURE_DATA[currentScenario].value, EXPOSURE_DATA[currentScenario].label);
-    }
-    showLiveBrief(content);
-    document.getElementById('resetBtn').style.display = 'block';
-    setBottomStatus('Analysis complete -5 agents, 0 autonomous decisions');
-    document.getElementById('liveDot').classList.remove('live');
-    document.getElementById('liveLabel').textContent = 'COMPLETE';
-    clearInterval(timerInterval);
-    addSystemMessage('Pipeline complete. All 5 agents have reported. Executive brief ready.', false);
-    showPipelineComplete();
-    showOutcomeCard(); showPanelOutcome(); showConsensusPanel(); showAuditDownload();
-    if (scoreMatch) showEscalation(scoreMatch[1]);
-    showFollowupBar();
+    return;
   }
 }
 
@@ -2532,6 +2532,7 @@ async function startLiveMode() {
   document.getElementById('liveLabel').textContent = 'LIVE';
   setProgress(2);
   narratedSteps = {};
+  pipelineComplete = false;
 
   addSystemMessage('Sending analysis request to Band platform. All 5 agents will coordinate through Band messaging to review this contract.', false);
 
