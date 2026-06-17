@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<<<<<<< HEAD
 <title>SentinelOps — Multi-Agent Decision Intelligence</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
@@ -18,6 +17,7 @@
   --border: #D9D2C0;      /* kraft rule */
   --border2: #C7BFA9;     /* stronger rule */
   --text: #1B1B22;        /* ink */
+  --text-rgb: 27,27,34;
   --muted: #847D69;       /* faint label */
   --muted2: #615B49;      /* stronger label */
   --analyst: #1F6FD6;     --analyst-dim: #E6EEFB;
@@ -28,63 +28,21 @@
   --mono: 'IBM Plex Mono', monospace;
   --sans: 'IBM Plex Sans', sans-serif;
   --serif: Georgia, "Iowan Old Style", "Palatino Linotype", serif;
-=======
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-<title>SentinelOps v2 - Multi-Agent Decision Intelligence</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
-<script src="https://unpkg.com/lucide@latest"></script>
-<style>
-:root {
-  --bg: #0F1117;
-  --surface: #161B22;
-  --surface2: #1C2129;
-  --surface3: #21262D;
-  --border: #30363D;
-  --border2: #3D444D;
-  --text: #E6EDF3;
-  --muted: #7D8590;
-  --muted2: #8B949E;
-  --analyst: #2F81F7;
-  --analyst-dim: #0D1D31;
-  --da: #DA3633;
-  --da-dim: #2D0C0C;
-  --precedent: #8957E5;
-  --precedent-dim: #1A0D30;
-  --risk: #D29922;
-  --risk-dim: #261B07;
-  --briefing: #238636;
-  --briefing-dim: #0D2614;
-  --mono: 'IBM Plex Mono', monospace;
-  --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --transition-theme: background .25s ease, color .25s ease, border-color .25s ease, box-shadow .25s ease;
 }
-body.light {
-  --bg: #F6F8FA;
-  --surface: #FFFFFF;
-  --surface2: #F0F3F6;
-  --surface3: #E8ECF0;
-  --border: #D1D9E0;
-  --border2: #B8C1CC;
-  --text: #1F2328;
-  --muted: #656D76;
-  --muted2: #57606A;
-  --analyst: #0969DA;
-  --analyst-dim: #DDF4FF;
-  --da: #CF222E;
-  --da-dim: #FFEBE9;
-  --precedent: #8250DF;
-  --precedent-dim: #FBEFFF;
-  --risk: #BF8700;
-  --risk-dim: #FFF8C5;
-  --briefing: #1A7F37;
-  --briefing-dim: #DAFBE1;
->>>>>>> 896cf8aec11f683173326d0b4df1222fa61ac0d4
+/* Night mode — dark dossier palette */
+[data-theme="dark"] {
+  --bg: #100F14; --surface: #18171F; --surface2: #201E28; --surface3: #282633;
+  --border: #2C2A36; --border2: #3C3949;
+  --text: #ECE7DA; --text-rgb: 236,231,218;
+  --muted: #8A8474; --muted2: #ACA694;
+  --analyst: #5B9CF0;   --analyst-dim: #16243A;
+  --da: #F0586C;        --da-dim: #371318;
+  --precedent: #B281F2; --precedent-dim: #251A38;
+  --risk: #E0A93B;      --risk-dim: #2E2614;
+  --briefing: #34C77E;  --briefing-dim: #0E2C1E;
 }
 * { margin:0; padding:0; box-sizing:border-box; }
-body { background:var(--bg); color:var(--text); font-family:var(--sans); font-size:14px; line-height:1.6; overflow-x:hidden; height:100vh; transition:var(--transition-theme); -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+body { background:var(--bg); color:var(--text); font-family:var(--sans); font-size:14px; line-height:1.6; overflow-x:hidden; height:100vh; }
 
 .header {
   display:flex; align-items:center; justify-content:space-between;
@@ -93,9 +51,27 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); font-si
   position:relative; z-index:60;
 }
 .logo { font-family:var(--mono); font-size:16px; font-weight:600; letter-spacing:-.02em; }
-.logo span { color:var(--text); }
+.logo span { color:var(--analyst); }
 .logo .logo-sub { font-size:9px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-left:12px; font-weight:400; }
 .header-right { display:flex; align-items:center; gap:18px; }
+.theme-toggle {
+  width:30px; height:30px; border-radius:6px; cursor:pointer; flex-shrink:0;
+  border:1px solid var(--border2); background:var(--surface2); color:var(--muted2);
+  display:flex; align-items:center; justify-content:center; transition:all .2s;
+}
+.theme-toggle:hover { color:var(--text); border-color:var(--muted); }
+.theme-toggle svg { width:16px; height:16px; }
+.agent-icon svg { width:20px; height:20px; }
+.card-avatar svg { width:16px; height:16px; }
+/* Night-mode landing (keeps the dossier feel, dark) */
+[data-theme="dark"] #caseFileLanding { background:radial-gradient(120% 90% at 50% -10%, #1B1925 0%, #110F17 58%, #0B0A10 100%); color:#ECE7DA; }
+[data-theme="dark"] .cf-brand .cf-logo, [data-theme="dark"] .cf-head h1, [data-theme="dark"] .cf-title, [data-theme="dark"] .cf-stat-v { color:#ECE7DA; }
+[data-theme="dark"] .cf-head p, [data-theme="dark"] .cf-persona { color:#A8A290; }
+[data-theme="dark"] .cf-caseno, [data-theme="dark"] .cf-stat-l, [data-theme="dark"] .cf-foot { color:#8A8474; }
+[data-theme="dark"] .cf-folder { background:linear-gradient(180deg,#211F2A 0%, #19171F 100%); border-color:#34313F; box-shadow:0 1px 0 rgba(255,255,255,.04) inset, 0 14px 28px rgba(0,0,0,.5); }
+[data-theme="dark"] .cf-folder .cf-tab { background:linear-gradient(180deg,#2B2835,#221F2B); color:#9A937F; border-color:#34313F; }
+[data-theme="dark"] .cf-folder .cf-paper { background:#2A2733; border-color:#34313F; }
+[data-theme="dark"] .cf-status::before { background:#3C3949; }
 .status-badge {
   display:flex; align-items:center; gap:7px;
   font-family:var(--mono); font-size:10px; text-transform:uppercase;
@@ -106,20 +82,20 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); font-si
   width:7px; height:7px; border-radius:50%; background:var(--muted);
   transition: background .3s;
 }
-.status-dot.live { background:var(--briefing); animation:pulse 2s ease infinite; }
+.status-dot.live { background:#22c55e; box-shadow:0 0 8px rgba(34,197,94,.5); animation:pulse 2s ease infinite; }
 .mode-badge {
   font-family:var(--mono); font-size:9px; letter-spacing:.1em;
   text-transform:uppercase; padding:3px 8px; border-radius:2px;
   border:1px solid var(--border);
 }
-.mode-badge.live { color:var(--briefing); border-color:var(--border); background:var(--briefing-dim); }
-.mode-badge.demo { color:var(--risk); border-color:var(--border); background:var(--risk-dim); }
+.mode-badge.live { color:var(--briefing); border-color:rgba(34,197,94,.3); background:rgba(34,197,94,.08); }
+.mode-badge.demo { color:var(--risk); border-color:rgba(245,158,11,.3); background:rgba(245,158,11,.08); }
 @keyframes pulse {
   0%,100% { opacity:1; }
   50% { opacity:.4; }
 }
 
-.main { display:grid; grid-template-columns:240px 1fr 340px; height:calc(100vh - 49px); }
+.main { display:grid; grid-template-columns:240px 1fr 320px; height:calc(100vh - 49px); }
 
 .agents-panel {
   background:var(--surface); border-right:1px solid var(--border);
@@ -133,32 +109,31 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); font-si
 .agent-list { flex:1; overflow-y:auto; padding:8px 0; }
 .agent-card {
   display:flex; align-items:center; gap:12px;
-  padding:14px 18px; cursor:default;
+  padding:12px 18px; cursor:default;
   border-left:3px solid transparent;
   transition: all .3s;
 }
-.agent-card.active { background:var(--surface2); border-left-color:var(--analyst); }
-.agent-card.complete { border-left-color:var(--briefing); }
-.agent-card.complete .agent-status { color:var(--briefing); }
+.agent-card.active { background:var(--surface2); }
+.agent-card[data-agent="analyst"].active { border-left-color:var(--analyst); }
+.agent-card[data-agent="devils_advocate"].active { border-left-color:var(--da); }
+.agent-card[data-agent="precedent"].active { border-left-color:var(--precedent); }
+.agent-card[data-agent="risk"].active { border-left-color:var(--risk); }
+.agent-card[data-agent="briefing"].active { border-left-color:var(--briefing); }
+.agent-card.complete { opacity:.7; }
+.agent-card.complete .agent-status { color:#22c55e; }
 
 .agent-icon {
-  width:36px; height:36px; border-radius:8px;
+  width:36px; height:36px; border-radius:6px;
   display:flex; align-items:center; justify-content:center;
-  font-size:16px; flex-shrink:0;
-  background:var(--surface2); color:var(--muted);
-  border:1px solid var(--border);
+  font-size:14px; font-weight:700; font-family:var(--mono);
+  flex-shrink:0; transition: box-shadow .3s;
 }
-<<<<<<< HEAD
 .agent-card[data-agent="analyst"] .agent-icon { background:var(--analyst-dim); color:var(--analyst); border:1px solid rgba(59,130,246,.2); }
 .agent-card[data-agent="devils_advocate"] .agent-icon { background:var(--da-dim); color:var(--da); border:1px solid rgba(239,68,68,.2); }
 .agent-card[data-agent="precedent"] .agent-icon { background:var(--precedent-dim); color:var(--precedent); border:1px solid rgba(168,85,247,.2); }
 .agent-card[data-agent="risk"] .agent-icon { background:var(--risk-dim); color:var(--risk); border:1px solid rgba(245,158,11,.2); }
 .agent-card[data-agent="briefing"] .agent-icon { background:var(--briefing-dim); color:var(--briefing); border:1px solid rgba(34,197,94,.2); }
 .agent-card.active .agent-icon { box-shadow:0 0 16px rgba(168,106,14,.18); }
-=======
-.agent-card.active .agent-icon { color:var(--analyst); background:var(--surface3); border-color:var(--border2); }
-.agent-card.complete .agent-icon { color:var(--briefing); }
->>>>>>> 896cf8aec11f683173326d0b4df1222fa61ac0d4
 
 .agent-info { flex:1; min-width:0; }
 .agent-name { font-size:13px; font-weight:600; color:var(--text); line-height:1.2; }
@@ -168,84 +143,91 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); font-si
   letter-spacing:.08em; color:var(--muted); margin-top:3px;
   transition: color .3s;
 }
-.agent-card.active .agent-status { color:var(--analyst); font-size:9px; }
-.agent-card.complete .agent-status { color:var(--briefing); font-size:9px; }
+.agent-card.active .agent-status { color:var(--risk); font-size:9px; }
+.agent-card.complete .agent-status { color:#22c55e; font-size:9px; }
 .provider-tag {
-  font-family:var(--mono); font-size:9px; font-weight:500; letter-spacing:.06em;
-  padding:2px 6px; border-radius:3px; margin-top:3px; display:inline-block;
-  background:var(--surface2); color:var(--muted); border:1px solid var(--border);
+  font-family:var(--mono); font-size:9.5px; font-weight:500; letter-spacing:.06em;
+  padding:3px 8px; border-radius:3px; margin-top:3px; display:inline-block;
+  background:rgba(59,130,246,.12); color:var(--analyst); border:1px solid rgba(59,130,246,.2);
 }
-.provider-tag.featherless { background:var(--surface2); color:var(--muted); border-color:var(--border); }
-.provider-tag.fallback { background:var(--risk-dim); color:var(--risk); border-color:var(--border); }
+.provider-tag.featherless { background:rgba(168,85,247,.12); color:var(--precedent); border-color:rgba(168,85,247,.2); }
+.provider-tag.fallback { background:rgba(245,158,11,.12); color:var(--risk); border-color:rgba(245,158,11,.2); }
 
 /* Pipeline connectors between agent cards */
 .pipe-connector {
-  position:relative; height:16px; margin:0 18px;
+  position:relative; height:20px; margin:0 18px;
   display:flex; align-items:center; justify-content:center;
 }
 .pipe-line {
-  position:absolute; left:28px; top:0; bottom:0; width:1px;
-  background:var(--border); transition:background .4s;
+  position:absolute; left:28px; top:0; bottom:0; width:2px;
+  background:var(--border2); transition:background .4s;
 }
 .pipe-connector.active .pipe-line { background:var(--analyst); }
-.pipe-connector.complete .pipe-line { background:var(--briefing); }
+.pipe-connector.complete .pipe-line { background:rgba(34,197,94,.4); }
 .pipe-pulse {
   position:absolute; left:25px; width:8px; height:8px;
-  border-radius:50%; opacity:0; display:none;
+  border-radius:50%; opacity:0; transform:translateY(-50%);
 }
-.pipe-connector.active .pipe-pulse { display:none; }
-.pipe-connector.complete .pipe-pulse { display:none; }
+.pipe-connector.active .pipe-pulse {
+  opacity:1;
+  animation:pipePulse 1s ease-in-out infinite;
+}
+@keyframes pipePulse {
+  0% { top:0; opacity:.8; }
+  100% { top:100%; opacity:0; }
+}
+.pipe-connector.complete .pipe-pulse { opacity:0; animation:none; }
 
 /* Band broadcast fork */
 .pipe-fork {
-  position:relative; height:22px; margin:0 18px;
+  position:relative; height:28px; margin:0 18px;
   display:flex; align-items:center;
 }
 .pipe-fork-line {
-  position:absolute; left:28px; top:0; width:1px; height:100%;
-  background:var(--border); transition:background .4s;
+  position:absolute; left:28px; top:0; width:2px; height:100%;
+  background:var(--border2); transition:background .4s;
 }
 .pipe-fork-branch {
-  position:absolute; left:28px; top:50%; width:16px; height:1px;
-  background:var(--border); transition:background .4s;
+  position:absolute; left:28px; top:50%; width:20px; height:2px;
+  background:var(--border2); transition:background .4s;
 }
 .pipe-fork-label {
-  position:absolute; left:48px; top:50%; transform:translateY(-50%);
+  position:absolute; left:52px; top:50%; transform:translateY(-50%);
   font-family:var(--mono); font-size:8px; text-transform:uppercase;
-  letter-spacing:.1em; color:var(--muted); opacity:0;
-  transition:opacity .4s;
+  letter-spacing:.12em; color:var(--muted); opacity:0;
+  transition:opacity .4s, color .4s;
 }
 .pipe-fork.active .pipe-fork-line,
-.pipe-fork.active .pipe-fork-branch { background:var(--analyst); }
-.pipe-fork.active .pipe-fork-label { opacity:1; color:var(--muted); }
+.pipe-fork.active .pipe-fork-branch { background:var(--precedent); }
+.pipe-fork.active .pipe-fork-label { opacity:1; color:var(--precedent); }
 .pipe-fork.complete .pipe-fork-line,
-.pipe-fork.complete .pipe-fork-branch { background:var(--briefing); }
+.pipe-fork.complete .pipe-fork-branch { background:rgba(34,197,94,.4); }
 .pipe-fork.complete .pipe-fork-label { opacity:1; color:var(--muted); }
 
-/* Merge connector */
+/* Merge connector (DA + Precedent → Risk) */
 .pipe-merge {
-  position:relative; height:22px; margin:0 18px;
+  position:relative; height:28px; margin:0 18px;
   display:flex; align-items:center;
 }
 .pipe-merge-line {
-  position:absolute; left:28px; top:0; width:1px; height:100%;
-  background:var(--border); transition:background .4s;
+  position:absolute; left:28px; top:0; width:2px; height:100%;
+  background:var(--border2); transition:background .4s;
 }
 .pipe-merge-branch {
-  position:absolute; left:28px; top:50%; width:16px; height:1px;
-  background:var(--border); transition:background .4s;
+  position:absolute; left:28px; top:50%; width:20px; height:2px;
+  background:var(--border2); transition:background .4s;
 }
 .pipe-merge-label {
-  position:absolute; left:48px; top:50%; transform:translateY(-50%);
+  position:absolute; left:52px; top:50%; transform:translateY(-50%);
   font-family:var(--mono); font-size:8px; text-transform:uppercase;
-  letter-spacing:.1em; color:var(--muted); opacity:0;
-  transition:opacity .4s;
+  letter-spacing:.12em; color:var(--muted); opacity:0;
+  transition:opacity .4s, color .4s;
 }
 .pipe-merge.active .pipe-merge-line,
-.pipe-merge.active .pipe-merge-branch { background:var(--analyst); }
-.pipe-merge.active .pipe-merge-label { opacity:1; color:var(--muted); }
+.pipe-merge.active .pipe-merge-branch { background:var(--risk); }
+.pipe-merge.active .pipe-merge-label { opacity:1; color:var(--risk); }
 .pipe-merge.complete .pipe-merge-line,
-.pipe-merge.complete .pipe-merge-branch { background:var(--briefing); }
+.pipe-merge.complete .pipe-merge-branch { background:rgba(34,197,94,.4); }
 .pipe-merge.complete .pipe-merge-label { opacity:1; color:var(--muted); }
 
 .feed-panel { display:flex; flex-direction:column; overflow:hidden; background:var(--bg); border-left:1px solid var(--border); border-right:1px solid var(--border); }
@@ -255,7 +237,7 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); font-si
   border-bottom:1px solid var(--border);
 }
 .feed-title { font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:.14em; color:var(--muted2); }
-.feed-timer { font-family:var(--mono); font-size:12px; font-weight:500; color:var(--muted2); letter-spacing:.05em; }
+.feed-timer { font-family:var(--mono); font-size:12px; font-weight:500; color:var(--analyst); letter-spacing:.05em; }
 .feed-scroll { flex:1; overflow-y:auto; padding:16px 24px; scroll-behavior:smooth; }
 
 .feed-intro {
@@ -268,32 +250,35 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); font-si
   background:var(--surface2); border:1px solid var(--border2); border-radius:6px;
   font-family:var(--mono); font-size:10px; letter-spacing:.05em; color:var(--muted2);
 }
-.pipeline-flow .step { padding:3px 8px; border-radius:3px; white-space:nowrap; background:var(--surface3); color:var(--text); border:1px solid var(--border); }
-.pipeline-flow .step-analyst, .pipeline-flow .step-da, .pipeline-flow .step-pr,
-.pipeline-flow .step-risk, .pipeline-flow .step-brief { background:var(--surface3); color:var(--text); border-color:var(--border); }
+.pipeline-flow .step { padding:3px 8px; border-radius:3px; white-space:nowrap; }
+.pipeline-flow .step-analyst { background:var(--analyst-dim); color:var(--analyst); border:1px solid rgba(59,130,246,.2); }
+.pipeline-flow .step-da { background:var(--da-dim); color:var(--da); border:1px solid rgba(239,68,68,.2); }
+.pipeline-flow .step-pr { background:var(--precedent-dim); color:var(--precedent); border:1px solid rgba(168,85,247,.2); }
+.pipeline-flow .step-risk { background:var(--risk-dim); color:var(--risk); border:1px solid rgba(245,158,11,.2); }
+.pipeline-flow .step-brief { background:var(--briefing-dim); color:var(--briefing); border:1px solid rgba(34,197,94,.2); }
 .pipeline-flow .arrow { color:var(--muted); }
-.pipeline-flow .parallel { font-size:8px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; }
+.pipeline-flow .parallel { font-size:8px; color:var(--precedent); text-transform:uppercase; letter-spacing:.08em; }
 
 .sys-msg {
-  padding:10px 14px; margin:8px 0;
-  border-radius:6px; border-left:2px solid var(--border);
-  background:transparent; font-family:var(--mono); font-size:11px;
-  color:var(--muted); letter-spacing:.02em;
-  animation: msgSlide .3s ease-out;
+  padding:10px 14px; margin:12px 0;
+  border-radius:4px; border-left:3px solid var(--border2);
+  background:var(--surface2); font-family:var(--mono); font-size:11px;
+  color:var(--muted2); letter-spacing:.03em;
+  animation: msgSlide .4s ease-out;
 }
-.sys-msg.step { border-left-color:var(--analyst); color:var(--text); font-weight:500; background:var(--surface2); }
+.sys-msg.step { border-left-color:var(--analyst); color:var(--text); font-weight:500; }
 .sys-msg.band-broadcast {
-  border-left-color:var(--analyst); background:var(--surface2);
+  border-left-color:var(--precedent); background:rgba(176,106,240,.06);
   color:var(--text); font-weight:500; display:flex; align-items:center; gap:8px;
 }
 .sys-msg.band-broadcast .broadcast-icon {
   display:inline-flex; align-items:center; justify-content:center;
   width:20px; height:20px; border-radius:4px; flex-shrink:0;
-  background:var(--surface3); color:var(--muted2);
-  font-size:10px; border:1px solid var(--border);
+  background:rgba(176,106,240,.12); color:var(--precedent);
+  font-size:10px; border:1px solid rgba(176,106,240,.2);
 }
 .sys-msg.agent-disagreement {
-  border-left-color:var(--risk); background:var(--risk-dim);
+  border-left-color:var(--risk); background:rgba(245,166,35,.06);
   color:var(--text); font-weight:500;
 }
 
@@ -302,10 +287,11 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); font-si
 /* ======================== */
 
 .report-card {
-  background:var(--surface); border:1px solid var(--border);
-  border-radius:10px; margin:20px 0; overflow:hidden;
-  animation: msgSlide .3s ease-out;
-  transition:var(--transition-theme);
+  background:var(--surface); border:1px solid var(--border2);
+  border-left:3px solid var(--muted);
+  border-radius:8px; margin:16px 0; overflow:hidden;
+  animation: msgSlide .4s ease-out;
+  box-shadow:0 2px 12px rgba(0,0,0,.15);
 }
 @keyframes msgSlide {
   from { opacity:0; transform:translateY(12px); }
@@ -313,16 +299,15 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); font-si
 }
 .card-top-bar {
   display:flex; align-items:center; gap:10px;
-  padding:12px 18px;
-  background:var(--surface); border-bottom:1px solid var(--border);
+  padding:10px 16px;
+  background:var(--surface2); border-bottom:1px solid var(--border);
 }
 .card-avatar {
-  width:28px; height:28px; border-radius:6px;
+  width:28px; height:28px; border-radius:5px;
   display:flex; align-items:center; justify-content:center;
   font-family:var(--mono); font-size:10px; font-weight:600; flex-shrink:0;
-  background:var(--surface2); color:var(--muted2); border:1px solid var(--border);
 }
-.card-agent-name { font-size:13px; font-weight:600; color:var(--text); }
+.card-agent-name { font-size:13px; font-weight:600; }
 .card-top-bar .provider-tag { margin-top:0; }
 .card-timestamp {
   font-family:var(--mono); font-size:9px; letter-spacing:.08em;
@@ -331,20 +316,15 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); font-si
 .msg-parallel-badge {
   display:inline-flex; align-items:center; gap:5px;
   font-family:var(--mono); font-size:9px; letter-spacing:.08em;
-  padding:2px 8px; border-radius:3px;
-  background:var(--surface2); color:var(--muted);
-  border:1px solid var(--border);
+  padding:2px 8px; border-radius:2px;
+  background:rgba(168,85,247,.1); color:var(--precedent);
+  border:1px solid rgba(168,85,247,.2);
 }
 
 /* Card content area */
 .card-content {
-<<<<<<< HEAD
   padding:16px 18px; font-size:13px;
-  color:rgba(43, 40, 32,.75); line-height:1.7;
-=======
-  padding:18px 20px; font-size:13.5px;
-  color:var(--muted2); line-height:1.75;
->>>>>>> 896cf8aec11f683173326d0b4df1222fa61ac0d4
+  color:rgba(var(--text-rgb),.75); line-height:1.7;
   word-break:break-word; overflow:hidden; position:relative;
 }
 .card-content.html-content { white-space:pre-wrap; }
@@ -364,10 +344,10 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); font-si
 .card-content p { margin:0 0 8px; }
 .card-content p:last-child { margin-bottom:0; }
 .card-content h1, .card-content h2, .card-content h3, .card-content h4 {
-  font-family:var(--sans); font-size:12px; text-transform:uppercase;
-  letter-spacing:.08em; color:var(--text);
-  margin:20px 0 10px; padding:14px 0 8px;
-  border-top:1px solid var(--border); border-bottom:none;
+  font-family:var(--mono); font-size:11px; text-transform:uppercase;
+  letter-spacing:.12em; color:var(--card-accent-muted, var(--muted2));
+  margin:20px 0 8px; padding:14px 0 6px;
+  border-top:1px solid var(--border2); border-bottom:1px solid var(--border);
   font-weight:600;
 }
 .card-content > :first-child { margin-top:0; padding-top:0; border-top:none; }
@@ -400,14 +380,14 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); font-si
 .card-content tbody td {
   padding:8px 12px; border:1px solid var(--border);
 }
-.card-content tbody tr:nth-child(even) { background:var(--surface2); }
+.card-content tbody tr:nth-child(even) { background:rgba(13,15,20,.5); }
 
 /* Risk flag badges */
 .risk-flag { padding:6px 10px; margin:6px 0; border-radius:4px; border-left:3px solid; }
 p.risk-flag, li.risk-flag { display:block; }
-.risk-flag-red { background:var(--da-dim); border-left-color:var(--da); }
-.risk-flag-amber { background:var(--risk-dim); border-left-color:var(--risk); }
-.risk-flag-green { background:var(--briefing-dim); border-left-color:var(--briefing); }
+.risk-flag-red { background:rgba(239,68,68,.06); border-left-color:var(--da); }
+.risk-flag-amber { background:rgba(245,158,11,.06); border-left-color:var(--risk); }
+.risk-flag-green { background:rgba(34,197,94,.06); border-left-color:var(--briefing); }
 
 /* Highlighted numbers */
 .highlight-number { font-family:var(--mono); font-weight:600; }
@@ -415,9 +395,9 @@ p.risk-flag, li.risk-flag { display:block; }
 /* Card expand/collapse */
 .card-expand {
   padding:8px 16px; font-family:var(--mono); font-size:10px;
-  color:var(--muted2); cursor:pointer; letter-spacing:.05em;
+  color:var(--analyst); cursor:pointer; letter-spacing:.05em;
   border-top:1px solid var(--border); text-align:center;
-  background:var(--surface); transition:background .2s;
+  background:var(--surface2); transition:background .2s;
 }
 .card-expand:hover { background:var(--surface3); text-decoration:underline; }
 
@@ -436,23 +416,9 @@ p.risk-flag, li.risk-flag { display:block; }
 .doc-value.large { font-size:22px; font-weight:700; font-family:var(--mono); }
 
 .how-it-works {
-  margin-top:8px; padding:0; background:var(--surface2);
-  border:1px solid var(--border); border-radius:6px; overflow:hidden;
+  margin-top:8px; padding:14px; background:var(--surface2);
+  border:1px solid var(--border2); border-radius:6px;
 }
-.hiw-toggle {
-  display:flex; align-items:center; gap:8px; width:100%;
-  padding:12px 14px; border:none; background:none; cursor:pointer;
-  font-family:var(--mono); font-size:9px; text-transform:uppercase;
-  letter-spacing:.12em; color:var(--muted); text-align:left;
-}
-.hiw-toggle:hover { color:var(--text); }
-.hiw-toggle .hiw-chevron { transition:transform .2s; font-size:10px; }
-.how-it-works.open .hiw-toggle .hiw-chevron { transform:rotate(90deg); }
-.hiw-body {
-  max-height:0; overflow:hidden; transition:max-height .3s ease;
-  padding:0 14px;
-}
-.how-it-works.open .hiw-body { max-height:400px; padding:0 14px 14px; }
 .how-it-works .hiw-title {
   font-family:var(--mono); font-size:9px; text-transform:uppercase;
   letter-spacing:.12em; color:var(--muted); margin-bottom:10px;
@@ -468,22 +434,25 @@ p.risk-flag, li.risk-flag { display:block; }
   display:flex; align-items:center; justify-content:center;
   margin-top:1px;
 }
-.hiw-num.c-analyst, .hiw-num.c-da, .hiw-num.c-precedent,
-.hiw-num.c-risk, .hiw-num.c-briefing { background:var(--surface3); color:var(--muted2); }
+.hiw-num.c-analyst { background:var(--analyst-dim); color:var(--analyst); }
+.hiw-num.c-da { background:var(--da-dim); color:var(--da); }
+.hiw-num.c-precedent { background:var(--precedent-dim); color:var(--precedent); }
+.hiw-num.c-risk { background:var(--risk-dim); color:var(--risk); }
+.hiw-num.c-briefing { background:var(--briefing-dim); color:var(--briefing); }
 .hiw-parallel {
-  border-left:1px solid var(--border); margin:4px 0 4px 7px;
+  border-left:2px solid var(--precedent-dim); margin:4px 0 4px 7px;
   padding-left:10px; position:relative;
 }
 .hiw-parallel-label {
   font-family:var(--mono); font-size:8px; text-transform:uppercase;
-  letter-spacing:.1em; color:var(--muted); margin-bottom:6px;
+  letter-spacing:.1em; color:var(--precedent); margin-bottom:6px;
 }
 .hiw-provider {
   font-family:var(--mono); font-size:7px; letter-spacing:.04em;
   padding:1px 4px; border-radius:2px; margin-left:4px; vertical-align:middle;
 }
-.hiw-provider.aiml { background:var(--surface2); color:var(--muted); border:1px solid var(--border); }
-.hiw-provider.featherless { background:var(--surface2); color:var(--muted); border:1px solid var(--border); }
+.hiw-provider.aiml { background:rgba(59,130,246,.1); color:var(--analyst); border:1px solid rgba(59,130,246,.15); }
+.hiw-provider.featherless { background:rgba(168,85,247,.1); color:var(--precedent); border:1px solid rgba(168,85,247,.15); }
 
 .risk-score-display {
   background:var(--surface2); border:1px solid var(--border2);
@@ -512,9 +481,9 @@ p.risk-flag, li.risk-flag { display:block; }
   animation: riskFlash 1.2s ease-out;
 }
 @keyframes riskFlash {
-  0% { border-color: var(--border2); }
-  30% { border-color: var(--da); }
-  100% { border-color: var(--border2); }
+  0% { box-shadow: 0 0 0 0 rgba(240,82,82,.4); }
+  30% { box-shadow: 0 0 30px 4px rgba(240,82,82,.25); }
+  100% { box-shadow: none; }
 }
 .risk-score-value.critical { color:var(--da); }
 .risk-score-value.high { color:var(--risk); }
@@ -544,8 +513,8 @@ p.risk-flag, li.risk-flag { display:block; }
   animation: exposureGlow 1.5s ease-in-out 2;
 }
 @keyframes exposureGlow {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+  0%, 100% { text-shadow: none; }
+  50% { text-shadow: 0 0 12px rgba(239,68,68,.6), 0 0 24px rgba(239,68,68,.3); }
 }
 
 .value-callout {
@@ -561,9 +530,10 @@ p.risk-flag, li.risk-flag { display:block; }
   padding:14px; border:none; border-radius:6px; cursor:pointer;
   font-family:var(--mono); font-size:12px; font-weight:600;
   text-transform:uppercase; letter-spacing:.12em;
-  background:var(--analyst); color:#fff; transition:all .2s;
+  background:linear-gradient(135deg, var(--analyst), #2563eb);
+  color:#fff; transition:all .2s;
 }
-.start-btn:hover { opacity:.9; }
+.start-btn:hover { transform:translateY(-1px); box-shadow:0 4px 20px rgba(59,130,246,.3); }
 .start-btn:disabled { opacity:.3; cursor:not-allowed; transform:none; box-shadow:none; }
 .kbd-hint {
   text-align:center; margin:-10px 18px 14px;
@@ -607,7 +577,7 @@ p.risk-flag, li.risk-flag { display:block; }
   background:var(--surface3); color:var(--muted); border:1px solid var(--border2);
   transition:all .4s ease;
 }
-.persona-badge.ready { background:var(--briefing-dim); color:var(--briefing); border-color:var(--border); }
+.persona-badge.ready { background:rgba(34,197,94,.12); color:var(--briefing); border-color:rgba(34,197,94,.25); }
 
 .scenario-switcher {
   display:flex; padding:14px 18px 0; gap:0;
@@ -621,23 +591,23 @@ p.risk-flag, li.risk-flag { display:block; }
 }
 .scenario-pill:first-child { border-radius:4px 0 0 4px; border-right:none; }
 .scenario-pill:last-child { border-radius:0 4px 4px 0; }
-.scenario-pill.active { background:var(--surface3); color:var(--text); border-color:var(--border); font-weight:600; }
+.scenario-pill.active { background:var(--analyst); color:#fff; border-color:var(--analyst); }
 .scenario-pill:not(.active):hover { background:var(--surface3); color:var(--text); }
 .scenario-pill.disabled { pointer-events:none; opacity:.4; }
 
 .scenario-overlay {
   display:none; position:fixed; inset:0; z-index:200;
-  background:rgba(0,0,0,.7); backdrop-filter:blur(8px);
+  background:rgba(6,7,9,.94); backdrop-filter:blur(12px);
   justify-content:center; align-items:center;
   padding:40px 20px; overflow-y:auto;
   transition:opacity .3s ease;
 }
 .scenario-overlay.visible { display:flex; }
 .scenario-modal {
-  background:var(--surface); border:1px solid var(--border);
+  background:var(--surface); border:1px solid var(--border2);
   border-radius:10px; max-width:600px; width:100%;
   padding:40px 36px 32px; position:relative;
-  box-shadow:0 4px 24px rgba(0,0,0,.2);
+  box-shadow:0 0 80px rgba(59,130,246,.06);
 }
 .scenario-headline {
   font-family:var(--sans); font-size:30px; font-weight:700;
@@ -648,11 +618,7 @@ p.risk-flag, li.risk-flag { display:block; }
   color:var(--muted2); text-transform:uppercase; margin-bottom:28px;
 }
 .scenario-story {
-<<<<<<< HEAD
-  font-size:15px; line-height:1.7; color:rgba(43, 40, 32,.7);
-=======
-  font-size:15px; line-height:1.7; color:var(--muted2);
->>>>>>> 896cf8aec11f683173326d0b4df1222fa61ac0d4
+  font-size:15px; line-height:1.7; color:rgba(var(--text-rgb),.7);
   margin-bottom:16px;
 }
 .scenario-story:last-of-type { margin-bottom:28px; }
@@ -667,7 +633,7 @@ p.risk-flag, li.risk-flag { display:block; }
 }
 .scenario-stat-value {
   font-family:var(--mono); font-size:20px; font-weight:700;
-  color:var(--text); line-height:1; margin-bottom:4px;
+  color:var(--analyst); line-height:1; margin-bottom:4px;
 }
 .scenario-stat-label {
   font-family:var(--mono); font-size:9px; text-transform:uppercase;
@@ -678,21 +644,22 @@ p.risk-flag, li.risk-flag { display:block; }
   border:none; border-radius:6px; cursor:pointer;
   font-family:var(--mono); font-size:14px; font-weight:600;
   letter-spacing:.06em;
-  background:var(--analyst); color:#fff; transition:all .2s;
+  background:linear-gradient(135deg, var(--analyst), #2563eb);
+  color:#fff; transition:all .2s;
 }
-.scenario-cta:hover { opacity:.9; }
+.scenario-cta:hover { transform:translateY(-1px); box-shadow:0 4px 24px rgba(59,130,246,.35); }
 
 .brief-overlay {
   display:none; position:fixed; inset:0; z-index:100;
-  background:rgba(0,0,0,.7); backdrop-filter:blur(8px);
+  background:rgba(6,7,9,.92); backdrop-filter:blur(8px);
   padding:40px; overflow-y:auto;
 }
 .brief-overlay.visible { display:flex; justify-content:center; align-items:flex-start; }
 .brief-card {
-  background:var(--surface); border:1px solid var(--border);
+  background:var(--surface); border:1px solid var(--border2);
   border-radius:8px; max-width:720px; width:100%;
   animation: briefIn .5s ease-out;
-  box-shadow:0 4px 24px rgba(0,0,0,.2);
+  box-shadow:0 0 60px rgba(34,197,94,.08);
 }
 @keyframes briefIn {
   from { opacity:0; transform:translateY(20px) scale(.98); }
@@ -717,7 +684,7 @@ p.risk-flag, li.risk-flag { display:block; }
 .brief-actions { display:flex; align-items:center; gap:8px; }
 .brief-dl-btn {
   height:32px; padding:0 12px; border:1px solid var(--border2); border-radius:4px;
-  background:var(--surface2); color:rgba(43, 40, 32,.85); cursor:pointer;
+  background:var(--surface2); color:rgba(var(--text-rgb),.85); cursor:pointer;
   font-size:12px; font-weight:600; white-space:nowrap; transition:all .2s;
 }
 .brief-dl-btn:hover { color:var(--text); border-color:var(--briefing); }
@@ -743,11 +710,7 @@ p.risk-flag, li.risk-flag { display:block; }
 .bf-ask { font-family:var(--mono); font-size:12px; font-weight:600; letter-spacing:.04em; cursor:pointer; background:var(--briefing-dim); color:var(--briefing); border:1px solid rgba(14,122,79,.3); border-radius:8px; padding:0 16px; transition:all .15s; }
 .bf-ask:hover { border-color:var(--briefing); }
 .brief-body {
-<<<<<<< HEAD
-  padding:28px; font-size:14px; line-height:1.8; color:rgba(43, 40, 32,.8);
-=======
-  padding:28px; font-size:14px; line-height:1.8; color:var(--muted2);
->>>>>>> 896cf8aec11f683173326d0b4df1222fa61ac0d4
+  padding:28px; font-size:14px; line-height:1.8; color:rgba(var(--text-rgb),.8);
   white-space:pre-wrap; word-break:break-word;
 }
 .brief-body h3 {
@@ -781,6 +744,7 @@ p.risk-flag, li.risk-flag { display:block; }
 .pipeline-complete-badge .pc-dot {
   width:6px; height:6px; border-radius:50%;
   background:var(--briefing);
+  box-shadow:0 0 6px rgba(34,197,94,.5);
 }
 
 .agent-card.pipeline-done {
@@ -802,10 +766,10 @@ p.risk-flag, li.risk-flag { display:block; }
 }
 
 .outcome-card {
-  display:none; margin:20px 0; padding:0;
-  border-radius:10px; border:1px solid var(--border);
+  display:none; margin:18px 0; padding:0;
+  border-radius:8px; border:1px solid var(--border2);
   background:var(--surface); overflow:hidden;
-  animation:outcomeSlide .4s ease-out;
+  animation:outcomeSlide .6s ease-out;
 }
 .outcome-card.visible { display:block; }
 @keyframes outcomeSlide {
@@ -820,8 +784,8 @@ p.risk-flag, li.risk-flag { display:block; }
 .outcome-header-icon {
   width:28px; height:28px; border-radius:6px;
   display:flex; align-items:center; justify-content:center;
-  font-size:13px; background:var(--surface2); color:var(--briefing);
-  border:1px solid var(--border);
+  font-size:13px; background:rgba(34,197,94,.12); color:var(--briefing);
+  border:1px solid rgba(34,197,94,.2);
 }
 .outcome-header-text {
   font-family:var(--mono); font-size:10px; text-transform:uppercase;
@@ -848,15 +812,15 @@ p.risk-flag, li.risk-flag { display:block; }
 .outcome-verdict {
   padding:12px 16px; border-radius:6px;
   border-left:3px solid var(--da);
-  background:var(--da-dim);
+  background:rgba(239,68,68,.06);
 }
 .outcome-verdict.go {
   border-left-color:var(--briefing);
-  background:var(--briefing-dim);
+  background:rgba(34,197,94,.06);
 }
 .outcome-verdict.conditional {
   border-left-color:var(--risk);
-  background:var(--risk-dim);
+  background:rgba(245,158,11,.06);
 }
 .outcome-verdict-label {
   font-family:var(--mono); font-size:9px; text-transform:uppercase;
@@ -884,11 +848,11 @@ p.risk-flag, li.risk-flag { display:block; }
   transition:transform .2s; font-size:10px; color:var(--muted);
 }
 .band-log-panel.open .band-log-toggle .chevron { transform:rotate(90deg); }
-.band-log-toggle .band-label { color:var(--text); font-weight:600; }
+.band-log-toggle .band-label { color:var(--analyst); font-weight:600; }
 .band-log-toggle .log-count {
   margin-left:auto; font-size:8px; padding:2px 6px;
-  border-radius:3px; background:var(--surface3);
-  color:var(--muted2); border:1px solid var(--border);
+  border-radius:3px; background:rgba(59,130,246,.12);
+  color:var(--analyst); border:1px solid rgba(59,130,246,.2);
 }
 .band-log-body {
   max-height:0; overflow:hidden; transition:max-height .3s ease;
@@ -911,61 +875,19 @@ p.risk-flag, li.risk-flag { display:block; }
   font-family:var(--mono); font-size:10px; color:var(--muted2);
   letter-spacing:.02em;
 }
-.band-log-msg .log-agent { font-weight:600; color:var(--text); }
-.band-log-msg .log-agent.a-analyst { color:var(--text); }
-.band-log-msg .log-agent.a-da { color:var(--text); }
-.band-log-msg .log-agent.a-precedent { color:var(--text); }
-.band-log-msg .log-agent.a-risk { color:var(--text); }
-.band-log-msg .log-agent.a-briefing { color:var(--text); }
+.band-log-msg .log-agent { font-weight:600; }
+.band-log-msg .log-agent.a-analyst { color:var(--analyst); }
+.band-log-msg .log-agent.a-da { color:var(--da); }
+.band-log-msg .log-agent.a-precedent { color:var(--precedent); }
+.band-log-msg .log-agent.a-risk { color:var(--risk); }
+.band-log-msg .log-agent.a-briefing { color:var(--briefing); }
 .band-log-msg .log-arrow { color:var(--muted); margin:0 2px; }
-.band-log-msg .log-broadcast { color:var(--muted2); font-style:italic; }
+.band-log-msg .log-broadcast { color:var(--precedent); font-style:italic; }
 .band-log-empty {
   font-family:var(--mono); font-size:9px; color:var(--muted);
   padding:8px 0; text-align:center; letter-spacing:.06em;
 }
 
-<<<<<<< HEAD
-=======
-/* Human-in-the-loop follow-up chat */
-.followup-bar {
-  display:none; align-items:center; gap:10px;
-  padding:10px 16px; background:var(--surface2);
-  border-top:1px solid var(--border2);
-}
-.followup-bar.visible { display:flex; }
-.followup-input {
-  flex:1; background:var(--surface3); color:var(--text);
-  border:1px solid var(--border2); border-radius:6px;
-  padding:10px 14px; font-family:var(--sans); font-size:13px;
-  outline:none; transition:border-color .2s;
-}
-.followup-input:focus { border-color:var(--briefing); }
-.followup-input::placeholder { color:var(--muted); }
-.followup-send {
-  background:var(--briefing); color:#fff; border:none; border-radius:6px;
-  padding:10px 18px; font-family:var(--mono); font-size:11px; font-weight:600;
-  letter-spacing:.06em; text-transform:uppercase; cursor:pointer;
-  transition:opacity .2s;
-}
-.followup-send:hover { opacity:.85; }
-.followup-send:disabled { opacity:.4; cursor:default; }
-.followup-label {
-  font-family:var(--mono); font-size:9px; letter-spacing:.1em;
-  text-transform:uppercase; color:var(--briefing); white-space:nowrap;
-}
-.followup-msg {
-  margin:12px 0; padding:12px 16px; background:var(--briefing-dim);
-  border-left:3px solid var(--briefing); border-radius:0 8px 8px 0;
-}
-.followup-msg .followup-q-label {
-  font-family:var(--mono); font-size:9px; letter-spacing:.1em;
-  text-transform:uppercase; color:var(--briefing); margin-bottom:4px;
-}
-.followup-msg .followup-q-text {
-  color:var(--text); font-size:13px;
-}
-
->>>>>>> 896cf8aec11f683173326d0b4df1222fa61ac0d4
 .bottom-bar {
   display:flex; align-items:center; gap:16px;
   padding:8px 28px; background:var(--surface); border-top:1px solid var(--border);
@@ -977,7 +899,7 @@ p.risk-flag, li.risk-flag { display:block; }
 }
 .progress-fill {
   height:100%; width:0; border-radius:2px;
-  background:var(--analyst);
+  background:linear-gradient(90deg, var(--analyst), var(--briefing));
   transition: width .5s ease;
 }
 .panel-outcome {
@@ -1004,17 +926,47 @@ p.risk-flag, li.risk-flag { display:block; }
   margin-top:10px; padding:8px 10px; border-radius:4px; border-left:3px solid;
   font-family:var(--mono); font-size:10px; font-weight:600; line-height:1.4;
 }
-.panel-outcome-verdict.no-go { border-left-color:var(--da); background:var(--da-dim); color:var(--da); }
-.panel-outcome-verdict.conditional { border-left-color:var(--risk); background:var(--risk-dim); color:var(--risk); }
+.panel-outcome-verdict.no-go { border-left-color:var(--da); background:rgba(240,82,82,.06); color:var(--da); }
+.panel-outcome-verdict.conditional { border-left-color:var(--risk); background:rgba(245,166,35,.06); color:var(--risk); }
 
 .zero-decisions-badge {
   font-family:var(--mono); font-size:9px; letter-spacing:.08em;
   color:var(--briefing); padding:3px 10px; border-radius:3px;
-  background:var(--briefing-dim); border:1px solid var(--border);
+  background:rgba(52,208,104,.08); border:1px solid rgba(52,208,104,.2);
   white-space:nowrap;
 }
 
-
+.landing-banner {
+  position:fixed; top:49px; left:0; right:0; z-index:50;
+  background:linear-gradient(135deg, rgba(75,141,248,.08), rgba(52,208,104,.06));
+  border-bottom:1px solid rgba(75,141,248,.15);
+  padding:14px 28px; display:flex; justify-content:center;
+  animation: landingFadeIn .6s ease-out;
+  transition: opacity .5s ease, transform .5s ease;
+}
+.landing-banner.hidden {
+  opacity:0; transform:translateY(-10px); pointer-events:none;
+}
+@keyframes landingFadeIn {
+  from { opacity:0; transform:translateY(-10px); }
+  to { opacity:1; transform:translateY(0); }
+}
+.landing-content {
+  display:flex; align-items:center; gap:14px; max-width:800px;
+}
+.landing-icon {
+  font-size:16px; color:var(--analyst); flex-shrink:0;
+  animation:pulse 2s ease infinite;
+}
+.landing-text {
+  font-family:var(--sans); font-size:13px; color:var(--text);
+  line-height:1.4;
+}
+.landing-text strong { color:var(--analyst); }
+.landing-sub {
+  font-family:var(--mono); font-size:9px; text-transform:uppercase;
+  letter-spacing:.1em; color:var(--muted2); white-space:nowrap;
+}
 
 @media(max-width:1024px){
   .main { grid-template-columns:200px 1fr 260px; }
@@ -1027,7 +979,6 @@ p.risk-flag, li.risk-flag { display:block; }
   .pipe-connector, .pipe-fork, .pipe-merge { display:none; }
   .doc-panel { border-left:none; border-top:1px solid var(--border); }
 }
-<<<<<<< HEAD
 /* ============================================================
    Case-File Landing — dossier entry screen (light, self-contained)
    Scoped under #caseFileLanding so nothing leaks into the dark app.
@@ -1119,219 +1070,15 @@ p.risk-flag, li.risk-flag { display:block; }
 }
 /* Dossier titles in serif — placed last so it wins over earlier font rules */
 .scenario-headline, .brief-title, .outcome-title { font-family:var(--serif) !important; letter-spacing:-.01em; }
-=======
-
-/* Download Brief button */
-.brief-download {
-  padding:8px 14px; border:1px solid var(--border2); border-radius:4px;
-  background:var(--surface2); color:var(--briefing); cursor:pointer;
-  font-family:var(--mono); font-size:10px; font-weight:600;
-  letter-spacing:.06em; text-transform:uppercase;
-  display:flex; align-items:center; gap:6px; transition:all .2s;
-}
-.brief-download:hover { background:var(--briefing); color:#fff; border-color:var(--briefing); }
-.brief-header-actions { display:flex; align-items:center; gap:8px; }
-
-/* ======================== */
-/*   Escalation Banner      */
-/* ======================== */
-.escalation-banner {
-  display:none; padding:12px 24px; align-items:center; gap:14px;
-  background:var(--surface2); border-bottom:2px solid var(--da);
-  animation:escalationSlide .4s ease-out;
-}
-.escalation-banner.visible { display:flex; }
-@keyframes escalationSlide {
-  from { opacity:0; transform:translateY(-100%); }
-  to { opacity:1; transform:translateY(0); }
-}
-.escalation-icon {
-  width:32px; height:32px; border-radius:6px; flex-shrink:0;
-  display:flex; align-items:center; justify-content:center;
-  background:var(--da-dim); color:var(--da);
-  border:1px solid var(--border2); font-size:14px;
-}
-.escalation-content { flex:1; }
-.escalation-title {
-  font-family:var(--mono); font-size:11px; font-weight:700;
-  letter-spacing:.1em; text-transform:uppercase; color:var(--da);
-  margin-bottom:2px;
-}
-.escalation-desc {
-  font-size:12px; color:var(--muted2); line-height:1.4;
-}
-.escalation-tag {
-  font-family:var(--mono); font-size:9px; font-weight:600;
-  letter-spacing:.08em; text-transform:uppercase;
-  padding:5px 12px; border-radius:3px;
-  background:var(--da-dim); color:var(--da);
-  border:1px solid var(--border); white-space:nowrap;
-}
-
-/* ======================== */
-/*   Consensus Panel        */
-/* ======================== */
-.consensus-panel {
-  display:none; margin-top:12px; padding:16px;
-  background:var(--surface2); border:1px solid var(--border2);
-  border-radius:6px; animation:msgSlide .4s ease-out;
-}
-.consensus-panel.visible { display:block; }
-.consensus-title {
-  font-family:var(--mono); font-size:9px; text-transform:uppercase;
-  letter-spacing:.14em; color:var(--muted); margin-bottom:12px;
-}
-.consensus-agents {
-  display:flex; flex-direction:column; gap:8px; margin-bottom:12px;
-}
-.consensus-row {
-  display:flex; align-items:center; gap:8px; font-size:11px;
-}
-.consensus-dot {
-  width:8px; height:8px; border-radius:50%; flex-shrink:0;
-}
-.consensus-dot.agree { background:var(--briefing); }
-.consensus-dot.disagree { background:var(--risk); }
-.consensus-agent-name { color:var(--text); font-weight:500; flex:1; }
-.consensus-position {
-  font-family:var(--mono); font-size:9px; letter-spacing:.04em;
-  color:var(--muted2); text-align:right;
-}
-.consensus-meter { margin-top:10px; }
-.consensus-meter-label {
-  font-family:var(--mono); font-size:9px; letter-spacing:.1em;
-  text-transform:uppercase; color:var(--muted); margin-bottom:6px;
-  display:flex; justify-content:space-between;
-}
-.consensus-bar {
-  height:6px; border-radius:3px; background:var(--surface3);
-  overflow:hidden; position:relative;
-}
-.consensus-fill {
-  height:100%; border-radius:3px; transition:width 1s ease-out;
-  background:var(--briefing);
-}
-.consensus-fill.split {
-  background:linear-gradient(90deg, var(--briefing) 0%, var(--risk) 100%);
-}
-.consensus-verdict {
-  margin-top:10px; padding:8px 10px;
-  border-radius:4px; border-left:3px solid;
-  font-family:var(--mono); font-size:10px; font-weight:500;
-  letter-spacing:.04em;
-}
-.consensus-verdict.unanimous {
-  border-color:var(--briefing); background:var(--briefing-dim); color:var(--briefing);
-}
-.consensus-verdict.split-verdict {
-  border-color:var(--risk); background:var(--risk-dim); color:var(--risk);
-}
-
-/* ======================== */
-/*   Audit Trail Download   */
-/* ======================== */
-.audit-download-btn {
-  display:none; width:calc(100% - 36px); margin:8px 18px;
-  padding:10px 14px; border:1px solid var(--border2); border-radius:6px;
-  cursor:pointer; font-family:var(--mono); font-size:10px; font-weight:600;
-  letter-spacing:.06em; text-transform:uppercase; text-align:center;
-  background:var(--surface2); color:var(--muted2); transition:all .2s;
-}
-.audit-download-btn.visible { display:block; }
-.audit-download-btn:hover {
-  color:var(--text); border-color:var(--muted);
-  background:var(--surface3);
-}
-
-/* ======================== */
-/*   Enterprise Visual Polish */
-/* ======================== */
-.header {
-  background:var(--surface);
-  border-bottom:1px solid var(--border);
-  box-shadow:0 1px 3px rgba(0,0,0,.08);
-}
-.logo {
-  display:flex; align-items:center; gap:8px;
-}
-.logo-icon {
-  width:28px; height:28px; border-radius:5px;
-  background:var(--analyst);
-  display:flex; align-items:center; justify-content:center;
-  font-size:14px; color:#fff; font-weight:700;
-}
-.track-badge {
-  font-family:var(--mono); font-size:8px; font-weight:500;
-  letter-spacing:.08em; text-transform:uppercase;
-  padding:3px 8px; border-radius:2px;
-  background:rgba(240,82,82,.08); color:var(--da);
-  border:1px solid rgba(240,82,82,.15);
-}
-
-/* Theme Toggle */
-.theme-toggle {
-  width:32px; height:32px; border-radius:6px; border:1px solid var(--border);
-  background:var(--surface2); color:var(--muted2); cursor:pointer;
-  display:flex; align-items:center; justify-content:center;
-  font-size:16px; transition:all .2s; flex-shrink:0;
-}
-.theme-toggle:hover { color:var(--text); border-color:var(--muted); background:var(--surface3); }
-.theme-toggle:focus-visible { outline:2px solid var(--analyst); outline-offset:2px; }
-body.light .theme-icon::after { content:''; }
-
-/* Transition all panels for theme switch */
-.agents-panel, .feed-panel, .doc-panel, .bottom-bar,
-.report-card, .sys-msg, .brief-card, .scenario-modal,
-.escalation-banner, .consensus-panel, .band-log-panel,
-.persona-card, .how-it-works, .risk-score-display,
-.exposure-display, .panel-outcome, .outcome-card {
-  transition:var(--transition-theme);
-}
-
-/* Focus states for accessibility */
-button:focus-visible, input:focus-visible, .scenario-pill:focus-visible {
-  outline:2px solid var(--analyst); outline-offset:2px;
-}
-
-/* Print styles - only the brief card prints */
-@media print {
-  body * { visibility:hidden; }
-  .brief-overlay, .brief-overlay * { visibility:visible; }
-  .brief-overlay {
-    display:block !important; position:absolute; inset:0;
-    background:#fff; padding:20px;
-  }
-  .brief-card {
-    border:none; box-shadow:none; max-width:100%;
-    animation:none;
-  }
-  .brief-header { border-bottom:2px solid #333; }
-  .brief-pretitle { color:#666; }
-  .brief-title { color:#000; }
-  .brief-body { color:#000; padding:20px 0; }
-  .brief-body h3 { color:#000; border-bottom:1px solid #ccc; }
-  .brief-body strong { color:#000; }
-  .brief-body .risk-item { border-left:3px solid; page-break-inside:avoid; }
-  .brief-body .risk-item.critical { background:#fef2f2; border-color:#dc2626; }
-  .brief-body .risk-item.high { background:#fffbeb; border-color:#d97706; }
-  .brief-body .audit-trail { background:#f5f5f5; border:1px solid #ddd; color:#333; }
-  .brief-body .audit-trail strong { color:#000; }
-  .brief-close, .brief-download, .brief-header-actions button { display:none !important; }
-  .escalation-banner { display:none !important; }
-}
->>>>>>> 896cf8aec11f683173326d0b4df1222fa61ac0d4
 </style>
 </head>
 <body>
 
 <div class="header">
-  <div class="logo"><div class="logo-icon">S</div><div>Sentinel<span>Ops</span><span class="logo-sub">Multi-Agent Decision Intelligence</span></div></div>
+  <div class="logo">Sentinel<span>Ops</span><span class="logo-sub">Multi-Agent Decision Intelligence</span></div>
   <div class="header-right">
-    <div class="track-badge">Track 3: Regulated Workflows</div>
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle night mode" title="Toggle night mode"></button>
     <div class="mode-badge" id="modeBadge">DETECTING...</div>
-    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle light/dark mode" aria-label="Toggle light/dark mode">
-      <span class="theme-icon" id="themeIcon">&#9790;</span>
-    </button>
     <div class="status-badge">
       <div class="status-dot" id="liveDot"></div>
       <span id="liveLabel">STANDBY</span>
@@ -1339,92 +1086,79 @@ button:focus-visible, input:focus-visible, .scenario-pill:focus-visible {
   </div>
 </div>
 
-<div class="escalation-banner" id="escalationBanner">
-  <div class="escalation-icon"><i data-lucide="bell-ring" style="width:16px;height:16px"></i></div>
-  <div class="escalation-content">
-    <div class="escalation-title" id="escalationTitle">Escalation Required</div>
-    <div class="escalation-desc" id="escalationDesc">Risk score exceeds organizational threshold. Board/Legal review mandatory before proceeding.</div>
-  </div>
-  <div class="escalation-tag" id="escalationTag">Mandatory Review</div>
-</div>
-
 <div class="main">
   <div class="agents-panel">
-    <div class="panel-title">Decision Pipeline</div>
+    <div class="panel-title">Agent Pipeline</div>
     <div class="agent-list">
       <div class="agent-card" data-agent="analyst" id="card-analyst">
-        <div class="agent-icon"><i data-lucide="search" style="width:16px;height:16px"></i></div>
+        <div class="agent-icon">AN</div>
         <div class="agent-info">
-          <div class="agent-name">Intake Analysis</div>
-          <div class="agent-role">Step 1</div>
+          <div class="agent-name">Analyst</div>
+          <div class="agent-role">Step 1 &middot; The Mapper</div>
           <div class="provider-tag">AI/ML API</div>
-          <div class="agent-status" id="status-analyst">Waiting</div>
+          <div class="agent-status" id="status-analyst">Standby</div>
         </div>
       </div>
       <div class="pipe-fork" id="pipe-analyst-to-parallel">
         <div class="pipe-fork-line"></div>
         <div class="pipe-fork-branch"></div>
-        <div class="pipe-fork-label">Parallel review</div>
+        <div class="pipe-fork-label">Band broadcast &darr;&darr;</div>
       </div>
       <div class="agent-card" data-agent="devils_advocate" id="card-da">
-        <div class="agent-icon"><i data-lucide="triangle-alert" style="width:16px;height:16px"></i></div>
+        <div class="agent-icon">DA</div>
         <div class="agent-info">
-          <div class="agent-name">Counter Analysis</div>
-          <div class="agent-role">Step 2a</div>
+          <div class="agent-name">Devil's Advocate</div>
+          <div class="agent-role">Step 2a &middot; The Challenger</div>
           <div class="provider-tag">AI/ML API</div>
-          <div class="agent-status" id="status-da">Waiting</div>
+          <div class="agent-status" id="status-da">Standby</div>
         </div>
       </div>
       <div class="pipe-connector" id="pipe-parallel-link">
         <div class="pipe-line"></div>
-        <div class="pipe-pulse"></div>
+        <div class="pipe-pulse" style="background:var(--precedent)"></div>
       </div>
       <div class="agent-card" data-agent="precedent" id="card-precedent">
-        <div class="agent-icon"><i data-lucide="book-open" style="width:16px;height:16px"></i></div>
+        <div class="agent-icon">PR</div>
         <div class="agent-info">
-          <div class="agent-name">Historical Evidence</div>
-          <div class="agent-role">Step 2b</div>
-          <div class="provider-tag">Featherless AI</div>
-          <div class="agent-status" id="status-precedent">Waiting</div>
+          <div class="agent-name">Precedent</div>
+          <div class="agent-role">Step 2b &middot; The Historian</div>
+          <div class="provider-tag featherless">Featherless AI</div>
+          <div class="agent-status" id="status-precedent">Standby</div>
         </div>
       </div>
       <div class="pipe-merge" id="pipe-parallel-to-risk">
         <div class="pipe-merge-line"></div>
         <div class="pipe-merge-branch"></div>
-        <div class="pipe-merge-label">Merge findings</div>
+        <div class="pipe-merge-label">Band merge</div>
       </div>
       <div class="agent-card" data-agent="risk" id="card-risk">
-        <div class="agent-icon"><i data-lucide="shield-alert" style="width:16px;height:16px"></i></div>
+        <div class="agent-icon">RK</div>
         <div class="agent-info">
-          <div class="agent-name">Risk Assessment</div>
-          <div class="agent-role">Step 3</div>
+          <div class="agent-name">Risk</div>
+          <div class="agent-role">Step 3 &middot; The Scorer</div>
           <div class="provider-tag">AI/ML API</div>
-          <div class="agent-status" id="status-risk">Waiting</div>
+          <div class="agent-status" id="status-risk">Standby</div>
         </div>
       </div>
       <div class="pipe-connector" id="pipe-risk-to-briefing">
         <div class="pipe-line"></div>
-        <div class="pipe-pulse"></div>
+        <div class="pipe-pulse" style="background:var(--briefing)"></div>
       </div>
       <div class="agent-card" data-agent="briefing" id="card-briefing">
-        <div class="agent-icon"><i data-lucide="file-text" style="width:16px;height:16px"></i></div>
+        <div class="agent-icon">BR</div>
         <div class="agent-info">
-          <div class="agent-name">Executive Brief</div>
-          <div class="agent-role">Step 4</div>
+          <div class="agent-name">Briefing</div>
+          <div class="agent-role">Step 4 &middot; The Communicator</div>
           <div class="provider-tag">AI/ML API</div>
-          <div class="agent-status" id="status-briefing">Waiting</div>
+          <div class="agent-status" id="status-briefing">Standby</div>
         </div>
       </div>
     </div>
-    <button class="start-btn" id="startBtn" onclick="startAnalysis()">Analyze Contract</button>
-    <div class="kbd-hint" id="kbdHint">Press <kbd>Space</kbd> or <kbd>Enter</kbd></div>
-    <button class="reset-btn" id="resetBtn" onclick="resetDashboard()">Run Again</button>
-    <button class="audit-download-btn" id="auditDownloadBtn" onclick="downloadAuditTrail()">Download Audit Trail</button>
   </div>
 
   <div class="feed-panel">
     <div class="feed-header">
-      <div class="feed-title">Decision Timeline</div>
+      <div class="feed-title">Agent Coordination Feed &middot; via Band</div>
       <div class="feed-timer" id="timer">T+00:00</div>
     </div>
     <div class="feed-scroll" id="feed">
@@ -1432,18 +1166,18 @@ button:focus-visible, input:focus-visible, .scenario-pill:focus-visible {
         <strong>SentinelOps</strong> is a multi-agent decision intelligence system. Five specialized AI agents coordinate through <strong>Band</strong> to review enterprise contracts and produce an executive decision brief.<br><br>
         Each agent has a distinct role. They communicate through Band's messaging platform, passing findings to the next agent in the pipeline. No autonomous decisions are made — the human retains full authority.
         <div class="pipeline-flow">
-          <span class="step step-analyst">Intake</span>
+          <span class="step step-analyst">Analyst</span>
           <span class="arrow">&rarr;</span>
-          <span class="step step-da">Counter</span>
+          <span class="step step-da">Devil's Advocate</span>
           <span class="arrow">+</span>
-          <span class="step step-pr">Evidence</span>
+          <span class="step step-pr">Precedent</span>
           <span class="parallel">(parallel)</span>
           <span class="arrow">&rarr;</span>
           <span class="step step-risk">Risk</span>
           <span class="arrow">&rarr;</span>
-          <span class="step step-brief">Brief</span>
+          <span class="step step-brief">Briefing</span>
           <span class="arrow">&rarr;</span>
-          <span style="color:var(--text)">Human Review</span>
+          <span style="color:var(--text)">Human</span>
         </div>
         Press <strong>Analyze Contract</strong> to begin. All agents are connected to Band and ready.
       </div>
@@ -1452,7 +1186,7 @@ button:focus-visible, input:focus-visible, .scenario-pill:focus-visible {
 
   <div class="doc-panel">
     <div class="doc-header">
-      <div class="panel-title">Evidence &amp; Decision Summary</div>
+      <div class="panel-title">Decision Under Review</div>
     </div>
     <div class="persona-card" id="personaCard">
       <div class="persona-avatar amber" id="personaAvatar">AD</div>
@@ -1477,7 +1211,7 @@ button:focus-visible, input:focus-visible, .scenario-pill:focus-visible {
       </div>
       <div class="doc-field">
         <div class="doc-label">Deal Value</div>
-        <div class="doc-value large" id="docDealValue">$1,800,000</div>
+        <div class="doc-value large" id="docDealValue" style="color:var(--analyst)">$1,800,000</div>
       </div>
       <div class="doc-field">
         <div class="doc-label">Duration</div>
@@ -1487,25 +1221,16 @@ button:focus-visible, input:focus-visible, .scenario-pill:focus-visible {
         <div class="doc-label">Pages</div>
         <div class="doc-value" id="docPages">74 pages &middot; 10 sections</div>
       </div>
-      <div class="how-it-works" id="hiwPanel">
-        <button class="hiw-toggle" onclick="document.getElementById('hiwPanel').classList.toggle('open')">
-          <span class="hiw-chevron">&#9654;</span> How It Works
-        </button>
-        <div class="hiw-body">
-        <div class="hiw-step"><div class="hiw-num c-analyst">1</div><div><strong>Intake Analysis</strong> <span class="hiw-provider aiml">AI/ML API</span> <span id="hiwAnalyst">extracts every clause, term, and financial obligation</span></div></div>
+      <div class="how-it-works">
+        <div class="hiw-title">How It Works</div>
+        <div class="hiw-step"><div class="hiw-num c-analyst">1</div><div><strong style="color:var(--analyst)">Analyst</strong> <span class="hiw-provider aiml">AI/ML API</span> <span id="hiwAnalyst">extracts every clause, term, and financial obligation</span></div></div>
         <div class="hiw-parallel">
           <div class="hiw-parallel-label">parallel via Band</div>
-<<<<<<< HEAD
           <div class="hiw-step"><div class="hiw-num c-da">2a</div><div><strong style="color:var(--da)">Devil's Advocate</strong> <span class="hiw-provider aiml">AI/ML API</span> <span id="hiwDA">attacks the contract &mdash; finds contradictions, unfair terms, missing protections</span></div></div>
           <div class="hiw-step"><div class="hiw-num c-precedent">2b</div><div><strong style="color:var(--precedent)">Precedent Agent</strong> <span class="hiw-provider featherless">Featherless AI</span> <span id="hiwPrecedent">searches institutional memory for past deals, board resolutions, and precedents</span></div></div>
-=======
-          <div class="hiw-step"><div class="hiw-num c-da">2a</div><div><strong>Counter Analysis</strong> <span class="hiw-provider aiml">AI/ML API</span> <span id="hiwDA">challenges the contract - finds contradictions, unfair terms, missing protections</span></div></div>
-          <div class="hiw-step"><div class="hiw-num c-precedent">2b</div><div><strong>Historical Evidence</strong> <span class="hiw-provider featherless">Featherless AI</span> <span id="hiwPrecedent">searches institutional memory for past deals, board resolutions, and precedents</span></div></div>
         </div>
-        <div class="hiw-step"><div class="hiw-num c-risk">3</div><div><strong>Risk Assessment</strong> <span class="hiw-provider aiml">AI/ML API</span> <span id="hiwRisk">scores every finding and calculates total financial exposure</span></div></div>
-        <div class="hiw-step"><div class="hiw-num c-briefing">4</div><div><strong>Executive Brief</strong> <span class="hiw-provider aiml">AI/ML API</span> <span id="hiwBriefing">synthesizes everything into an executive decision brief</span></div></div>
->>>>>>> 896cf8aec11f683173326d0b4df1222fa61ac0d4
-        </div>
+        <div class="hiw-step"><div class="hiw-num c-risk">3</div><div><strong style="color:var(--risk)">Risk Agent</strong> <span class="hiw-provider aiml">AI/ML API</span> <span id="hiwRisk">scores every finding and calculates total financial exposure</span></div></div>
+        <div class="hiw-step"><div class="hiw-num c-briefing">4</div><div><strong style="color:var(--briefing)">Briefing Agent</strong> <span class="hiw-provider aiml">AI/ML API</span> <span id="hiwBriefing">synthesizes everything into an executive decision brief</span></div></div>
       </div>
       <div class="risk-score-display" id="riskDisplay">
         <div class="risk-score-label" id="riskLabel">Aggregate Risk Score</div>
@@ -1518,7 +1243,6 @@ button:focus-visible, input:focus-visible, .scenario-pill:focus-visible {
       </div>
       <div class="value-callout" id="valueCallout"></div>
       <div class="panel-outcome" id="panelOutcome"></div>
-      <div class="consensus-panel" id="consensusPanel"></div>
       <div class="band-log-panel" id="bandLogPanel">
         <button class="band-log-toggle" onclick="toggleBandLog()">
           <span class="chevron">&#9654;</span>
@@ -1532,19 +1256,18 @@ button:focus-visible, input:focus-visible, .scenario-pill:focus-visible {
         </div>
       </div>
     </div>
+    <button class="start-btn" id="startBtn" onclick="startAnalysis()">Analyze Contract</button>
+    <div class="kbd-hint" id="kbdHint">Press <kbd>Space</kbd> or <kbd>Enter</kbd></div>
+    <button class="reset-btn" id="resetBtn" onclick="resetDashboard()">&#8634; Run Again</button>
   </div>
 </div>
 
 <div class="bottom-bar">
-<<<<<<< HEAD
   <span id="bottomStatus">Ready &mdash; 5 agents connected</span>
-=======
-  <span id="bottomStatus">Ready -5 agents connected</span>
->>>>>>> 896cf8aec11f683173326d0b4df1222fa61ac0d4
   <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
   <div class="pipeline-complete-badge" id="pipelineBadge"><span class="pc-dot"></span>Executive Brief Ready</div>
   <span class="zero-decisions-badge">0 Autonomous Decisions &middot; Human Authority Retained</span>
-  <span style="margin-left:auto">SentinelOps v2 &middot; Band of Agents Hackathon 2026</span>
+  <span style="margin-left:auto">SentinelOps &middot; Band of Agents Hackathon 2026</span>
 </div>
 
 <div class="brief-overlay" id="briefOverlay">
@@ -1554,14 +1277,9 @@ button:focus-visible, input:focus-visible, .scenario-pill:focus-visible {
         <div class="brief-pretitle">SentinelOps Executive Decision Brief</div>
         <div class="brief-title" id="briefTitle">GlobalTech Solutions Partnership Agreement</div>
       </div>
-<<<<<<< HEAD
       <div class="brief-actions">
         <button class="brief-dl-btn" onclick="downloadAuditTrail()">&#8595; Audit trail (.txt)</button>
         <button class="brief-dl-btn primary" onclick="downloadBriefPDF(this)">&#8595; Brief (PDF)</button>
-=======
-      <div class="brief-header-actions">
-        <button class="brief-download" onclick="downloadBriefPDF()">&#8681; Download PDF</button>
->>>>>>> 896cf8aec11f683173326d0b4df1222fa61ac0d4
         <button class="brief-close" onclick="closeBrief()">&times;</button>
       </div>
     </div>
@@ -1570,7 +1288,6 @@ button:focus-visible, input:focus-visible, .scenario-pill:focus-visible {
   </div>
 </div>
 
-<<<<<<< HEAD
 <div class="cf-landing" id="caseFileLanding">
   <div class="cf-wrap">
     <div class="cf-topline">
@@ -1617,8 +1334,6 @@ button:focus-visible, input:focus-visible, .scenario-pill:focus-visible {
     <div class="cf-foot">Band of Agents 2026 · Track 3 · Zero autonomous decisions</div>
   </div>
 </div>
-=======
->>>>>>> 896cf8aec11f683173326d0b4df1222fa61ac0d4
 
 <div class="scenario-overlay" id="scenarioOverlay">
   <div class="scenario-modal">
@@ -1632,7 +1347,6 @@ button:focus-visible, input:focus-visible, .scenario-pill:focus-visible {
 </div>
 
 <script>
-console.log('%c[SentinelOps v2] Dashboard code loaded', 'background:#238636;color:white;font-weight:bold;padding:4px 8px;border-radius:4px');
 marked.setOptions({ breaks: true, gfm: true });
 
 var AGENTS = {
@@ -1646,12 +1360,50 @@ var AGENTS = {
 var AGENT_PROGRESS = { analyst: 25, devils_advocate: 45, precedent: 55, risk: 75, briefing: 100 };
 
 var AGENT_COLORS = {
-  analyst:         { accent:'#2F81F7', dim:'var(--analyst-dim)',   muted:'rgba(47,129,247,.7)' },
-  devils_advocate: { accent:'#DA3633', dim:'var(--da-dim)',        muted:'rgba(218,54,51,.7)' },
-  precedent:       { accent:'#8957E5', dim:'var(--precedent-dim)', muted:'rgba(137,87,229,.7)' },
-  risk:            { accent:'#D29922', dim:'var(--risk-dim)',      muted:'rgba(210,153,34,.7)' },
-  briefing:        { accent:'#238636', dim:'var(--briefing-dim)',  muted:'rgba(35,134,54,.7)' }
+  analyst:         { accent:'#3b82f6', dim:'var(--analyst-dim)',   muted:'rgba(59,130,246,.7)' },
+  devils_advocate: { accent:'#ef4444', dim:'var(--da-dim)',        muted:'rgba(239,68,68,.7)' },
+  precedent:       { accent:'#a855f7', dim:'var(--precedent-dim)', muted:'rgba(168,85,247,.7)' },
+  risk:            { accent:'#f59e0b', dim:'var(--risk-dim)',      muted:'rgba(245,158,11,.7)' },
+  briefing:        { accent:'#22c55e', dim:'var(--briefing-dim)',  muted:'rgba(34,197,94,.7)' }
 };
+
+// Line icons per agent (stroke = currentColor, so they take the agent's accent).
+var AGENT_ICONS = {
+  analyst: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><line x1="20.5" y1="20.5" x2="15.5" y2="15.5"/></svg>',
+  devils_advocate: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V6l7-3z"/><line x1="12" y1="8" x2="12" y2="12.5"/><circle cx="12" cy="15.6" r=".6" fill="currentColor" stroke="none"/></svg>',
+  precedent: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h11v16H7a1 1 0 0 1-1-1z"/><line x1="9" y1="4" x2="9" y2="20"/><line x1="11.5" y1="8.5" x2="15" y2="8.5"/></svg>',
+  risk: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l8.5 15h-17z"/><line x1="12" y1="10" x2="12" y2="14"/><circle cx="12" cy="16.8" r=".6" fill="currentColor" stroke="none"/></svg>',
+  briefing: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10v16H7z"/><line x1="10" y1="9" x2="14" y2="9"/><line x1="10" y1="12.5" x2="14" y2="12.5"/><line x1="10" y1="16" x2="12.5" y2="16"/></svg>'
+};
+// Paint the pipeline-card icons from the single icon source.
+(function paintAgentIcons() {
+  document.querySelectorAll('.agent-card[data-agent]').forEach(function(card) {
+    var key = card.getAttribute('data-agent');
+    var slot = card.querySelector('.agent-icon');
+    if (slot && AGENT_ICONS[key]) slot.innerHTML = AGENT_ICONS[key];
+  });
+})();
+
+// ---- Night mode ----
+var _SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.2"/><line x1="12" y1="2.5" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="21.5"/><line x1="2.5" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="21.5" y2="12"/><line x1="5.4" y1="5.4" x2="7.1" y2="7.1"/><line x1="16.9" y1="16.9" x2="18.6" y2="18.6"/><line x1="5.4" y1="18.6" x2="7.1" y2="16.9"/><line x1="16.9" y1="7.1" x2="18.6" y2="5.4"/></svg>';
+var _MOON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13.5A8 8 0 1 1 10.5 4a6.3 6.3 0 0 0 9.5 9.5z"/></svg>';
+function _applyTheme(t) {
+  if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+  else document.documentElement.removeAttribute('data-theme');
+  var btn = document.getElementById('themeToggle');
+  if (btn) btn.innerHTML = (t === 'dark') ? _SUN : _MOON;
+}
+function toggleTheme() {
+  var cur = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  var next = (cur === 'dark') ? 'light' : 'dark';
+  _applyTheme(next);
+  try { localStorage.setItem('sentinelops-theme', next); } catch (e) {}
+}
+(function initTheme() {
+  var saved = 'light';
+  try { saved = localStorage.getItem('sentinelops-theme') || 'light'; } catch (e) {}
+  _applyTheme(saved);
+})();
 
 var STEP_NARRATION = {
   a: {
@@ -1959,7 +1711,7 @@ function setAgentStatus(key, status) {
     updatePipeConnectors(key, 'active');
   }
   else if (status === 'complete') {
-    card.classList.add('complete'); el.textContent = 'Completed';
+    card.classList.add('complete'); el.textContent = 'Complete ✓';
     updatePipeConnectors(key, 'complete');
     if (key === 'briefing') {
       var badge = document.getElementById('personaBadge');
@@ -1967,7 +1719,7 @@ function setAgentStatus(key, status) {
       badge.classList.add('ready');
     }
   }
-  else { el.textContent = 'Waiting'; }
+  else { el.textContent = 'Standby'; }
 }
 
 function updatePipeConnectors(agent, status) {
@@ -2039,11 +1791,11 @@ function postProcessContent(html, agentKey, isHtml) {
     var blocks = tmp.querySelectorAll('p, li');
     for (var i = 0; i < blocks.length; i++) {
       var text = blocks[i].textContent;
-      if (text.indexOf('[CRITICAL]') !== -1 || text.indexOf('[REJECT]') !== -1) {
+      if (text.indexOf('🔴') !== -1 || text.indexOf('❌') !== -1) {
         blocks[i].classList.add('risk-flag', 'risk-flag-red');
-      } else if (text.indexOf('[HIGH]') !== -1 || text.indexOf('[CAUTION]') !== -1) {
+      } else if (text.indexOf('🟡') !== -1) {
         blocks[i].classList.add('risk-flag', 'risk-flag-amber');
-      } else if (text.indexOf('[OK]') !== -1) {
+      } else if (text.indexOf('🟢') !== -1 || text.indexOf('✅') !== -1) {
         blocks[i].classList.add('risk-flag', 'risk-flag-green');
       }
     }
@@ -2092,7 +1844,7 @@ function addMessage(agentKey, content, extra) {
   card.style.setProperty('--card-accent-muted', colors.muted);
   card.innerHTML =
     '<div class="card-top-bar">' +
-      '<div class="card-avatar" style="background:' + colors.dim + ';color:' + colors.accent + '">' + (AGENTS[agentKey]?.avatar||'SY') + '</div>' +
+      '<div class="card-avatar" style="background:' + colors.dim + ';color:' + colors.accent + '">' + (AGENT_ICONS[agentKey] || AGENTS[agentKey]?.avatar || 'SY') + '</div>' +
       '<span class="card-agent-name" style="color:' + colors.accent + '">' + (AGENTS[agentKey]?.name||'System') + '</span>' +
       parallel + providerTag +
       '<span class="card-timestamp">' + ts + '</span>' +
@@ -2184,11 +1936,7 @@ function animateExposure(targetValue, label) {
 
 function resetExposure() {
   var el = document.getElementById('exposureValue');
-<<<<<<< HEAD
   el.textContent = '—';
-=======
-  el.textContent = '-';
->>>>>>> 896cf8aec11f683173326d0b4df1222fa61ac0d4
   el.classList.remove('active', 'exposure-glow');
   document.getElementById('exposureLabel').textContent = EXPOSURE_DATA[currentScenario].label;
   var callout = document.getElementById('valueCallout');
@@ -2310,8 +2058,8 @@ function showOutcomeCard() {
   var verdictClass = '';
 
   if (currentScenario === 'a') {
-    var criticalMatches = lastRiskContent.match(/\[CRITICAL\]/g);
-    var highMatches = lastRiskContent.match(/\[HIGH\]/g);
+    var criticalMatches = lastRiskContent.match(/🔴 CRITICAL/g);
+    var highMatches = lastRiskContent.match(/🟡 HIGH/g);
     criticalCount = criticalMatches ? criticalMatches.length : 0;
     highCount = highMatches ? highMatches.length : 0;
     verdictText = 'DO NOT SIGN AS WRITTEN';
@@ -2339,7 +2087,7 @@ function showOutcomeCard() {
   card.id = 'outcomeCard';
   card.innerHTML =
     '<div class="outcome-header">' +
-      '<div class="outcome-header-icon"><i data-lucide="check-circle" style="width:16px;height:16px"></i></div>' +
+      '<div class="outcome-header-icon">✓</div>' +
       '<div class="outcome-header-text">What SentinelOps Found</div>' +
     '</div>' +
     '<div class="outcome-body">' +
@@ -2358,7 +2106,6 @@ function showOutcomeCard() {
   var feed = document.getElementById('feed');
   feed.appendChild(card);
   feed.scrollTop = feed.scrollHeight;
-  if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 function resetOutcomeCard() {
@@ -2385,11 +2132,7 @@ function showPanelOutcome() {
     html += '<div class="panel-outcome-row"><span class="po-label">Recommended</span><span class="po-value" style="color:var(--briefing)">Stratos Cloud (4.2)</span></div>';
     html += '<div class="panel-outcome-row"><span class="po-label">Rejected</span><span class="po-value po-critical">Apex (8.9)</span></div>';
     html += '<div class="panel-outcome-row"><span class="po-label">Exposure Avoided</span><span class="po-value po-exposure">' + exposureText + '</span></div>';
-<<<<<<< HEAD
     html += '<div class="panel-outcome-verdict conditional">SELECT STRATOS — 4 CONDITIONS</div>';
-=======
-    html += '<div class="panel-outcome-verdict conditional">SELECT STRATOS -4 CONDITIONS</div>';
->>>>>>> 896cf8aec11f683173326d0b4df1222fa61ac0d4
   }
   po.innerHTML = html;
   po.classList.add('visible');
@@ -2432,183 +2175,6 @@ function setMode(m) {
 }
 
 // ========================
-//   ESCALATION BANNER
-// ========================
-
-function showEscalation(score) {
-  var numScore = parseFloat(score);
-  if (numScore < 7.0) return;
-  var banner = document.getElementById('escalationBanner');
-  var title = document.getElementById('escalationTitle');
-  var desc = document.getElementById('escalationDesc');
-  var tag = document.getElementById('escalationTag');
-
-  if (numScore >= 8.0) {
-    title.textContent = 'ESCALATION REQUIRED - CRITICAL RISK';
-    desc.textContent = 'Risk score ' + score + '/10 exceeds organizational threshold (7.0). Board and Legal review mandatory before any contractual commitment.';
-    tag.textContent = 'Board Review Required';
-  } else {
-    title.textContent = 'ELEVATED RISK - REVIEW REQUIRED';
-    desc.textContent = 'Risk score ' + score + '/10 exceeds standard threshold. Senior management review recommended before proceeding.';
-    tag.textContent = 'Management Review';
-  }
-  banner.classList.add('visible');
-}
-
-function hideEscalation() {
-  document.getElementById('escalationBanner').classList.remove('visible');
-}
-
-// ========================
-//   CONSENSUS PANEL
-// ========================
-
-function showConsensusPanel() {
-  var panel = document.getElementById('consensusPanel');
-  var html = '<div class="consensus-title">Agent Consensus</div>';
-  html += '<div class="consensus-agents">';
-
-  if (currentScenario === 'a') {
-    html += '<div class="consensus-row"><div class="consensus-dot agree"></div><span class="consensus-agent-name">Analyst</span><span class="consensus-position">Flagged 5 clauses</span></div>';
-    html += '<div class="consensus-row"><div class="consensus-dot agree"></div><span class="consensus-agent-name">Devil\'s Advocate</span><span class="consensus-position">Do not sign</span></div>';
-    html += '<div class="consensus-row"><div class="consensus-dot agree"></div><span class="consensus-agent-name">Precedent Agent</span><span class="consensus-position">History confirms risk</span></div>';
-    html += '<div class="consensus-row"><div class="consensus-dot agree"></div><span class="consensus-agent-name">Risk Agent</span><span class="consensus-position">8.5/10 - Critical</span></div>';
-    html += '<div class="consensus-row"><div class="consensus-dot agree"></div><span class="consensus-agent-name">Briefing Agent</span><span class="consensus-position">Do not sign as written</span></div>';
-    html += '</div>';
-    html += '<div class="consensus-meter"><div class="consensus-meter-label"><span>Consensus Level</span><span>5/5 Aligned</span></div>';
-    html += '<div class="consensus-bar"><div class="consensus-fill" style="width:100%"></div></div></div>';
-    html += '<div class="consensus-verdict unanimous">UNANIMOUS - All agents recommend against signing as written</div>';
-  } else {
-    html += '<div class="consensus-row"><div class="consensus-dot agree"></div><span class="consensus-agent-name">Analyst</span><span class="consensus-position">Parsed 3 proposals</span></div>';
-    html += '<div class="consensus-row"><div class="consensus-dot agree"></div><span class="consensus-agent-name">Devil\'s Advocate</span><span class="consensus-position">Champions Stratos</span></div>';
-    html += '<div class="consensus-row"><div class="consensus-dot disagree"></div><span class="consensus-agent-name">Precedent Agent</span><span class="consensus-position">Scale concerns</span></div>';
-    html += '<div class="consensus-row"><div class="consensus-dot agree"></div><span class="consensus-agent-name">Risk Agent</span><span class="consensus-position">Stratos w/ conditions</span></div>';
-    html += '<div class="consensus-row"><div class="consensus-dot agree"></div><span class="consensus-agent-name">Briefing Agent</span><span class="consensus-position">Conditional approval</span></div>';
-    html += '</div>';
-    html += '<div class="consensus-meter"><div class="consensus-meter-label"><span>Consensus Level</span><span>4/5 Aligned</span></div>';
-    html += '<div class="consensus-bar"><div class="consensus-fill split" style="width:80%"></div></div></div>';
-    html += '<div class="consensus-verdict split-verdict">SPLIT DECISION - Precedent Agent raised scale concerns; resolved by conditional approval</div>';
-  }
-
-  panel.innerHTML = html;
-  panel.classList.add('visible');
-}
-
-function hideConsensusPanel() {
-  var panel = document.getElementById('consensusPanel');
-  panel.classList.remove('visible');
-  panel.innerHTML = '';
-}
-
-// ========================
-//   AUDIT TRAIL DOWNLOAD
-// ========================
-
-function showAuditDownload() {
-  document.getElementById('auditDownloadBtn').classList.add('visible');
-}
-
-function hideAuditDownload() {
-  document.getElementById('auditDownloadBtn').classList.remove('visible');
-}
-
-function downloadAuditTrail() {
-  var now = new Date();
-  var timestamp = now.toISOString().replace(/[:.]/g, '-').slice(0, 19);
-  var scenarioLabel = currentScenario === 'a' ? 'Contract Review - GlobalTech Partnership' : 'Vendor Selection - Cloud Infrastructure';
-
-  var lines = [];
-  lines.push('═══════════════════════════════════════════════════════════════');
-  lines.push('SENTINELOPS - DECISION AUDIT TRAIL');
-  lines.push('═══════════════════════════════════════════════════════════════');
-  lines.push('Generated: ' + now.toUTCString());
-  lines.push('Scenario:  ' + scenarioLabel);
-  lines.push('Track:     Track 3 - Regulated & High-Stakes Workflows');
-  lines.push('Platform:  Band (Multi-Agent Coordination)');
-  lines.push('Agents:    5 (Analyst, Devil\'s Advocate, Precedent, Risk, Briefing)');
-  lines.push('Frameworks: httpx/ResilientAdapter, LangChain, OpenAI SDK');
-  lines.push('Providers: AI/ML API (4 agents), Featherless AI (Precedent)');
-  lines.push('Autonomous Decisions Made: 0');
-  lines.push('');
-  lines.push('═══════════════════════════════════════════════════════════════');
-  lines.push('AGENT PIPELINE FLOW');
-  lines.push('═══════════════════════════════════════════════════════════════');
-  lines.push('Human → Analyst → Band broadcast → [Devil\'s Advocate + Precedent (PARALLEL)] → Risk Agent (wait_for_all) → Briefing Agent → Human');
-  lines.push('');
-  lines.push('═══════════════════════════════════════════════════════════════');
-  lines.push('BAND COORDINATION LOG');
-  lines.push('═══════════════════════════════════════════════════════════════');
-
-  var logEntries = document.querySelectorAll('#bandLogScroll .band-log-entry');
-  if (logEntries.length > 0) {
-    logEntries.forEach(function(entry) {
-      lines.push('  ' + entry.textContent.trim());
-    });
-  } else {
-    lines.push('  (Band log entries not available in this session)');
-  }
-
-  lines.push('');
-  lines.push('═══════════════════════════════════════════════════════════════');
-  lines.push('AGENT REPORTS');
-  lines.push('═══════════════════════════════════════════════════════════════');
-
-  var cards = document.querySelectorAll('.report-card');
-  cards.forEach(function(card) {
-    var agentName = card.querySelector('.card-agent-name');
-    var ts = card.querySelector('.card-timestamp');
-    var content = card.querySelector('.card-content');
-    var provider = card.querySelector('.provider-tag');
-    if (agentName && content) {
-      lines.push('');
-      lines.push('--- ' + agentName.textContent.toUpperCase() + ' [' + (ts ? ts.textContent : '') + '] [' + (provider ? provider.textContent : '') + '] ---');
-      lines.push(content.textContent.trim());
-    }
-  });
-
-  lines.push('');
-  lines.push('═══════════════════════════════════════════════════════════════');
-  lines.push('RISK ASSESSMENT');
-  lines.push('═══════════════════════════════════════════════════════════════');
-  lines.push('Risk Score:       ' + document.getElementById('riskScore').textContent + '/10');
-  lines.push('Financial Exposure: ' + document.getElementById('exposureValue').textContent);
-  lines.push('Severity:         ' + document.getElementById('riskSub').textContent);
-
-  var escalation = document.getElementById('escalationBanner');
-  if (escalation.classList.contains('visible')) {
-    lines.push('');
-    lines.push('*** ESCALATION TRIGGERED ***');
-    lines.push(document.getElementById('escalationTitle').textContent);
-    lines.push(document.getElementById('escalationDesc').textContent);
-  }
-
-  lines.push('');
-  lines.push('═══════════════════════════════════════════════════════════════');
-  lines.push('COMPLIANCE ATTESTATION');
-  lines.push('═══════════════════════════════════════════════════════════════');
-  lines.push('This audit trail certifies that:');
-  lines.push('  1. All analysis was performed by AI agents under human supervision');
-  lines.push('  2. Zero autonomous decisions were made');
-  lines.push('  3. The human decision-maker retains full authority');
-  lines.push('  4. All agent outputs are preserved in this record');
-  lines.push('  5. The pipeline enforced escalation gates where applicable');
-  lines.push('');
-  lines.push('End of Audit Trail');
-  lines.push('═══════════════════════════════════════════════════════════════');
-
-  var text = lines.join('\n');
-  var blob = new Blob([text], { type: 'text/plain' });
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  a.href = url;
-  a.download = 'SentinelOps_Audit_Trail_' + timestamp + '.txt';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-}
-
-// ========================
 //   LIVE MODE
 // ========================
 
@@ -2630,126 +2196,90 @@ async function triggerLive() {
   }
 }
 
-var _polling = false;
 async function pollEvents() {
-  if (_polling) return;
-  _polling = true;
   try {
     var resp = await fetch('/api/events?after=' + lastEventIndex + '&_=' + Date.now(), { cache: 'no-store' });
     var events = await resp.json();
-    if (events.length > 0) console.log('[SentinelOps Live] Polled', events.length, 'events, after=' + lastEventIndex);
     for (var i = 0; i < events.length; i++) {
       handleLiveEvent(events[i]);
       lastEventIndex++;
     }
   } catch(e) {
     console.error('Poll error:', e);
-  } finally {
-    _polling = false;
-  }
-}
-
-function completePipeline(briefContent) {
-  if (pipelineComplete) return;
-  Object.keys(AGENTS).forEach(function(key) { setAgentStatus(key, 'complete'); });
-  setProgress(100);
-  setBottomStatus('Analysis complete — 5 agents, 0 autonomous decisions');
-  document.getElementById('liveDot').classList.remove('live');
-  document.getElementById('liveLabel').textContent = 'COMPLETE';
-  clearInterval(timerInterval);
-  if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
-  addSystemMessage('Pipeline complete. All 5 agents have reported. Executive brief ready.', false);
-  addSystemMessage('You can now ask follow-up questions below. The Briefing Agent will respond using the full analysis context.', false);
-  document.getElementById('resetBtn').style.display = 'block';
-  showPipelineComplete();
-  showOutcomeCard(); showPanelOutcome(); showConsensusPanel(); showAuditDownload();
-  showFollowupBar();
-  if (briefContent) {
-    setTimeout(function() { showLiveBrief(briefContent); }, 2000);
-  }
-  if (!followupPollInterval) {
-    followupPollInterval = setInterval(pollEvents, 2000);
   }
 }
 
 function handleLiveEvent(event) {
-  if (!event || !event.type) return;
-  console.log('[SentinelOps Live] Event:', event.type, event.agent || '', event.status || '');
-
   if (event.type === 'status') {
     if (event.status === 'active') {
       setAgentStatus(event.agent, 'active');
-      setBottomStatus((AGENTS[event.agent] ? AGENTS[event.agent].name : event.agent) + ' analyzing...');
+      setBottomStatus(AGENTS[event.agent]?.name + ' analyzing...');
       var curProgress = parseFloat(document.getElementById('progressFill').style.width) || 0;
       setProgress(Math.max(curProgress, (AGENT_PROGRESS[event.agent] || 10) - 15));
-      if (STEP_NARRATION[currentScenario] && STEP_NARRATION[currentScenario][event.agent] && !narratedSteps[event.agent]) {
+
+      if (STEP_NARRATION[currentScenario][event.agent] && !narratedSteps[event.agent]) {
         narratedSteps[event.agent] = true;
         addSystemMessage(STEP_NARRATION[currentScenario][event.agent], true);
       }
     } else if (event.status === 'complete') {
       setAgentStatus(event.agent, 'complete');
     }
-    return;
-  }
+  } else if (event.type === 'message') {
+    setAgentStatus(event.agent, 'complete');
+    var isParallel = event.agent === 'devils_advocate' || event.agent === 'precedent';
 
-  if (event.type === 'message') {
-
-    var agent = event.agent || '';
-    if (agent === 'sentinelops-analyst') agent = 'analyst';
-    if (agent === 'sentinelops-devils-advocate') agent = 'devils_advocate';
-    if (agent === 'sentinelops-precedent') agent = 'precedent';
-    if (agent === 'sentinelops-risk') agent = 'risk';
-    if (agent === 'sentinelops-briefing') agent = 'briefing';
-
-    var card = AGENTS[agent] ? document.getElementById(AGENTS[agent].card) : null;
-    if (card && !card.classList.contains('active')) {
-      setAgentStatus(agent, 'active');
-      if (STEP_NARRATION[currentScenario] && STEP_NARRATION[currentScenario][agent] && !narratedSteps[agent]) {
-        narratedSteps[agent] = true;
-        addSystemMessage(STEP_NARRATION[currentScenario][agent], true);
-      }
+    if (STEP_NARRATION[currentScenario][event.agent] && !narratedSteps[event.agent]) {
+      narratedSteps[event.agent] = true;
+      addSystemMessage(STEP_NARRATION[currentScenario][event.agent], true);
     }
 
-    var isParallel = agent === 'devils_advocate' || agent === 'precedent';
-    addMessage(agent, event.content, { parallel: isParallel, provider: event.provider || null });
-    setProgress(AGENT_PROGRESS[agent] || 50);
-    setTimeout(function() { setAgentStatus(agent, 'complete'); }, 800);
+    addMessage(event.agent, event.content, {
+      parallel: isParallel,
+      provider: event.provider || null
+    });
 
     var elapsed = document.getElementById('timer').textContent.replace('T+', '');
     var agentNames = { analyst:'Analyst', devils_advocate:"Devil's Advocate", precedent:'Precedent', risk:'Risk', briefing:'Briefing' };
-    var aName = agentNames[agent] || agent;
-    if (agent === 'analyst') {
+    var aName = agentNames[event.agent] || event.agent;
+    if (event.agent === 'analyst') {
       addBandLogEntry(elapsed, aName, null, '→ Band room');
       addSystemMessage("Band broadcast → Devil's Advocate + Precedent Agent activating in parallel", false, 'band-broadcast');
       addBandLogEntry(elapsed, 'Band', null, "broadcast → Devil's Advocate + Precedent (parallel)");
-    } else if (agent === 'devils_advocate') {
+    } else if (event.agent === 'devils_advocate') {
       addBandLogEntry(elapsed, aName, 'Risk', 'findings delivered');
-    } else if (agent === 'precedent') {
+    } else if (event.agent === 'precedent') {
       addBandLogEntry(elapsed, aName, 'Risk', 'institutional memory delivered');
-    } else if (agent === 'risk') {
+    } else if (event.agent === 'risk') {
       if (currentScenario === 'b') {
         addSystemMessage("Agent disagreement detected — Devil's Advocate champions Stratos Cloud, Precedent Agent raises scale concerns (47 employees). Briefing Agent will synthesize both positions.", false, 'agent-disagreement');
       }
       addBandLogEntry(elapsed, aName, 'Briefing', 'scored matrix delivered');
-    } else if (agent === 'briefing') {
+    } else if (event.agent === 'briefing') {
       addBandLogEntry(elapsed, aName, 'Human', 'executive brief delivered');
     }
 
-    if (agent === 'risk') {
+    setProgress(AGENT_PROGRESS[event.agent] || 50);
+
+    if (event.agent === 'risk') {
       if (currentScenario === 'b') {
         setRiskScore('4.2', 'moderate');
         document.getElementById('riskSub').textContent = 'Stratos Cloud · Recommended with Conditions';
         animateExposure(EXPOSURE_DATA.b.value, EXPOSURE_DATA.b.label);
       } else {
         var scoreMatch = event.content.match(/(\d+\.?\d*)\s*\/\s*10/);
-        var score = scoreMatch ? scoreMatch[1] : '8.5';
-        setRiskScore(score, getSeverityFromScore(score));
-        showEscalation(score);
-        animateExposure(EXPOSURE_DATA.a.value, EXPOSURE_DATA.a.label);
+        if (scoreMatch) {
+          setRiskScore(scoreMatch[1], getSeverityFromScore(scoreMatch[1]));
+        }
+        var exposureMatch = event.content.match(/[Tt]otal\s+(?:quantifiable\s+)?exposure[:\s]*\$?([\d,]+)/i);
+        if (exposureMatch) {
+          var exposureNum = parseInt(exposureMatch[1].replace(/,/g, ''), 10);
+          animateExposure(exposureNum, EXPOSURE_DATA.a.label);
+        } else {
+          animateExposure(EXPOSURE_DATA.a.value, EXPOSURE_DATA.a.label);
+        }
       }
     }
 
-<<<<<<< HEAD
     if (event.agent === 'briefing') {
       setBottomStatus('Analysis complete — 5 agents, 0 autonomous decisions');
       document.getElementById('liveDot').classList.remove('live');
@@ -2787,21 +2317,6 @@ function handleLiveEvent(event) {
     addSystemMessage('Pipeline complete. All 5 agents have reported. Executive brief ready.', false);
     showPipelineComplete();
     showOutcomeCard(); showPanelOutcome();
-=======
-    if (agent === 'briefing' && !pipelineComplete) {
-      completePipeline(event.content);
-    } else if (agent === 'briefing' && pipelineComplete) {
-      addMessage('briefing', event.content, { provider: event.provider || null });
-    }
-    return;
-  }
-
-  if (event.type === 'pipeline_complete') {
-    if (!pipelineComplete) {
-      completePipeline(event.content || '');
-    }
-    return;
->>>>>>> 896cf8aec11f683173326d0b4df1222fa61ac0d4
   }
 }
 
@@ -2814,7 +2329,6 @@ function showLiveBrief(content) {
 
 function closeBrief() { document.getElementById('briefOverlay').classList.remove('visible'); }
 
-<<<<<<< HEAD
 // ============================================================
 //   Follow-up Q&A  (demo = pre-recorded answers; live = real Briefing agent)
 // ============================================================
@@ -3135,15 +2649,6 @@ function downloadBriefPDF(btn) {
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = label; }
   }
-=======
-function downloadBriefPDF() {
-  var title = document.getElementById('briefTitle').textContent || 'SentinelOps Brief';
-  var filename = title.replace(/[^a-zA-Z0-9]+/g, '_').replace(/_+$/,'') + '_Brief';
-  var originalTitle = document.title;
-  document.title = filename;
-  window.print();
-  document.title = originalTitle;
->>>>>>> 896cf8aec11f683173326d0b4df1222fa61ac0d4
 }
 
 async function startLiveMode() {
@@ -3157,7 +2662,6 @@ async function startLiveMode() {
   document.getElementById('liveLabel').textContent = 'LIVE';
   setProgress(2);
   narratedSteps = {};
-  pipelineComplete = false;
 
   addSystemMessage('Sending analysis request to Band platform. All 5 agents will coordinate through Band messaging to review this contract.', false);
 
@@ -3195,17 +2699,10 @@ function resetDashboard() {
 
   setProgress(0);
   document.getElementById('timer').textContent = 'T+00:00';
-<<<<<<< HEAD
   setBottomStatus('Ready — 5 agents connected');
 
   var riskEl = document.getElementById('riskScore');
   riskEl.textContent = '—';
-=======
-  setBottomStatus('Ready -5 agents connected');
-
-  var riskEl = document.getElementById('riskScore');
-  riskEl.textContent = ' - ';
->>>>>>> 896cf8aec11f683173326d0b4df1222fa61ac0d4
   riskEl.classList.remove('critical', 'high', 'medium', 'low', 'score-pop');
   document.getElementById('riskSub').textContent = 'Pending analysis';
   document.getElementById('riskDisplay').style.borderColor = '';
@@ -3215,13 +2712,6 @@ function resetDashboard() {
   resetBandLog();
   resetOutcomeCard();
   resetPipeConnectors();
-<<<<<<< HEAD
-=======
-  hideFollowupBar();
-  hideEscalation();
-  hideConsensusPanel();
-  hideAuditDownload();
->>>>>>> 896cf8aec11f683173326d0b4df1222fa61ac0d4
 
   document.getElementById('liveDot').classList.remove('live');
   document.getElementById('liveLabel').textContent = 'STANDBY';
@@ -3243,7 +2733,8 @@ function resetDashboard() {
 
   document.getElementById('briefTitle').textContent = DOC_INFO[currentScenario].briefTitle;
 
-
+  var banner = document.getElementById('landingBanner');
+  if (banner) banner.classList.remove('hidden');
 
   (async function() {
     var serverUp = await checkServer();
@@ -3269,7 +2760,6 @@ function showBrief() {
     'Meridian Ventures has a $600K annual minimum commitment and a $500K liability cap — ' +
     '<strong>27.8% of deal value</strong>.</p>' +
 
-<<<<<<< HEAD
     '<h3>Top Risks — Act on These Before Signing</h3>' +
     '<div class="risk-item critical"><strong>🔴 CRITICAL: Board Resolution BRD-2023-47 Violation (Section 4.1, p.27)</strong><br>' +
     'Automatic IP transfer to GlobalTech. Your board prohibited this in September 2023. ' +
@@ -3278,20 +2768,10 @@ function showBrief() {
     'Meridian evaluated GlobalTech and chose not to proceed. Documented reasons — surprise penalty clauses, ' +
     'declining EMEA performance — are present in this contract.</div>' +
     '<div class="risk-item critical"><strong>🔴 CRITICAL: 5+ Year Exclusivity Lock-In (p.34 + p.67)</strong><br>' +
-=======
-    '<h3>Top Risks - Act on These Before Signing</h3>' +
-    '<div class="risk-item critical"><strong>[CRITICAL]: Board Resolution BRD-2023-47 Violation (Section 4.1, p.27)</strong><br>' +
-    'Automatic IP transfer to GlobalTech. Your board prohibited this in September 2023. ' +
-    'This contract <strong>cannot be signed without board approval</strong>.</div>' +
-    '<div class="risk-item critical"><strong>[CRITICAL]: We Rejected This Vendor 12 Months Ago (April 2025)</strong><br>' +
-    'Meridian evaluated GlobalTech and chose not to proceed. Documented reasons - surprise penalty clauses, ' +
-    'declining EMEA performance - are present in this contract.</div>' +
-    '<div class="risk-item critical"><strong>[CRITICAL]: 5+ Year Exclusivity Lock-In (p.34 + p.67)</strong><br>' +
->>>>>>> 896cf8aec11f683173326d0b4df1222fa61ac0d4
     '3-year exclusivity plus 24-month post-termination extension. NovaCorp precedent: $780K lost in identical structure.</div>' +
-    '<div class="risk-item high"><strong>[HIGH]: Liability Cap Leaves $1.3M Exposed (p.52)</strong><br>' +
+    '<div class="risk-item high"><strong>🟡 HIGH: Liability Cap Leaves $1.3M Exposed (p.52)</strong><br>' +
     '$500K cap on $1.8M deal = 27.8% coverage. Vertex benchmark: 100% of deal value. Recovery gap: $1,300,000.</div>' +
-    '<div class="risk-item high"><strong>[HIGH]: "Best Efforts" Is Legally Unenforceable (p.12)</strong><br>' +
+    '<div class="risk-item high"><strong>🟡 HIGH: "Best Efforts" Is Legally Unenforceable (p.12)</strong><br>' +
     'No KPIs, no benchmarks, no definition. DataStream precedent: identical language, $340K lost with zero remedy.</div>' +
 
     '<h3>What Your Company\'s History Says</h3>' +
@@ -3311,11 +2791,7 @@ function showBrief() {
     '<ul style="padding-left:18px;margin:8px 0">' +
     '<li>Define "best efforts" with specific quarterly KPIs and mutual minimums (p.12)</li>' +
     '<li>Remove or cap post-termination exclusivity to 6 months maximum (p.67)</li>' +
-<<<<<<< HEAD
     '<li>Raise liability cap to 100% of deal value — $1,800,000 (p.52)</li>' +
-=======
-    '<li>Raise liability cap to 100% of deal value -$1,800,000 (p.52)</li>' +
->>>>>>> 896cf8aec11f683173326d0b4df1222fa61ac0d4
     '<li>Add change-of-control clause: Meridian exits if GlobalTech is acquired</li>' +
     '<li>Require full Schedule C disclosure before any signature</li>' +
     '<li>Equalize termination rights: both parties get 90-day exit</li></ul>' +
@@ -3344,11 +2820,7 @@ var DEMO = [
     '<strong>Value:</strong> $1,800,000 over 3 years | Annual minimum: $600,000\n\n' +
     '<strong>Key Clauses Extracted:</strong>\n' +
     '• Section 1.2 (p.8): 35% revenue share on all EMEA/APAC distribution\n' +
-<<<<<<< HEAD
     '• Section 2.1 (p.12): "Best efforts" commitment — <strong>undefined, no KPIs</strong>\n' +
-=======
-    '• Section 2.1 (p.12): "Best efforts" commitment -<strong>undefined, no KPIs</strong>\n' +
->>>>>>> 896cf8aec11f683173326d0b4df1222fa61ac0d4
     '• Section 3.4 (p.19): $600K annual minimum purchase, penalties in Schedule C\n' +
     '• Section 4.1 (p.27): All IP improvements transfer to GlobalTech automatically\n' +
     '• Section 5.2 (p.34): Exclusive EMEA distribution rights\n' +
@@ -3389,11 +2861,7 @@ var DEMO = [
     '<strong>DIRECT HISTORY WITH THIS VENDOR:</strong>\n' +
     'March 2023: GlobalTech filed a payment dispute against our portfolio company TechBridge Ltd for $142K. ' +
     'Settled for $89K. TechBridge CEO noted "aggressive billing practices." <strong>TechBridge no longer works with GlobalTech.</strong>\n\n' +
-<<<<<<< HEAD
     'April 2025 — 12 months ago — Meridian evaluated a GlobalTech partnership and <strong>abandoned it at the LOI stage</strong>. ' +
-=======
-    'April 2025 -12 months ago - Meridian evaluated a GlobalTech partnership and <strong>abandoned it at the LOI stage</strong>. ' +
->>>>>>> 896cf8aec11f683173326d0b4df1222fa61ac0d4
     'Due diligence file documents a pattern of surprise penalty clauses in Schedule C. ' +
     '<strong>We chose not to proceed. Those reasons are on file.</strong>\n\n' +
     '<strong>RELEVANT CONTRACT PRECEDENTS:</strong>\n' +
@@ -3414,7 +2882,6 @@ var DEMO = [
   [28000, 'message', 'risk',
     '<strong>RISK ASSESSMENT MATRIX</strong>\n' +
     '<em>Synthesized from Devil\'s Advocate + Precedent Agent findings</em>\n\n' +
-<<<<<<< HEAD
     '<span class="risk-high">🔴 CRITICAL — Board Resolution Violation (Section 4.1, p.27)</span>\n' +
     'IP auto-transfer triggers BRD-2023-47. Deal invalidation + legal liability.\n' +
     '<strong>Exposure: Contract voidability</strong>\n\n' +
@@ -3428,21 +2895,6 @@ var DEMO = [
     '$500K cap on $1.8M deal = 27.8% coverage. Vertex benchmark: 100%.\n' +
     '<strong>Exposure: $1,300,000 unrecoverable</strong>\n\n' +
     '<span class="risk-med">🟡 HIGH — Unenforceable "Best Efforts" (p.12)</span>\n' +
-=======
-    '<span class="risk-high">[CRITICAL] - Board Resolution Violation (Section 4.1, p.27)</span>\n' +
-    'IP auto-transfer triggers BRD-2023-47. Deal invalidation + legal liability.\n' +
-    '<strong>Exposure: Contract voidability</strong>\n\n' +
-    '<span class="risk-high">[CRITICAL] - Prior Vendor Rejection on File (April 2025)</span>\n' +
-    'Evaluated and rejected GlobalTech 12 months ago. Documented risks unchanged.\n' +
-    '<strong>Exposure: Repeated pattern of unfavorable terms</strong>\n\n' +
-    '<span class="risk-high">[CRITICAL] - Exclusivity Lock-In (p.34 + p.67)</span>\n' +
-    '3-year term + 24-month post-termination = 5+ years restricted.\n' +
-    '<strong>Exposure: ~$780,000</strong> (NovaCorp precedent)\n\n' +
-    '<span class="risk-med">[HIGH] - Inadequate Liability Cap (p.52)</span>\n' +
-    '$500K cap on $1.8M deal = 27.8% coverage. Vertex benchmark: 100%.\n' +
-    '<strong>Exposure: $1,300,000 unrecoverable</strong>\n\n' +
-    '<span class="risk-med">[HIGH] - Unenforceable "Best Efforts" (p.12)</span>\n' +
->>>>>>> 896cf8aec11f683173326d0b4df1222fa61ac0d4
     'Undefined commitment. DataStream precedent: $340K lost.\n' +
     '<strong>Exposure: $340,000+</strong>\n\n' +
     '<strong>AGGREGATE RISK SCORE: 8.5 / 10</strong>\n' +
@@ -3494,21 +2946,12 @@ var DEMO_B = [
     '| NimbusStack | 99.9% | 4 hours P1 | Service credits | 5% monthly fee |\n' +
     '| Apex Systems | 99.5% | Best efforts | None defined | None |\n\n' +
     '### III. KEY FLAGS\n' +
-<<<<<<< HEAD
     '🔴 Apex Systems: "best efforts" SLA support — unenforceable. No penalty for downtime.\n\n' +
     '🔴 Stratos Cloud: proprietary architecture lock-in. Migration exit cost estimated $180K+.\n\n' +
     '🟡 NimbusStack: CPI+2% price escalation clause — cost could reach $340K by year 3.\n\n' +
     '🟡 Apex Systems: no defined exit penalty — but billing dispute history with Meridian (2024).\n\n' +
     '🟢 Stratos Cloud: strongest SLA with defined breach remedies.\n\n' +
     '🟢 NimbusStack: most flexible exit terms of the three vendors.\n\n' +
-=======
-    '[CRITICAL] Apex Systems: "best efforts" SLA support - unenforceable. No penalty for downtime.\n\n' +
-    '[CRITICAL] Stratos Cloud: proprietary architecture lock-in. Migration exit cost estimated $180K+.\n\n' +
-    '[HIGH] NimbusStack: CPI+2% price escalation clause - cost could reach $340K by year 3.\n\n' +
-    '[HIGH] Apex Systems: no defined exit penalty - but billing dispute history with Meridian (2024).\n\n' +
-    '[OK] Stratos Cloud: strongest SLA with defined breach remedies.\n\n' +
-    '[OK] NimbusStack: most flexible exit terms of the three vendors.\n\n' +
->>>>>>> 896cf8aec11f683173326d0b4df1222fa61ac0d4
     '*Forwarding to @sentinelops-devils-advocate and @sentinelops-precedent for parallel review.*'],
   [8000, 'complete', 'analyst'],
   [8200, 'progress', 25],
@@ -3524,19 +2967,12 @@ var DEMO_B = [
     '## Challenge Report — Vendor Selection\n' +
     '*Verdict: Reject Apex outright. Challenge the assumption that NimbusStack is safer — Stratos Cloud is the stronger risk-adjusted choice.*\n\n' +
     '### WHY NOT NIMBUSSTACK\n' +
-<<<<<<< HEAD
     '**The "safe" choice has hidden costs.** NimbusStack\'s CPI+2% escalation means Meridian pays $308K by year 3 — and has no price certainty for a platform 40 teams depend on. Their 99.9% SLA allows 8.7 hours of downtime per year. For a business-critical migration, that is a bet on hope.\n\n' +
     '**Stratos offers what this migration actually needs**: 99.99% uptime (52 minutes/year max downtime), 15-minute P1 response, and fixed pricing that locks in budget certainty for 3 years. These are not luxuries — they are requirements for a platform serving 40+ teams.\n\n' +
     '### REJECT APEX — NO DEBATE\n' +
     '🔴 **Apex Systems — No SLA penalty**: "Best efforts" support with zero financial accountability. Combined with the 2024 billing dispute, Apex is disqualified.\n\n' +
-=======
-    '**The "safe" choice has hidden costs.** NimbusStack\'s CPI+2% escalation means Meridian pays $308K by year 3 - and has no price certainty for a platform 40 teams depend on. Their 99.9% SLA allows 8.7 hours of downtime per year. For a business-critical migration, that is a bet on hope.\n\n' +
-    '**Stratos offers what this migration actually needs**: 99.99% uptime (52 minutes/year max downtime), 15-minute P1 response, and fixed pricing that locks in budget certainty for 3 years. These are not luxuries - they are requirements for a platform serving 40+ teams.\n\n' +
-    '### REJECT APEX - NO DEBATE\n' +
-    '[CRITICAL] **Apex Systems - No SLA penalty**: "Best efforts" support with zero financial accountability. Combined with the 2024 billing dispute, Apex is disqualified.\n\n' +
->>>>>>> 896cf8aec11f683173326d0b4df1222fa61ac0d4
     '### THE REAL QUESTION\n' +
-    '[HIGH] **Stratos Cloud lock-in is real but manageable**: Yes, proprietary APIs create switching cost. But Meridian is committing to 3 years regardless. The question is whether $180K exit cost in year 4 outweighs $90K in hidden NimbusStack escalation fees PLUS 8x more allowed downtime every single year.\n\n' +
+    '🟡 **Stratos Cloud lock-in is real but manageable**: Yes, proprietary APIs create switching cost. But Meridian is committing to 3 years regardless. The question is whether $180K exit cost in year 4 outweighs $90K in hidden NimbusStack escalation fees PLUS 8x more allowed downtime every single year.\n\n' +
     '### MY POSITION\n' +
     'Stratos is the right vendor for this migration. The lock-in risk is the price of reliability — and it can be mitigated with an open-standard API addendum and a phased rollout that validates performance before full commitment.\n\n' +
     '*Forwarding findings to @sentinelops-risk for scoring.*', {parallel:true}],
@@ -3569,31 +3005,18 @@ var DEMO_B = [
     '### AGENT DISAGREEMENT NOTE\n' +
     'Devil\'s Advocate argues strongly for Stratos Cloud based on SLA superiority and fixed pricing. Precedent Agent raises the counterpoint: Stratos is unproven at Meridian\'s scale (47 employees, no prior relationship). Both positions have merit. Scoring reflects this tension.\n\n' +
     '### VENDOR RISK SCORES\n\n' +
-<<<<<<< HEAD
     '**APEX SYSTEMS — 🔴 8.9 / 10 RISK — DO NOT SELECT**\n' +
     '- No SLA penalty: $200K+ exposure if extended downtime occurs\n' +
     '- Billing dispute history: pattern of opaque invoicing (2024 — $34K overbill)\n' +
     '- Variable pricing with no ceiling — structural repeat of prior dispute\n' +
     '- Total quantified exposure: $890,000\n\n' +
     '**NIMBUSSTACK — 🟡 5.1 / 10 RISK — ADEQUATE BUT NOT OPTIMAL**\n' +
-=======
-    '**APEX SYSTEMS -[CRITICAL] 8.9 / 10 RISK - DO NOT SELECT**\n' +
-    '- No SLA penalty: $200K+ exposure if extended downtime occurs\n' +
-    '- Billing dispute history: pattern of opaque invoicing (2024 -$34K overbill)\n' +
-    '- Variable pricing with no ceiling - structural repeat of prior dispute\n' +
-    '- Total quantified exposure: $890,000\n\n' +
-    '**NIMBUSSTACK -[HIGH] 5.1 / 10 RISK - ADEQUATE BUT NOT OPTIMAL**\n' +
->>>>>>> 896cf8aec11f683173326d0b4df1222fa61ac0d4
     '- Positive pilot history (Project Helix) but at 30x smaller scale\n' +
     '- CPI+2% escalation: $90K additional cost over term if uncapped\n' +
     '- 99.9% SLA allows 8.7 hours downtime/year — board directive demands better\n' +
     '- 4-hour P1 response is standard but not what 40 teams need at 3am\n' +
     '- Total quantified exposure: $310,000 (escalation + downtime cost)\n\n' +
-<<<<<<< HEAD
     '**STRATOS CLOUD — 🟢 4.2 / 10 RISK — RECOMMENDED WITH CONDITIONS**\n' +
-=======
-    '**STRATOS CLOUD -[OK] 4.2 / 10 RISK - RECOMMENDED WITH CONDITIONS**\n' +
->>>>>>> 896cf8aec11f683173326d0b4df1222fa61ac0d4
     '- 99.99% SLA directly addresses board directive after Q4 2025 outage\n' +
     '- Fixed pricing eliminates budget uncertainty over 3 years\n' +
     '- 15-minute P1 response is best-in-class for critical infrastructure\n' +
@@ -3603,9 +3026,9 @@ var DEMO_B = [
     '### AGGREGATE COMPARISON\n' +
     '| Vendor | Risk Score | Exposure | Recommendation |\n' +
     '|--------|-----------|----------|-----------------|\n' +
-    '| Apex Systems | 8.9 / 10 | $890,000 | [REJECT] Do Not Select |\n' +
-    '| NimbusStack | 5.1 / 10 | $310,000 | [CAUTION] Adequate, not optimal |\n' +
-    '| Stratos Cloud | 4.2 / 10 | $180,000 | Recommended (conditions) |\n\n' +
+    '| Apex Systems | 8.9 / 10 | $890,000 | ❌ Do Not Select |\n' +
+    '| NimbusStack | 5.1 / 10 | $310,000 | ⚠️ Adequate, not optimal |\n' +
+    '| Stratos Cloud | 4.2 / 10 | $180,000 | ✅ Recommended (conditions) |\n\n' +
     '*Forwarding to @sentinelops-briefing for executive brief.*'],
   [28500, 'complete', 'risk'],
   [28500, 'riskscoreB'],
@@ -3654,22 +3077,14 @@ function showBriefB() {
     'Stratos\'s SLA and pricing advantages.</div>' +
 
     '<h3>Why Not Apex Systems</h3>' +
-<<<<<<< HEAD
     '<div class="risk-item critical"><strong>🔴 Risk Score: 8.9 / 10 — DO NOT SELECT</strong><br>' +
-=======
-    '<div class="risk-item critical"><strong>[CRITICAL] Risk Score: 8.9 / 10 - DO NOT SELECT</strong><br>' +
->>>>>>> 896cf8aec11f683173326d0b4df1222fa61ac0d4
     'Apex carries a risk score of 8.9/10. Their "best efforts" SLA provides zero ' +
     'financial accountability for downtime. The 2024 billing dispute ($34K overbill over 6 months) ' +
     'and variable pricing with no defined ceiling represent structural risks that would repeat.<br>' +
     '<strong>Potential exposure: $890,000</strong></div>' +
 
     '<h3>Why Not NimbusStack</h3>' +
-<<<<<<< HEAD
     '<div class="risk-item high"><strong>🟡 Risk Score: 5.1 / 10 — ADEQUATE BUT NOT OPTIMAL</strong><br>' +
-=======
-    '<div class="risk-item high"><strong>[HIGH] Risk Score: 5.1 / 10 - ADEQUATE BUT NOT OPTIMAL</strong><br>' +
->>>>>>> 896cf8aec11f683173326d0b4df1222fa61ac0d4
     'NimbusStack has a positive prior relationship (Project Helix) and flexible exit terms. ' +
     'However, its 99.9% SLA allows 8.7 hours of downtime per year — ten times more than Stratos. ' +
     'Its 4-hour P1 response and CPI+2% escalation do not meet the bar set by the board directive. ' +
@@ -3677,17 +3092,10 @@ function showBriefB() {
 
     '<h3>Conditions for Stratos Cloud (All 4 Required)</h3>' +
     '<ol style="padding-left:18px;margin:8px 0">' +
-<<<<<<< HEAD
     '<li>✅ <strong>Phased rollout:</strong> Migrate non-critical workloads first (60 days), then production — with rollback clause if SLA breached during pilot</li>' +
     '<li>✅ <strong>SLA penalty escrow:</strong> 3 months\' fees held in escrow, released only after 6 months at 99.99% or better</li>' +
     '<li>✅ <strong>Open-API addendum:</strong> Stratos must provide documented open-standard API access — eliminates proprietary lock-in ($180K exit cost drops to ~$40K)</li>' +
     '<li>✅ <strong>Staffing & escalation clause:</strong> Named account team of ≥3 engineers; exit rights triggered if Stratos headcount falls below 40 FTE</li></ol>' +
-=======
-    '<li><strong>Phased rollout:</strong> Migrate non-critical workloads first (60 days), then production - with rollback clause if SLA breached during pilot</li>' +
-    '<li><strong>SLA penalty escrow:</strong> 3 months\' fees held in escrow, released only after 6 months at 99.99% or better</li>' +
-    '<li><strong>Open-API addendum:</strong> Stratos must provide documented open-standard API access - eliminates proprietary lock-in ($180K exit cost drops to ~$40K)</li>' +
-    '<li><strong>Staffing & escalation clause:</strong> Named account team of ≥3 engineers; exit rights triggered if Stratos headcount falls below 40 FTE</li></ol>' +
->>>>>>> 896cf8aec11f683173326d0b4df1222fa61ac0d4
 
     '<h3>Fallback Position</h3>' +
     '<p>If Stratos refuses any of the four conditions above, <strong>revert to NimbusStack</strong> ' +
@@ -3734,7 +3142,6 @@ function startDemo() {
         case 'riskscore':
           setRiskScore('8.5', getSeverityFromScore('8.5'));
           animateExposure(EXPOSURE_DATA.a.value, EXPOSURE_DATA.a.label);
-          showEscalation('8.5');
           break;
         case 'riskscoreB':
           setRiskScore('4.2', 'moderate');
@@ -3744,13 +3151,8 @@ function startDemo() {
         case 'bandlog': addBandLogEntry(step[2], step[3], step[4], step[5]); break;
         case 'bandbroadcast': addSystemMessage(step[2], false, 'band-broadcast'); break;
         case 'disagreement': addSystemMessage(step[2], false, 'agent-disagreement'); break;
-<<<<<<< HEAD
         case 'brief': showBrief(); showPipelineComplete(); showOutcomeCard(); showPanelOutcome(); break;
         case 'briefB': showBriefB(); showPipelineComplete(); showOutcomeCard(); showPanelOutcome(); break;
-=======
-        case 'brief': showBrief(); showPipelineComplete(); showOutcomeCard(); showPanelOutcome(); showConsensusPanel(); showFollowupBar(); showAuditDownload(); break;
-        case 'briefB': showBriefB(); showPipelineComplete(); showOutcomeCard(); showPanelOutcome(); showConsensusPanel(); showFollowupBar(); showAuditDownload(); break;
->>>>>>> 896cf8aec11f683173326d0b4df1222fa61ac0d4
       }
     }, step[0]);
     demoTimeouts.push(id);
@@ -3775,7 +3177,8 @@ async function startAnalysis() {
   }
   document.getElementById('startBtn').disabled = true;
   document.getElementById('kbdHint').classList.add('hidden');
-
+  var banner = document.getElementById('landingBanner');
+  if (banner) banner.classList.add('hidden');
 
   var serverUp = await checkServer();
   showScenarioIntro(function() {
@@ -3812,26 +3215,6 @@ document.addEventListener('keydown', function(e) {
   e.preventDefault();
   startAnalysis();
 });
-
-// ========================
-//   DARK / LIGHT THEME
-// ========================
-
-function toggleTheme() {
-  var isLight = document.body.classList.toggle('light');
-  localStorage.setItem('sentinelops-theme', isLight ? 'light' : 'dark');
-  document.getElementById('themeIcon').innerHTML = isLight ? '&#9788;' : '&#9790;';
-}
-
-(function initTheme() {
-  var saved = localStorage.getItem('sentinelops-theme');
-  if (saved === 'light') {
-    document.body.classList.add('light');
-    document.getElementById('themeIcon').innerHTML = '&#9788;';
-  }
-})();
-
-if (typeof lucide !== 'undefined') { lucide.createIcons(); }
 </script>
 </body>
 </html>
