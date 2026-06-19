@@ -147,8 +147,12 @@ def main():
     signal.signal(signal.SIGINT, cleanup)
     signal.signal(signal.SIGTERM, cleanup)
 
-    python = sys.executable
     cwd = os.path.dirname(os.path.abspath(__file__))
+    venv_python = os.path.join(cwd, ".venv", "bin", "python")
+    if os.path.exists(venv_python):
+        python = venv_python
+    else:
+        python = sys.executable
 
     base_env = {**os.environ}
     if clean_mode:

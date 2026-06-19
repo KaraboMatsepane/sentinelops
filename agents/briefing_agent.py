@@ -151,9 +151,28 @@ FOLLOWUP_PROMPT = """You are the Briefing Agent in SentinelOps. The analysis pip
 
 You have access to the full conversation history including all agent reports. Answer questions directly, citing specific findings, page numbers, section references, and dollar amounts from the analysis. Be concise and actionable.
 
+KEY FINDINGS FROM THE ANALYSIS (use as reference):
+- Document: GlobalTech Solutions Partnership Agreement, 74 pages, $1.8M over 3 years
+- Parties: Meridian Ventures Ltd / GlobalTech Solutions Inc
+- CRITICAL: Section 4.1 (p.27) - IP auto-transfer violates Board Resolution BRD-2023-47
+- CRITICAL: GlobalTech was evaluated and rejected April 2025 - documented risks unchanged
+- CRITICAL: Sections 5.2 (p.34) + 9.4 (p.67) - 5+ year exclusivity lock-in (NovaCorp precedent: $780K lost)
+- HIGH: Section 7.1 (p.52) - $500K liability cap on $1.8M deal (27.8% coverage)
+- HIGH: Section 2.1 (p.12) - "Best efforts" undefined (DataStream precedent: $340K lost)
+- HIGH: Section 8.2 (p.58) - Irrevocable customer data access, no deletion clause
+- Section 6.3 (p.41) - Termination asymmetry: GlobalTech 90 days vs Meridian 180 days
+- Section 3.4 (p.19) - $600K annual minimum, penalties in Schedule C (not provided)
+- Aggregate Risk Score: 8.5/10, Total Exposure: $2,420,000+
+- Prior history: DataStream 2022 ($340K lost), NovaCorp 2021 ($780K lost), TechBridge dispute
+- Vertex Systems (2024) benchmark: 100% liability cap, 90-day mutual exit, IP retained
+
 If asked about a specific risk, explain it in detail with the relevant context.
 If asked for recommendations, provide specific, numbered action items.
 If asked to compare options, use a structured format.
+
+FORMATTING RULES:
+Do NOT use markdown. Use CAPS for headers, numbered lists, and plain text.
+Keep answers concise - 2-4 paragraphs maximum.
 
 Always remind the user that final decisions remain with them - you provide analysis, not authority."""
 
@@ -213,33 +232,42 @@ class BriefingAdapter(ResilientAdapter):
         self._pipeline_complete = {}  # room_id -> bool
         super().__init__(**kwargs)
 
+    def _is_followup(self, msg, room_id, is_session_bootstrap):
+        """Detect if a message is a follow-up question."""
+        if is_session_bootstrap:
+            return False
+        if self._pipeline_complete.get(room_id):
+            return True
+        content = msg.content or ""
+        if "Human follow-up question:" in content:
+            return True
+        return False
+
     async def on_message(self, msg, tools, history, *args,
                          is_session_bootstrap, room_id, **kw):
         sender = msg.sender_name or ""
 
-        if self._pipeline_complete.get(room_id):
-            is_risk = "sentinelops-risk" in sender.lower()
-            if not is_risk:
-                original_prompt = self._system_prompt
-                original_respond_to = self.respond_to
-                self._system_prompt = self._followup_prompt
-                self.respond_to = None
-                try:
-                    await super().on_message(msg, tools, history, *args,
-                                             is_session_bootstrap=is_session_bootstrap,
-                                             room_id=room_id, **kw)
-                finally:
-                    self._system_prompt = original_prompt
-                    self.respond_to = original_respond_to
-                return
+        if self._is_followup(msg, room_id, is_session_bootstrap):
+            original_prompt = self._system_prompt
+            original_respond_to = self.respond_to
+            self._system_prompt = self._followup_prompt
+            self.respond_to = None
+            try:
+                await super().on_message(msg, tools, history, *args,
+                                         is_session_bootstrap=is_session_bootstrap,
+                                         room_id=room_id, **kw)
+            finally:
+                self._system_prompt = original_prompt
+                self.respond_to = original_respond_to
+            return
 
-        # Normal pipeline processing
+        # Normal pipeline processing — only respond to risk agent
         await super().on_message(msg, tools, history, *args,
                                  is_session_bootstrap=is_session_bootstrap,
                                  room_id=room_id, **kw)
 
-        # Only mark pipeline complete for real messages, not bootstrap replays
-        if not is_session_bootstrap:
+        # Mark pipeline complete only when briefing actually responded (sender was risk)
+        if not is_session_bootstrap and self._should_respond(msg):
             self._pipeline_complete[room_id] = True
 
 

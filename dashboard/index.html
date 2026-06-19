@@ -1377,6 +1377,7 @@ button:focus-visible, input:focus-visible, .scenario-pill:focus-visible {
         <div class="brief-title" id="briefTitle">GlobalTech Solutions Partnership Agreement</div>
       </div>
       <div class="brief-header-actions">
+        <button class="brief-download" onclick="downloadAuditTrail()">&#8681; Audit Trail</button>
         <button class="brief-download" onclick="downloadBriefPDF()">&#8681; Download PDF</button>
         <button class="brief-close" onclick="closeBrief()">&times;</button>
       </div>
@@ -2212,7 +2213,9 @@ function showConsensusPanel() {
     html += '<div class="consensus-row"><div class="consensus-dot agree"></div><span class="consensus-agent-name">Analyst</span><span class="consensus-position">Flagged 5 clauses</span></div>';
     html += '<div class="consensus-row"><div class="consensus-dot agree"></div><span class="consensus-agent-name">Devil\'s Advocate</span><span class="consensus-position">Do not sign</span></div>';
     html += '<div class="consensus-row"><div class="consensus-dot agree"></div><span class="consensus-agent-name">Precedent Agent</span><span class="consensus-position">History confirms risk</span></div>';
-    html += '<div class="consensus-row"><div class="consensus-dot agree"></div><span class="consensus-agent-name">Risk Agent</span><span class="consensus-position">8.5/10 - Critical</span></div>';
+    var liveScore = document.getElementById('riskScore').textContent || '8.5';
+    var sevLabel = parseFloat(liveScore) >= 7 ? 'Critical' : (parseFloat(liveScore) >= 4 ? 'High' : 'Moderate');
+    html += '<div class="consensus-row"><div class="consensus-dot agree"></div><span class="consensus-agent-name">Risk Agent</span><span class="consensus-position">' + liveScore + '/10 - ' + sevLabel + '</span></div>';
     html += '<div class="consensus-row"><div class="consensus-dot agree"></div><span class="consensus-agent-name">Briefing Agent</span><span class="consensus-position">Do not sign as written</span></div>';
     html += '</div>';
     html += '<div class="consensus-meter"><div class="consensus-meter-label"><span>Consensus Level</span><span>5/5 Aligned</span></div>';
@@ -2320,6 +2323,37 @@ function downloadAuditTrail() {
     lines.push('*** ESCALATION TRIGGERED ***');
     lines.push(document.getElementById('escalationTitle').textContent);
     lines.push(document.getElementById('escalationDesc').textContent);
+  }
+
+  var followups = document.querySelectorAll('.followup-msg');
+  if (followups.length > 0) {
+    lines.push('');
+    lines.push('═══════════════════════════════════════════════════════════════');
+    lines.push('FOLLOW-UP QUESTIONS & ANSWERS');
+    lines.push('═══════════════════════════════════════════════════════════════');
+    var feedEl = document.getElementById('feed');
+    var feedChildren = feedEl.children;
+    var inFollowup = false;
+    for (var fi = 0; fi < feedChildren.length; fi++) {
+      var child = feedChildren[fi];
+      if (child.classList.contains('followup-msg')) {
+        var qText = child.querySelector('.followup-q-text');
+        if (qText) {
+          lines.push('');
+          lines.push('Q: ' + qText.textContent.trim());
+        }
+        inFollowup = true;
+      } else if (inFollowup && child.classList.contains('report-card')) {
+        var agentName = child.querySelector('.card-agent-name');
+        if (agentName && agentName.textContent.trim() === 'Briefing Agent') {
+          var content = child.querySelector('.card-content');
+          if (content) {
+            lines.push('A: ' + content.textContent.trim().substring(0, 500));
+          }
+          inFollowup = false;
+        }
+      }
+    }
   }
 
   lines.push('');
@@ -2480,8 +2514,9 @@ function handleLiveEvent(event) {
         document.getElementById('riskSub').textContent = 'Stratos Cloud · Recommended with Conditions';
         animateExposure(EXPOSURE_DATA.b.value, EXPOSURE_DATA.b.label);
       } else {
+        var aggMatch = event.content.match(/AGGREGATE\s+RISK\s+SCORE[:\s]*(\d+\.?\d*)\s*\/\s*10/i);
         var scoreMatch = event.content.match(/(\d+\.?\d*)\s*\/\s*10/);
-        var score = scoreMatch ? scoreMatch[1] : '8.5';
+        var score = aggMatch ? aggMatch[1] : (scoreMatch ? scoreMatch[1] : '8.5');
         setRiskScore(score, getSeverityFromScore(score));
         showEscalation(score);
         animateExposure(EXPOSURE_DATA.a.value, EXPOSURE_DATA.a.label);
@@ -2492,6 +2527,7 @@ function handleLiveEvent(event) {
       completePipeline(event.content);
     } else if (agent === 'briefing' && pipelineComplete) {
       addMessage('briefing', event.content, { provider: event.provider || null });
+      addBandLogEntry(elapsed, 'Briefing', 'Human', 'follow-up answer delivered');
     }
     return;
   }
@@ -2500,6 +2536,12 @@ function handleLiveEvent(event) {
     if (!pipelineComplete) {
       completePipeline(event.content || '');
     }
+    return;
+  }
+
+  if (event.type === 'followup_question') {
+    var elapsed = document.getElementById('timer').textContent.replace('T+', '');
+    addBandLogEntry(elapsed, 'Human', 'Briefing', 'follow-up question asked');
     return;
   }
 }

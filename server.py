@@ -84,22 +84,28 @@ def trigger_analysis(scenario="a"):
 
 
 def send_followup(question):
-    """Send a human follow-up question to the Band room via the analyst agent."""
+    """Send a human follow-up question to the Band room via the risk agent.
+
+    Uses the risk agent's identity so that:
+    - The briefing agent processes it (respond_to includes sentinelops-risk)
+    - DA/Precedent/Analyst ignore it (they don't respond to risk)
+    - The risk agent itself won't see it (self-message filtered by Band SDK)
+    """
     try:
         sys.path.insert(0, os.path.join(os.path.dirname(__file__), "agents"))
         from band.client.rest import AsyncRestClient, ChatMessageRequest, ChatMessageRequestMentionsItem
         from band.config import load_agent_config
 
         briefing_id, _ = load_agent_config("briefing")
-        _, analyst_key = load_agent_config("analyst")
+        _, risk_key = load_agent_config("risk")
         rest_url = os.getenv("THENVOI_REST_URL", "https://app.band.ai/")
 
         async def send():
-            client = AsyncRestClient(api_key=analyst_key, base_url=rest_url)
+            client = AsyncRestClient(api_key=risk_key, base_url=rest_url)
             await client.agent_api_messages.create_agent_chat_message(
                 chat_id=ROOM_ID,
                 message=ChatMessageRequest(
-                    content=f"@sentinelops-briefing {question}",
+                    content=f"@sentinelops-briefing Human follow-up question: {question}",
                     mentions=[ChatMessageRequestMentionsItem(id=briefing_id)],
                 ),
             )
@@ -187,6 +193,13 @@ class DashboardHandler(SimpleHTTPRequestHandler):
             try:
                 event = json.loads(body)
                 event.setdefault("timestamp", time.time())
+                raw = event.get("agent", "")
+                if raw.startswith("sentinelops-"):
+                    raw = raw[len("sentinelops-"):]
+                raw = raw.replace("-", "_")
+                if raw == "devils_advoc":
+                    raw = "devils_advocate"
+                event["agent"] = raw
                 with events_lock:
                     events.append(event)
                     if event.get("agent") == "briefing" and event.get("type") == "message":

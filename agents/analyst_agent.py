@@ -18,7 +18,6 @@ from band import Agent
 from band.config import load_agent_config
 
 from resilient_adapter import ResilientAdapter
-from band_targets import handle
 
 logging.basicConfig(
     level=logging.INFO,
@@ -129,8 +128,8 @@ async def main():
         respond_to=["User"],
         trigger_phrase="flag anything unusual",
         mention_targets=[
-            handle("devils_advocate"),
-            handle("precedent"),
+            "karabomatsepane16/sentinelops-devils-advoc",
+            "karabomatsepane16/sentinelops-precedent",
         ],
     )
 
