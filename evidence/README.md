@@ -1,39 +1,71 @@
-# SentinelOps - Live Run Evidence
+# SentinelOps – Live Run Evidence
 
-This folder contains evidence from the live SentinelOps demonstration run showing all five agents coordinating through Band in real time.
+This folder contains evidence from a live SentinelOps demonstration run showing all five agents coordinating through Band to analyze a compliance scenario and generate an executive briefing.
 
-## Contents
+## Evidence Files
 
-| File | Description | Status |
-|------|-------------|--------|
-| `band_room_screenshot.png` | Screenshot of the Band room showing all five agents connected and active | To be captured before submission |
-| `live_run_transcript.md` | Full transcript of the live analysis session (Scenario A) | To be captured before submission |
-
-> **Note:** The GitHub Pages dashboard (`docs/index.html`) runs in demo mode, replaying the exact outputs produced during live testing. To capture fresh evidence, run `python run_demo.py --clean` with the dashboard server active and record the terminal output.
+| File                       | Description                                                                                                       |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `band_screenshot.png`      | Screenshot of the Band room showing all five agents connected and communicating in real time                      |
+| `dashboard_screenshot.png` | Screenshot of the SentinelOps dashboard displaying live analysis results, risk assessment, and executive briefing |
+| `band_full_chat.json`      | Complete exported Band conversation log containing all agent interactions and workflow events from the live run   |
 
 ## What the Live Run Demonstrates
 
-1. **All five agents connected to Band** - visible in a single Band room
-2. **Parallel activation** - Devil's Advocate and Precedent Agent fire simultaneously after Analyst posts
-3. **Featherless AI usage** - Precedent Agent calls Featherless AI as its primary provider
-4. **AI/ML API usage** - Analyst, Devil's Advocate, Risk, and Briefing use AI/ML API
-5. **Complete pipeline** - Document to executive brief in minutes, not days
-6. **Zero autonomous decisions** - the system recommends, the human decides
+* Multi-agent orchestration through Band
+* Five specialized agents collaborating in a shared room
+* Parallel analysis and challenge workflows
+* Featherless AI integration through the Precedent Agent
+* AI/ML API integration across the remaining agents
+* Real-time communication between agents
+* End-to-end workflow from document ingestion to executive briefing
+* Human-in-the-loop decision support rather than autonomous decision making
 
-## Notes
+## Architecture Used During the Live Run
 
-- API credentials are stored in `.env` (gitignored) and never committed to the repository
-- The GitHub Pages dashboard (`docs/index.html`) runs in verified demo mode - it replays a pre-computed analysis using the exact same outputs produced during the live run
-- The live-run server (`server.py`) connects to Band and streams real agent events to the dashboard in real time
+| Agent                  | Provider       |
+| ---------------------- | -------------- |
+| Analyst Agent          | AI/ML API      |
+| Devil's Advocate Agent | AI/ML API      |
+| Precedent Agent        | Featherless AI |
+| Risk Agent             | AI/ML API      |
+| Briefing Agent         | AI/ML API      |
 
-## Adding Evidence Before Submission
+## Band Room Screenshot
 
-To capture the Band room screenshot:
-1. Open [app.band.ai](https://app.band.ai) and navigate to the SentinelOps room
-2. Start all five agents (`python agents/<agent>.py` in separate terminals)
-3. Screenshot the room showing all agents listed as connected participants
+![Band Room](./band_screenshot.png)
 
-To capture the live transcript:
-1. Run `python run_demo.py --clean` with the dashboard server active
-2. Copy the full terminal output into `live_run_transcript.md`
-3. Include timestamps and provider annotations from the logs
+The screenshot shows all five agents connected to the shared Band room and participating in the analysis workflow.
+
+## Dashboard Screenshot
+
+![Dashboard](./dashboard_screenshot.png)
+
+The dashboard displays findings, risk assessments, financial exposure estimates, and the executive briefing generated from the live agent collaboration.
+
+## Full Agent Communication Log
+
+The complete conversation history from the live run is available in:
+
+`band_full_chat.json`
+
+This file contains the exported Band room conversation log, including agent messages, workflow coordination events, analysis outputs, and briefing generation.
+
+## Security
+
+* API credentials are stored in environment variables
+* Sensitive configuration is excluded from version control
+* No secrets are committed to the repository
+* Demonstration evidence contains no confidential customer information
+
+## Reproducing the Demonstration
+
+To generate a new live run:
+
+```bash
+python run_demo.py --clean
+```
+
+with the dashboard server running.
+
+The resulting Band conversation can be exported again and used to produce updated evidence artifacts.
